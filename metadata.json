@@ -1,0 +1,5 @@
+{
+  "name": "ClientFlow",
+  "description": "A production-ready CRM SaaS application for managing leads, pipelines, and analytics with AI-powered insights.",
+  "requestFramePermissions": []
+}
