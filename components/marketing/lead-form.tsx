@@ -63,62 +63,62 @@ export function LeadForm() {
   }
 
   return (
-    <Card className="w-full max-w-xl mx-auto border-zinc-200 dark:border-zinc-800 shadow-xl">
-      <CardHeader>
-        <CardTitle className="text-2xl">Get Started with ClientFlow</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-xl mx-auto border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden">
+      <CardHeader className="p-8 pb-4">
+        <CardTitle className="text-2xl font-bold tracking-tight">Get Started with ClientFlow</CardTitle>
+        <CardDescription className="text-sm font-medium text-muted-foreground">
           Fill out the form below and our team will get back to you within 24 hours.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="first_name">First Name</Label>
-              <Input id="first_name" placeholder="John" disabled={isLoading} {...form.register("first_name")} />
+      <CardContent className="p-8 pt-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="first_name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">First Name</Label>
+              <Input id="first_name" placeholder="John" className="h-12 bg-background/50" disabled={isLoading} {...form.register("first_name")} />
               {form.formState.errors.first_name && (
-                <p className="text-xs text-destructive">{form.formState.errors.first_name.message}</p>
+                <p className="text-[10px] font-semibold text-destructive ml-1">{form.formState.errors.first_name.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input id="last_name" placeholder="Doe" disabled={isLoading} {...form.register("last_name")} />
+            <div className="space-y-2.5">
+              <Label htmlFor="last_name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Last Name</Label>
+              <Input id="last_name" placeholder="Doe" className="h-12 bg-background/50" disabled={isLoading} {...form.register("last_name")} />
               {form.formState.errors.last_name && (
-                <p className="text-xs text-destructive">{form.formState.errors.last_name.message}</p>
+                <p className="text-[10px] font-semibold text-destructive ml-1">{form.formState.errors.last_name.message}</p>
               )}
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Work Email</Label>
-            <Input id="email" type="email" placeholder="john@company.com" disabled={isLoading} {...form.register("email")} />
+          <div className="space-y-2.5">
+            <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Work Email</Label>
+            <Input id="email" type="email" placeholder="john@company.com" className="h-12 bg-background/50" disabled={isLoading} {...form.register("email")} />
             {form.formState.errors.email && (
-              <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+              <p className="text-[10px] font-semibold text-destructive ml-1">{form.formState.errors.email.message}</p>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number (Optional)</Label>
-              <Input id="phone" placeholder="+1 (555) 000-0000" disabled={isLoading} {...form.register("phone")} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="phone" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Phone Number (Optional)</Label>
+              <Input id="phone" placeholder="+1 (555) 000-0000" className="h-12 bg-background/50" disabled={isLoading} {...form.register("phone")} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company Name (Optional)</Label>
-              <Input id="company" placeholder="Acme Inc." disabled={isLoading} {...form.register("company")} />
+            <div className="space-y-2.5">
+              <Label htmlFor="company" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Company Name (Optional)</Label>
+              <Input id="company" placeholder="Acme Inc." className="h-12 bg-background/50" disabled={isLoading} {...form.register("company")} />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="message">How can we help?</Label>
+          <div className="space-y-2.5">
+            <Label htmlFor="message" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">How can we help?</Label>
             <Textarea 
               id="message" 
               placeholder="Tell us about your team and CRM needs..." 
-              className="min-h-[120px]"
+              className="min-h-[140px] bg-background/50 resize-none"
               disabled={isLoading} 
               {...form.register("message")} 
             />
             {form.formState.errors.message && (
-              <p className="text-xs text-destructive">{form.formState.errors.message.message}</p>
+              <p className="text-[10px] font-semibold text-destructive ml-1">{form.formState.errors.message.message}</p>
             )}
           </div>
-          <Button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 text-white" disabled={isLoading}>
+          <Button type="submit" size="lg" className="w-full h-14 text-sm font-bold uppercase tracking-widest shadow-lg shadow-primary/20" disabled={isLoading}>
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

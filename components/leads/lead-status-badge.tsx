@@ -8,18 +8,18 @@ interface LeadStatusBadgeProps {
 
 export function LeadStatusBadge({ status, className }: LeadStatusBadgeProps) {
   const variants: Record<string, string> = {
-    new: "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-900",
-    contacted: "bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900",
-    qualified: "bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-400 dark:border-indigo-900",
-    lost: "bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-900",
-    won: "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-900",
-    closed: "bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800"
+    new: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    contacted: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    qualified: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+    lost: "bg-rose-500/10 text-rose-500 border-rose-500/20",
+    won: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    closed: "bg-secondary/50 text-muted-foreground border-border/50"
   }
 
   return (
     <Badge 
       variant="outline" 
-      className={cn("capitalize font-medium", variants[status] || "bg-slate-100 text-slate-700", className)}
+      className={cn("text-[10px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded-md border", variants[status] || "bg-secondary/50 text-muted-foreground border-border/50", className)}
     >
       {status}
     </Badge>

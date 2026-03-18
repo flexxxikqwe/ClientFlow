@@ -49,6 +49,8 @@ import { useLead } from "@/features/leads/hooks/use-leads"
 import { LeadInfoTab } from "./lead-info-tab"
 import { LeadAiTab } from "./lead-ai-tab"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useUser } from "@/features/auth/context/user-context"
+import { MOCK_LEADS } from "@/lib/mock-data"
 
 interface LeadDetailsProps {
   lead: Lead | null
@@ -57,7 +59,10 @@ interface LeadDetailsProps {
   onUpdate: () => void
 }
 
+import { LocalStore } from "@/lib/store"
+
 export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: LeadDetailsProps) {
+  const { isDemo } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [noteContent, setNoteContent] = useState("")
@@ -67,7 +72,14 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
   const [aiReply, setAiReply] = useState<{ subject: string, body: string } | null>(null)
   const [isAiLoading, setIsAiLoading] = useState(false)
 
-  const { lead, isLoading: isLeadLoading, mutate: mutateLead } = useLead(initialLead?.id || null)
+  const { lead: realLead, isLoading: isRealLoading, mutate: mutateLead } = useLead(isDemo ? null : initialLead?.id || null)
+  
+  const lead = useMemo(() => {
+    if (!isDemo) return realLead
+    return LocalStore.getLead(initialLead?.id || "")
+  }, [isDemo, realLead, initialLead])
+
+  const isLoading = isDemo ? false : isRealLoading
   const { users } = useUsers()
 
   useEffect(() => {
@@ -90,11 +102,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     if (!lead) return
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(formData)
-      })
-      if (!response.ok) throw new Error("Update failed")
+      LocalStore.updateLead(lead.id, formData)
       toast.success("Lead updated successfully")
       setIsEditing(false)
       mutateLead()
@@ -110,11 +118,16 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     if (!lead || !noteContent.trim()) return
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}/notes`, {
-        method: "POST",
-        body: JSON.stringify({ content: noteContent })
-      })
-      if (!response.ok) throw new Error("Failed to add note")
+      const newNote = {
+        id: Math.random().toString(36).substr(2, 9),
+        lead_id: lead.id,
+        author_id: "demo-user",
+        content: noteContent,
+        created_at: new Date().toISOString(),
+        author: { full_name: "Demo User" }
+      }
+      const updatedNotes = [newNote, ...(lead.notes || [])]
+      LocalStore.updateLead(lead.id, { notes: updatedNotes })
       toast.success("Note added")
       setNoteContent("")
       mutateLead()
@@ -127,12 +140,11 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
   }, [lead, noteContent, mutateLead, onUpdate])
 
   const handleDelete = useCallback(async () => {
-    if (!lead || !confirm("Are you sure you want to delete this lead?")) return
+    if (!lead || !confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}`, { method: "DELETE" })
-      if (!response.ok) throw new Error("Delete failed")
-      toast.success("Lead deleted")
+      LocalStore.deleteLead(lead.id)
+      toast.success("Lead deleted successfully")
       onClose()
       onUpdate()
     } catch (error) {
@@ -185,23 +197,48 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="p-6 border-b bg-slate-50/50 dark:bg-slate-800/50">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 overflow-hidden border-border/30 bg-background/80 backdrop-blur-2xl shadow-2xl rounded-[2rem]">
+        <DialogHeader className="p-10 border-b border-border/20 bg-card/30">
           <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <DialogTitle className="text-2xl font-bold">
-                {lead?.first_name} {lead?.last_name}
-              </DialogTitle>
-              <DialogDescription className="flex items-center gap-2">
-                <Building2 className="h-3 w-3" /> {lead?.company || "No company"}
-              </DialogDescription>
+            <div className="flex items-center gap-6">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-tr from-primary to-violet-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <Avatar className="h-20 w-20 border-4 border-background shadow-2xl relative">
+                  <AvatarImage src={`https://avatar.vercel.sh/${lead?.email}`} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-black italic">
+                    {lead?.first_name?.charAt(0)}{lead?.last_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="space-y-2">
+                <DialogTitle className="text-4xl font-bold tracking-tighter text-foreground">
+                  {lead?.first_name} {lead?.last_name}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-3.5 w-3.5 text-primary/60" /> {lead?.company || "Independent"}
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-border" />
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-primary/60" /> {lead ? format(new Date(lead.created_at), "MMMM d, yyyy") : ""}
+                  </div>
+                </DialogDescription>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
-                {isEditing ? "Cancel" : "Edit Details"}
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                className="h-12 px-8 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm font-bold text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-secondary/20" 
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? "Cancel" : "Edit Profile"}
               </Button>
-              <Button variant="destructive" size="sm" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4" />
+              <Button 
+                variant="destructive" 
+                className="h-12 w-12 rounded-xl shadow-xl shadow-destructive/10 transition-all hover:scale-105 active:scale-95" 
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -209,24 +246,24 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
         <div className="flex-1 flex overflow-hidden">
           {/* Left Side: Details */}
-          <div className="w-1/2 border-r p-6 overflow-y-auto space-y-6">
-            {isLeadLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-40 w-full" />
-                <Skeleton className="h-40 w-full" />
+          <div className="w-3/5 border-r border-border/20 p-10 overflow-y-auto space-y-10 bg-card/10">
+            {isLoading ? (
+              <div className="space-y-8">
+                <Skeleton className="h-14 w-full rounded-2xl bg-secondary/20" />
+                <Skeleton className="h-80 w-full rounded-2xl bg-secondary/20" />
+                <Skeleton className="h-80 w-full rounded-2xl bg-secondary/20" />
               </div>
             ) : lead && (
-              <Tabs defaultValue="info">
-                <TabsList className="w-full">
-                  <TabsTrigger value="info" className="flex-1">Information</TabsTrigger>
-                  <TabsTrigger value="message" className="flex-1">Inquiry</TabsTrigger>
-                  <TabsTrigger value="ai" className="flex-1 flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-sky-500" /> AI Assistant
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="w-full bg-secondary/30 p-1.5 h-16 rounded-2xl mb-10 border border-border/20">
+                  <TabsTrigger value="info" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all">Information</TabsTrigger>
+                  <TabsTrigger value="message" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all">Inquiry</TabsTrigger>
+                  <TabsTrigger value="ai" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" /> AI Insights
                   </TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="info">
+                <TabsContent value="info" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <LeadInfoTab 
                     lead={lead}
                     formData={formData}
@@ -238,15 +275,16 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   />
                 </TabsContent>
 
-                <TabsContent value="message" className="mt-4">
-                  <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border">
-                    <p className="text-sm leading-relaxed italic text-slate-600 dark:text-slate-300">
+                <TabsContent value="message" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="p-10 bg-card/30 backdrop-blur-sm rounded-3xl border border-border/30 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-2 h-full bg-primary/50 group-hover:bg-primary transition-colors duration-500" />
+                    <p className="text-xl leading-relaxed font-medium text-foreground/80 italic selection:bg-primary/20">
                       &quot;{lead.message || "No message provided with this lead."}&quot;
                     </p>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="ai">
+                <TabsContent value="ai" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <LeadAiTab 
                     isAiLoading={isAiLoading}
                     onAiAction={handleAiAction}
@@ -261,57 +299,69 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
           </div>
 
           {/* Right Side: Notes */}
-          <div className="w-1/2 flex flex-col bg-slate-50/30 dark:bg-slate-900/30">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" /> Notes
+          <div className="w-2/5 flex flex-col bg-card/20 backdrop-blur-sm">
+            <div className="p-8 border-b border-border/20 flex items-center justify-between bg-card/30">
+              <h3 className="font-bold text-foreground flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <MessageSquare className="h-4 w-4 text-primary" />
+                </div>
+                Activity Timeline
               </h3>
-              <span className="text-xs text-muted-foreground">{lead?.notes?.length || 0} notes</span>
+              <div className="px-4 py-1.5 rounded-full bg-primary/10 text-[10px] font-black text-primary uppercase tracking-[0.2em] border border-primary/20">
+                {lead?.notes?.length || 0} Events
+              </div>
             </div>
             
-            <ScrollArea className="flex-1 p-4">
-              {isLeadLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
+            <ScrollArea className="flex-1 p-8">
+              {isLoading ? (
+                <div className="space-y-8">
+                  <Skeleton className="h-28 w-full rounded-2xl bg-secondary/20" />
+                  <Skeleton className="h-28 w-full rounded-2xl bg-secondary/20" />
+                  <Skeleton className="h-28 w-full rounded-2xl bg-secondary/20" />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-8">
                   {lead?.notes?.map((note) => (
-                    <div key={note.id} className="bg-white dark:bg-slate-800 p-3 rounded-lg border shadow-sm space-y-2">
+                    <div key={note.id} className="bg-card/40 p-6 rounded-2xl border border-border/30 space-y-4 transition-all hover:border-primary/30 hover:bg-card/60 group">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-sky-600">{note.author?.full_name || "System"}</span>
-                        <span className="text-[10px] text-muted-foreground">{format(new Date(note.created_at), "MMM d, h:mm a")}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center transition-colors group-hover:bg-primary/10">
+                            <User className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                          </div>
+                          <span className="text-xs font-bold text-foreground">{note.author?.full_name || "System"}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">{format(new Date(note.created_at), "MMM d, h:mm a")}</span>
                       </div>
-                      <p className="text-sm text-slate-700 dark:text-slate-300">{note.content}</p>
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed font-medium">{note.content}</p>
                     </div>
                   ))}
                   {(!lead?.notes || lead.notes.length === 0) && (
-                    <div className="text-center py-12 opacity-50">
-                      <MessageSquare className="h-12 w-12 mx-auto mb-2" />
-                      <p className="text-sm">No notes yet</p>
+                    <div className="text-center py-32 opacity-20">
+                      <div className="w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center mx-auto mb-6">
+                        <MessageSquare className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">No activity history</p>
                     </div>
                   )}
                 </div>
               )}
             </ScrollArea>
 
-            <div className="p-4 border-t bg-white dark:bg-slate-900">
-              <div className="relative">
+            <div className="p-8 border-t border-border/20 bg-card/30">
+              <div className="relative group">
                 <Textarea 
-                  placeholder="Add a note..." 
-                  className="min-h-[100px] pr-12"
+                  placeholder="Log an activity or internal note..." 
+                  className="min-h-[140px] rounded-2xl border-border/50 bg-background/50 backdrop-blur-sm focus:ring-primary/20 transition-all pr-16 py-6 text-sm font-medium resize-none"
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                 />
                 <Button 
                   size="icon" 
-                  className="absolute bottom-2 right-2 h-8 w-8"
+                  className="absolute bottom-4 right-4 h-12 w-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                   onClick={handleAddNote}
                   disabled={isActionLoading || !noteContent.trim()}
                 >
-                  <Plus className="h-4 w-4" />
+                  {isActionLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-6 w-6" />}
                 </Button>
               </div>
             </div>

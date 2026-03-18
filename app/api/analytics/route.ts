@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { getLeads } from "@/lib/db"
+import { getSessionUser } from "@/lib/auth"
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
 
 export async function GET(request: Request) {
@@ -7,28 +8,24 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get("days") || "30")
     
-    const supabase = await createClient()
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const user = await getSessionUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const startDate = startOfDay(subDays(new Date(), days - 1)).toISOString()
-    const endDate = endOfDay(new Date()).toISOString()
+    const startDate = startOfDay(subDays(new Date(), days - 1))
+    const endDate = endOfDay(new Date())
 
-    const { data: leads, error } = await supabase
-      .from("leads")
-      .select("created_at, source, status, value")
-      .gte("created_at", startDate)
-      .lte("created_at", endDate)
-
-    if (error) throw error
+    // Get all leads and filter by date
+    const { data: allLeads } = getLeads({ limit: 1000000 }) // Get all leads
+    const leads = allLeads.filter(l => {
+      const createdAt = new Date(l.created_at)
+      return createdAt >= startDate && createdAt <= endDate
+    })
 
     const daysInterval = eachDayOfInterval({
-      start: new Date(startDate),
-      end: new Date(endDate),
+      start: startDate,
+      end: endDate,
     })
 
     const leadsPerDay = daysInterval.map((day) => {
@@ -50,7 +47,7 @@ export async function GET(request: Request) {
     }))
 
     const total = leads.length
-    const won = leads.filter((l) => l.status === "won").length
+    const won = leads.filter((l) => l.status === "won" || l.status === "Closed Won").length
     const conversionRate = total > 0 ? (won / total) * 100 : 0
     
     const pipelineValue = leads.reduce((acc, l) => acc + (l.value || 0), 0)

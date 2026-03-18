@@ -1,50 +1,35 @@
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getUserByEmail, createUser } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
-  try {
-    const { email, password, fullName } = await request.json()
-
-    if (!email || !password || !fullName) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    const supabase = await createClient()
-
-    // 1. Sign up user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    })
-
-    if (authError) throw authError
-
-    if (authData.user) {
-      // 2. Create profile in public.users table using admin client
-      const adminClient = createAdminClient()
-      const { error: profileError } = await adminClient
-        .from('users')
-        .insert({
-          id: authData.user.id,
-          email: email,
-          full_name: fullName,
-        })
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError)
-        // We don't throw here because the user is already created in Auth
-      }
-    }
-
-    return NextResponse.json({ message: "Registration successful" })
-  } catch (error: any) {
-    console.error("Registration error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  const { email, password, fullName } = await request.json()
+  
+  const existingUser = getUserByEmail(email)
+  if (existingUser) {
+    return NextResponse.json({ error: 'User already exists' }, { status: 400 })
   }
+
+  const user = createUser({
+    email,
+    password,
+    full_name: fullName,
+    role: 'user'
+  })
+
+  // Set a simple session cookie
+  const cookieStore = await cookies()
+  cookieStore.set('session_user_id', user.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7 // 1 week
+  })
+
+  const { password: _, ...userWithoutPassword } = user
+  return NextResponse.json({ 
+    message: 'Registration successful',
+    user: userWithoutPassword
+  })
 }

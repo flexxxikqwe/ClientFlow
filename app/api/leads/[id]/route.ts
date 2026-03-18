@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { getLeadById, updateLead, deleteLead } from '@/lib/db'
+import { getSessionUser } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -12,8 +13,8 @@ const updateLeadSchema = z.object({
   source: z.string().nullable().optional(),
   message: z.string().nullable().optional(),
   value: z.number().nullable().optional(),
-  owner_id: z.string().uuid().nullable().optional(),
-  stage_id: z.string().uuid().nullable().optional(),
+  owner_id: z.string().nullable().optional(),
+  stage_id: z.string().nullable().optional(),
 })
 
 export async function GET(
@@ -22,34 +23,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const user = await getSessionUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const { data, error } = await supabase
-      .from('leads')
-      .select(`
-        *,
-        owner:users(id, full_name, avatar_url),
-        stage:pipeline_stages(id, name),
-        notes:lead_notes(*, author:users(full_name))
-      `)
-      .eq('id', id)
-      .single()
+    const data = getLeadById(id)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+    if (!data) return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     
-    // Sort notes by created_at descending
-    if (data.notes) {
-      data.notes.sort((a: any, b: any) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-    }
-
     return NextResponse.json(data)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -65,22 +47,14 @@ export async function PATCH(
     const body = await request.json()
     const validatedData = updateLeadSchema.parse(body)
     
-    const supabase = await createClient()
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const user = await getSessionUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const { data, error } = await supabase
-      .from('leads')
-      .update(validatedData)
-      .eq('id', id)
-      .select()
-      .single()
+    const data = updateLead(id, validatedData as any)
 
-    if (error) throw error
+    if (!data) return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
 
     return NextResponse.json(data)
   } catch (error: any) {
@@ -97,20 +71,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const user = await getSessionUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const { error } = await supabase
-      .from('leads')
-      .delete()
-      .eq('id', id)
-
-    if (error) throw error
+    deleteLead(id)
 
     return NextResponse.json({ message: 'Lead deleted successfully' })
   } catch (error: any) {

@@ -1,4 +1,4 @@
-import { getUsers } from '@/lib/db'
+import { getPipelineStages } from '@/lib/db'
 import { getSessionUser } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
@@ -8,6 +8,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const users = getUsers().map(({ id, full_name }) => ({ id, full_name }))
-  return NextResponse.json({ users })
+  const stages = getPipelineStages()
+  return NextResponse.json({ stages })
 }

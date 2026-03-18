@@ -20,6 +20,8 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
+import { LocalStore } from "@/lib/store"
+
 export function RegisterForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -36,19 +38,19 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterFormValues) {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(values),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed")
+      // Simplified local registration
+      const user = {
+        id: "user_" + Math.random().toString(36).substr(2, 9),
+        email: values.email,
+        full_name: values.fullName,
+        role: "admin"
       }
+      
+      LocalStore.setUser(user)
 
-      toast.success("Account created! You can now sign in.")
-      router.push("/login")
+      toast.success("Account created! Welcome.")
+      router.push("/dashboard")
+      router.refresh()
     } catch (error: any) {
       toast.error(error.message)
     } finally {

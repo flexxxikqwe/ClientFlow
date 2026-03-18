@@ -1,8 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getLeads, createLead } from '@/lib/db'
+import { getSessionUser } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { sendTelegramNotification } from '@/lib/notifications/telegram'
 import { logger } from '@/lib/utils/logger'
 
 const leadSchema = z.object({
@@ -15,8 +14,8 @@ const leadSchema = z.object({
   source: z.string().nullable().optional(),
   message: z.string().nullable().optional(),
   value: z.number().nullable().optional(),
-  owner_id: z.string().uuid().nullable().optional(),
-  stage_id: z.string().uuid().nullable().optional(),
+  owner_id: z.string().nullable().optional(),
+  stage_id: z.string().nullable().optional(),
 })
 
 export async function GET(request: Request) {
@@ -24,55 +23,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
-    const status = searchParams.get('status')
-    const search = searchParams.get('search')
+    const status = searchParams.get('status') || undefined
+    const search = searchParams.get('search') || undefined
     const sortBy = searchParams.get('sortBy') || 'created_at'
-    const sortOrder = searchParams.get('sortOrder') || 'desc'
+    const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc'
 
-    const supabase = await createClient()
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    const user = await getSessionUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    let query = supabase
-      .from('leads')
-      .select(`
-        *,
-        owner:users(full_name, avatar_url),
-        stage:pipeline_stages(name)
-      `, { count: 'exact' })
-
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
-    }
-
-    if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%`)
-    }
-
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-
-    query = query
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(from, to)
-
-    const { data, error, count } = await query
-
-    if (error) throw error
-
-    return NextResponse.json({
-      data,
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
-      }
+    const result = getLeads({
+      page,
+      limit,
+      status,
+      search,
+      sortBy,
+      sortOrder
     })
+
+    return NextResponse.json(result)
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -83,26 +53,14 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = leadSchema.parse(body)
     
-    const supabase = await createClient()
+    const user = await getSessionUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    // If not authenticated, use admin client to bypass RLS for public lead capture
-    const client = user ? supabase : createAdminClient()
-    
-    const { data, error } = await client
-      .from('leads')
-      .insert(validatedData)
-      .select()
-      .single()
-
-    if (error) throw error
+    const data = createLead(validatedData as any)
 
     logger.info('Lead created successfully', { leadId: data.id })
-
-    // Send notification in the background
-    sendTelegramNotification(data).catch(err => console.error("Notification background error:", err))
 
     return NextResponse.json(data)
   } catch (error: any) {

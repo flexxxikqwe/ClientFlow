@@ -18,8 +18,12 @@ import { format } from "date-fns"
 import { useLeads } from "@/features/leads/hooks/use-leads"
 import { useDebounce } from "@/lib/hooks/use-debounce"
 import { LeadStatusBadge } from "./lead-status-badge"
+import { LocalStore } from "@/lib/store"
+import { cn } from "@/lib/utils"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
+import { useUser } from "@/features/auth/context/user-context"
+import { MOCK_LEADS } from "@/lib/mock-data"
 
 import {
   Table,
@@ -59,44 +63,49 @@ const LeadRow = memo(({ lead, onLeadClick, onDelete }: {
   onDelete: (id: string, e: React.MouseEvent) => void
 }) => (
   <TableRow 
-    className="group cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
+    className="group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20"
     onClick={() => onLeadClick(lead)}
   >
-    <TableCell className="py-4">
-      <div className="font-medium text-slate-900 dark:text-slate-100">
-        {lead.first_name} {lead.last_name}
+    <TableCell className="py-5 pl-8">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
+          {lead.first_name[0]}{lead.last_name[0]}
+        </div>
+        <div className="font-semibold text-foreground text-sm tracking-tight">
+          {lead.first_name} {lead.last_name}
+        </div>
       </div>
     </TableCell>
     <TableCell>
-      <div className="text-sm">{lead.email || "-"}</div>
+      <div className="text-sm text-muted-foreground/80 font-medium">{lead.email || "-"}</div>
     </TableCell>
     <TableCell>
-      <div className="text-sm">{lead.phone || "-"}</div>
+      <div className="text-sm text-muted-foreground/80 font-medium">{lead.phone || "-"}</div>
     </TableCell>
     <TableCell>
-      <div className="text-sm capitalize">{lead.source || "Direct"}</div>
+      <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60">{lead.source || "Direct"}</div>
     </TableCell>
     <TableCell>
       <LeadStatusBadge status={lead.status} />
     </TableCell>
-    <TableCell className="text-muted-foreground text-sm">
+    <TableCell className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.15em]">
       {format(new Date(lead.created_at), "MMM d, yyyy")}
     </TableCell>
-    <TableCell onClick={(e) => e.stopPropagation()}>
+    <TableCell className="pr-8" onClick={(e) => e.stopPropagation()}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-secondary/50 rounded-lg">
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground/40" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onLeadClick(lead)}>
+        <DropdownMenuContent align="end" className="w-48 p-1.5 backdrop-blur-xl bg-card/95 border-border/50 rounded-xl shadow-2xl">
+          <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 px-2.5 py-2">Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onLeadClick(lead)} className="rounded-lg cursor-pointer py-2 px-2.5 text-sm font-medium">
             View Details
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-border/30 my-1" />
           <DropdownMenuItem 
-            className="text-destructive"
+            className="text-destructive focus:text-destructive focus:bg-destructive/10 rounded-lg cursor-pointer py-2 px-2.5 text-sm font-medium"
             onClick={(e) => onDelete(lead.id, e)}
           >
             Delete Lead
@@ -135,41 +144,74 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
     }
   }, [sortBy])
 
+  const handleClearFilters = () => {
+    setSearch("")
+    setStatus("all")
+    setPage(1)
+  }
+
   const handleDelete = useCallback(async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
+    // In a real app we'd use a custom dialog, but keeping it simple for now
     if (!confirm("Are you sure you want to delete this lead?")) return
     
     try {
-      const res = await fetch(`/api/leads/${id}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Failed to delete")
+      LocalStore.deleteLead(id)
       toast.success("Lead deleted successfully")
       mutate()
-    } catch (err) {
+    } catch (error) {
       toast.error("Failed to delete lead")
     }
   }, [mutate])
 
-  if (error) return <div className="p-4 text-destructive">Failed to load leads</div>
+  if (error) return (
+    <div className="p-8 text-center border border-dashed rounded-xl border-destructive/20 bg-destructive/5">
+      <p className="text-destructive font-medium text-sm">Failed to load leads. Please try refreshing the page.</p>
+    </div>
+  )
+
+  const isFiltered = search !== "" || status !== "all"
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search leads..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+            <Input
+              placeholder="Search leads..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+              className="pl-10 h-11 bg-secondary/10 border-border/50 focus:ring-primary/20 text-sm"
+              aria-label="Search leads"
+            />
+          </div>
+          {isFiltered && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleClearFilters}
+              className="text-muted-foreground hover:text-foreground text-xs font-semibold uppercase tracking-widest"
+            >
+              Clear
+            </Button>
+          )}
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[150px]">
-              <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Status" />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Select value={status} onValueChange={(val) => {
+            setStatus(val)
+            setPage(1)
+          }}>
+            <SelectTrigger className="w-full sm:w-[180px] h-11 bg-secondary/10 border-border/50 text-sm" aria-label="Filter by status">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground/40" />
+                <SelectValue placeholder="All Status" />
+              </div>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="backdrop-blur-xl bg-card/95 border-border/50">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="contacted">Contacted</SelectItem>
@@ -181,87 +223,110 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50">
-            <TableRow className="hover:bg-transparent border-b border-slate-200 dark:border-slate-800">
-              <TableHead className="h-11 font-medium text-slate-500 cursor-pointer" onClick={() => handleSort("first_name")}>
-                Name <ArrowUpDown className="ml-2 h-3 w-3 inline opacity-50" />
-              </TableHead>
-              <TableHead className="h-11 font-medium text-slate-500">Email</TableHead>
-              <TableHead className="h-11 font-medium text-slate-500">Phone</TableHead>
-              <TableHead className="h-11 font-medium text-slate-500 cursor-pointer" onClick={() => handleSort("source")}>
-                Source <ArrowUpDown className="ml-2 h-3 w-3 inline opacity-50" />
-              </TableHead>
-              <TableHead className="h-11 font-medium text-slate-500 cursor-pointer" onClick={() => handleSort("status")}>
-                Status <ArrowUpDown className="ml-2 h-3 w-3 inline opacity-50" />
-              </TableHead>
-              <TableHead className="h-11 font-medium text-slate-500 cursor-pointer" onClick={() => handleSort("created_at")}>
-                Created <ArrowUpDown className="ml-2 h-3 w-3 inline opacity-50" />
-              </TableHead>
-              <TableHead className="h-11 w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-8 rounded-md" /></TableCell>
-                </TableRow>
-              ))
-            ) : leads.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-[400px]">
-                  <EmptyState
-                    title="No leads found"
-                    description="Try adjusting your search or filters to find what you're looking for."
-                    icon={UserPlus}
-                  />
-                </TableCell>
+      <div className="rounded-2xl border border-border/50 bg-card/20 shadow-none overflow-hidden backdrop-blur-sm">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-secondary/5">
+              <TableRow className="hover:bg-transparent border-b border-border/30">
+                <TableHead className="h-14 pl-8 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer transition-colors hover:text-primary" onClick={() => handleSort("first_name")}>
+                  <div className="flex items-center">
+                    Name 
+                    <ArrowUpDown className={cn("ml-2 h-3 w-3 opacity-0 transition-opacity", sortBy === "first_name" && "opacity-100 text-primary")} />
+                  </div>
+                </TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Email</TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Phone</TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer hover:text-primary" onClick={() => handleSort("source")}>
+                  <div className="flex items-center">
+                    Source
+                    <ArrowUpDown className={cn("ml-2 h-3 w-3 opacity-0", sortBy === "source" && "opacity-100 text-primary")} />
+                  </div>
+                </TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer hover:text-primary" onClick={() => handleSort("status")}>
+                  <div className="flex items-center">
+                    Status
+                    <ArrowUpDown className={cn("ml-2 h-3 w-3 opacity-0", sortBy === "status" && "opacity-100 text-primary")} />
+                  </div>
+                </TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer hover:text-primary" onClick={() => handleSort("created_at")}>
+                  <div className="flex items-center">
+                    Created
+                    <ArrowUpDown className={cn("ml-2 h-3 w-3 opacity-0", sortBy === "created_at" && "opacity-100 text-primary")} />
+                  </div>
+                </TableHead>
+                <TableHead className="h-14 w-[50px] pr-8"></TableHead>
               </TableRow>
-            ) : (
-              leads.map((lead) => (
-                <LeadRow 
-                  key={lead.id} 
-                  lead={lead} 
-                  onLeadClick={onLeadClick} 
-                  onDelete={handleDelete} 
-                />
-              ))
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="border-b border-border/30">
+                    <TableCell className="py-4"><Skeleton className="h-4 w-32 bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40 bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32 bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24 bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24 bg-secondary/20" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8 rounded-md bg-secondary/20" /></TableCell>
+                  </TableRow>
+                ))
+              ) : leads.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-[400px] text-center">
+                    <EmptyState
+                      title={isFiltered ? "No matching leads" : "Your lead list is empty"}
+                      description={isFiltered ? "Try adjusting your search or filters." : "Start by adding your first lead to the system."}
+                      icon={UserPlus}
+                      action={isFiltered ? (
+                        <Button variant="outline" onClick={handleClearFilters} className="h-10 px-6">Clear all filters</Button>
+                      ) : undefined}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                leads.map((lead) => (
+                  <LeadRow 
+                    key={lead.id} 
+                    lead={lead} 
+                    onLeadClick={onLeadClick} 
+                    onDelete={handleDelete} 
+                  />
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing {leads.length} of {pagination.total} leads
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+        <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          {isLoading ? (
+            <Skeleton className="h-4 w-40 bg-secondary/20" />
+          ) : (
+            <>Showing <span className="text-foreground">{leads.length}</span> of <span className="text-foreground">{pagination.total}</span> leads</>
+          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage(page - 1)}
             disabled={page === 1 || isLoading}
+            className="h-10 px-5 border-border/50 bg-secondary/5 hover:bg-secondary/20 text-xs font-semibold uppercase tracking-widest"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+            <ChevronLeft className="h-4 w-4 mr-2" /> Previous
           </Button>
-          <div className="text-sm font-medium">
-            Page {page} of {pagination.totalPages}
+          <div className="text-[11px] font-bold uppercase tracking-widest min-w-[100px] text-center text-muted-foreground">
+            Page {page} <span className="mx-1 text-muted-foreground/30">/</span> {pagination.totalPages || 1}
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage(page + 1)}
-            disabled={page === pagination.totalPages || isLoading}
+            disabled={page === pagination.totalPages || pagination.totalPages === 0 || isLoading}
+            className="h-10 px-5 border-border/50 bg-secondary/5 hover:bg-secondary/20 text-xs font-semibold uppercase tracking-widest"
           >
-            Next <ChevronRight className="h-4 w-4 ml-1" />
+            Next <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>

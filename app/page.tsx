@@ -1,45 +1,81 @@
+"use client"
+
 import Link from "next/link"
-import { CheckCircle2, BarChart3, Users, Zap, ArrowRight, ShieldCheck, Globe } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { CheckCircle2, BarChart3, Users, Zap, ShieldCheck, Globe, Sparkles, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LeadForm } from "@/components/marketing/lead-form"
+import { MarketingHeader } from "@/components/marketing/header"
+import { useUser } from "@/features/auth/context/user-context"
+import { toast } from "sonner"
 
 export default function HomePage() {
+  const { loginAsDemo } = useUser()
+  const router = useRouter()
+
+  const handleViewDemo = () => {
+    loginAsDemo()
+    router.push("/dashboard")
+    toast.success("Welcome to Demo Mode!")
+  }
+
+  const handlePlanChange = (plan: string) => {
+    toast.success(`You've selected the ${plan} plan!`)
+    router.push("/auth/register")
+  }
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20">
+      <MarketingHeader />
+      
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden bg-slate-950 text-white">
-        <div className="container px-4 mx-auto relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
-              The CRM built for <span className="text-sky-500">modern teams</span>
+      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 overflow-hidden">
+        <div className="container px-8 mx-auto relative z-10 max-w-7xl">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-[0.2em] animate-in fade-in slide-in-from-top-4 duration-1000">
+              <Sparkles className="h-3 w-3" />
+              The Future of CRM is Here
+            </div>
+            <h1 className="text-6xl lg:text-8xl font-bold tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              The CRM built for <br />
+              <span className="text-primary">modern teams</span>
             </h1>
-            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
               Streamline your sales pipeline, automate lead tracking, and close more deals with the world&apos;s most intuitive CRM platform.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-              <Button size="lg" className="bg-sky-600 hover:bg-sky-700 text-white px-8 h-12 text-lg" asChild>
-                <Link href="#contact">Get Started Free</Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+              <Button size="lg" className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest shadow-xl shadow-primary/20 group" asChild>
+                <Link href="/auth/login" className="flex items-center gap-2">
+                  Get Started Free <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-slate-700 text-white hover:bg-slate-900 px-8 h-12 text-lg">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest border-border/50 hover:bg-secondary/50"
+                onClick={handleViewDemo}
+              >
                 View Demo
               </Button>
             </div>
           </div>
         </div>
+        
         {/* Background Decoration */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden opacity-20">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sky-500 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden -z-10">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] animate-pulse delay-700" />
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-24 bg-white dark:bg-slate-900">
-        <div className="container px-4 mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold mb-4">Everything you need to scale</h2>
-            <p className="text-slate-500">Powerful features designed to help your sales team perform at their best every single day.</p>
+      <section id="features" className="py-32 border-t border-border/50">
+        <div className="container px-8 mx-auto max-w-7xl">
+          <div className="text-center max-w-3xl mx-auto mb-24 space-y-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Features</p>
+            <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">Everything you need to scale</h2>
+            <p className="text-lg text-muted-foreground">Powerful features designed to help your sales team perform at their best every single day.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -74,12 +110,12 @@ export default function HomePage() {
                 description: "Connect with your favorite tools like Slack, Gmail, and Zoom in just a few clicks."
               }
             ].map((feature, i) => (
-              <div key={i} className="p-8 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-shadow bg-slate-50 dark:bg-slate-800/50">
-                <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-xl flex items-center justify-center mb-6">
-                  <feature.icon className="w-6 h-6 text-sky-600" />
+              <div key={i} className="group p-10 rounded-3xl border border-border/50 bg-card/30 hover:bg-card/50 hover:border-primary/30 transition-all duration-500">
+                <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                  <feature.icon className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-slate-500 dark:text-slate-400 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-4 tracking-tight">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm font-medium">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -87,12 +123,15 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-slate-50 dark:bg-slate-950">
-        <div className="container px-4 mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="lg:w-1/2">
-              <h2 className="text-4xl font-bold mb-8">How ClientFlow works</h2>
-              <div className="space-y-8">
+      <section id="how-it-works" className="py-32 bg-secondary/20 border-y border-border/50">
+        <div className="container px-8 mx-auto max-w-7xl">
+          <div className="flex flex-col lg:flex-row items-center gap-24">
+            <div className="lg:w-1/2 space-y-12">
+              <div className="space-y-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Workflow</p>
+                <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">How ClientFlow works</h2>
+              </div>
+              <div className="space-y-10">
                 {[
                   {
                     step: "01",
@@ -110,19 +149,25 @@ export default function HomePage() {
                     description: "Use AI-powered insights to prioritize the right opportunities and close faster."
                   }
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-6">
-                    <div className="text-4xl font-bold text-sky-500/20">{item.step}</div>
-                    <div>
-                      <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                      <p className="text-slate-500 dark:text-slate-400">{item.description}</p>
+                  <div key={i} className="flex gap-8 group">
+                    <div className="text-5xl font-black text-primary/10 group-hover:text-primary/20 transition-colors duration-500 leading-none">{item.step}</div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold tracking-tight">{item.title}</h3>
+                      <p className="text-muted-foreground font-medium leading-relaxed">{item.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="lg:w-1/2 bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800">
-              <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                <BarChart3 className="w-20 h-20 text-slate-300" />
+            <div className="lg:w-1/2 w-full">
+              <div className="relative p-2 rounded-[2.5rem] bg-gradient-to-b from-border/50 to-transparent border border-border/50 shadow-2xl">
+                <div className="aspect-video bg-card rounded-[2rem] flex items-center justify-center overflow-hidden">
+                  <BarChart3 className="w-24 h-24 text-primary/10 animate-pulse" />
+                  {/* Decorative elements to simulate a dashboard */}
+                  <div className="absolute top-12 left-12 w-32 h-4 bg-primary/10 rounded-full" />
+                  <div className="absolute top-20 left-12 w-24 h-4 bg-primary/5 rounded-full" />
+                  <div className="absolute bottom-12 right-12 w-48 h-32 bg-primary/5 rounded-2xl border border-primary/10" />
+                </div>
               </div>
             </div>
           </div>
@@ -130,11 +175,12 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-white dark:bg-slate-900">
-        <div className="container px-4 mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold mb-4">Simple, transparent pricing</h2>
-            <p className="text-slate-500">Choose the plan that fits your team&apos;s needs.</p>
+      <section id="pricing" className="py-32">
+        <div className="container px-8 mx-auto max-w-7xl">
+          <div className="text-center max-w-3xl mx-auto mb-24 space-y-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Pricing</p>
+            <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">Simple, transparent pricing</h2>
+            <p className="text-lg text-muted-foreground">Choose the plan that fits your team&apos;s needs.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
@@ -156,26 +202,41 @@ export default function HomePage() {
               }
             ].map((plan, i) => (
               <div key={i} className={cn(
-                "p-8 rounded-3xl border transition-all hover:scale-105 duration-300",
-                plan.popular ? "border-sky-500 shadow-xl relative bg-slate-50 dark:bg-slate-800" : "border-slate-200 dark:border-slate-800"
+                "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col",
+                plan.popular 
+                  ? "border-primary shadow-2xl shadow-primary/10 relative bg-card scale-105 z-10" 
+                  : "border-border/50 bg-card/30 hover:bg-card/50"
               )}>
                 {plan.popular && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-sky-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
                     Most Popular
                   </div>
                 )}
-                <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-                <div className="text-4xl font-bold mb-6">{plan.price}<span className="text-lg font-normal text-slate-500">/mo</span></div>
-                <ul className="space-y-4 mb-8">
+                <div className="space-y-2 mb-8">
+                  <h3 className="text-xl font-bold tracking-tight">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black tracking-tighter">{plan.price}</span>
+                    <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">/mo</span>
+                  </div>
+                </div>
+                <ul className="space-y-5 mb-12 flex-1">
                   {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                      <CheckCircle2 className="w-5 h-5 text-sky-500" />
+                    <li key={j} className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
                       {feature}
                     </li>
                   ))}
                 </ul>
-                <Button className={cn("w-full h-12 text-lg", plan.popular ? "bg-sky-600 hover:bg-sky-700 text-white" : "variant-outline")} asChild>
-                  <Link href="#contact">Choose Plan</Link>
+                <Button 
+                  size="lg"
+                  variant={plan.popular ? "default" : "outline"}
+                  className={cn(
+                    "w-full h-14 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em]",
+                    plan.popular ? "shadow-lg shadow-primary/20" : "border-border/50"
+                  )}
+                  onClick={() => handlePlanChange(plan.name)}
+                >
+                  Choose {plan.name}
                 </Button>
               </div>
             ))}
@@ -184,26 +245,29 @@ export default function HomePage() {
       </section>
 
       {/* Lead Capture Section */}
-      <section id="contact" className="py-24 bg-slate-50 dark:bg-slate-950">
-        <div className="container px-4 mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="lg:w-1/2">
-              <h2 className="text-4xl font-bold mb-6">Ready to transform your sales?</h2>
-              <p className="text-xl text-slate-500 dark:text-slate-400 mb-8">
-                Join over 2,000+ companies using ClientFlow to grow their business. Our team is ready to help you set up your perfect pipeline.
-              </p>
+      <section id="contact" className="py-32 bg-secondary/20 border-t border-border/50">
+        <div className="container px-8 mx-auto max-w-7xl">
+          <div className="flex flex-col lg:flex-row items-center gap-24">
+            <div className="lg:w-1/2 space-y-10">
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6 text-sky-600" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Contact</p>
+                <h2 className="text-4xl lg:text-6xl font-bold tracking-tight leading-tight">Ready to transform <br /> your sales?</h2>
+                <p className="text-xl text-muted-foreground leading-relaxed font-medium">
+                  Join over 2,000+ companies using ClientFlow to grow their business. Our team is ready to help you set up your perfect pipeline.
+                </p>
+              </div>
+              <div className="space-y-6">
+                <div className="flex items-center gap-5 group">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="w-6 h-6 text-primary" />
                   </div>
-                  <span className="font-medium">Free 14-day trial, no credit card required</span>
+                  <span className="font-bold text-foreground">Free 14-day trial, no credit card required</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6 text-sky-600" />
+                <div className="flex items-center gap-5 group">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="w-6 h-6 text-primary" />
                   </div>
-                  <span className="font-medium">Setup in less than 5 minutes</span>
+                  <span className="font-bold text-foreground">Setup in less than 5 minutes</span>
                 </div>
               </div>
             </div>
@@ -215,20 +279,24 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-slate-950 text-slate-400 border-t border-slate-900">
-        <div className="container px-4 mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-2 text-white font-bold text-2xl">
-              <Zap className="w-8 h-8 text-sky-500 fill-sky-500" />
-              ClientFlow
+      <footer className="py-20 bg-background border-t border-border/50">
+        <div className="container px-8 mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-12">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Sparkles className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-foreground">ClientFlow</span>
+            </Link>
+            <div className="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
+              <Link href="#" className="hover:text-primary transition-colors">LinkedIn</Link>
             </div>
-            <div className="flex gap-8">
-              <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-              <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
-              <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
-            </div>
-            <p className="text-sm">© 2026 ClientFlow Inc. All rights reserved.</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+              © 2026 ClientFlow Inc. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

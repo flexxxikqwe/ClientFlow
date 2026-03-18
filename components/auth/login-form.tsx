@@ -19,6 +19,8 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
+import { LocalStore } from "@/lib/store"
+
 export function LoginForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -34,16 +36,15 @@ export function LoginForm() {
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(values),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed")
+      // Simplified local login
+      const user = {
+        id: "user_1",
+        email: values.email,
+        full_name: values.email.split("@")[0],
+        role: "admin"
       }
+      
+      LocalStore.setUser(user)
 
       toast.success("Welcome back!")
       router.push("/dashboard")
