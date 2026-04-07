@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Authentication', () => {
   test('should login successfully via demo mode', async ({ page }) => {
     // 1. Reach the login page
-    await page.goto('/auth/login');
-    await expect(page).toHaveURL(/\/auth\/login/);
+    await page.goto('/login');
+    await expect(page).toHaveURL(/\/login/);
 
     // 2. Click "Try Demo Mode"
     const demoButton = page.getByTestId('demo-mode-button');

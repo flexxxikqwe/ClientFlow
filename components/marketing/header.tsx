@@ -17,9 +17,9 @@ export function MarketingHeader() {
         <nav className="hidden md:flex items-center gap-10 text-sm font-semibold">
           <Link href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</Link>
           <Link href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
-          <Link href="/auth/login" className="text-muted-foreground hover:text-foreground transition-colors">Login</Link>
+          <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">Login</Link>
           <Button asChild size="lg" className="rounded-full px-8 font-bold shadow-lg shadow-primary/20">
-            <Link href="/auth/register">Get Started</Link>
+            <Link href="/register">Get Started</Link>
           </Button>
         </nav>
       </div>

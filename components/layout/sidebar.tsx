@@ -98,7 +98,14 @@ export function Sidebar() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">{user.full_name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">{user.full_name}</span>
+                  {user.isDemo && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/20">
+                      Demo
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] truncate mt-0.5">{user.role || "Admin"}</span>
               </div>
             </div>

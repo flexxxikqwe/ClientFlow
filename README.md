@@ -68,11 +68,18 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 - **Clean Architecture:** Effective use of the Repository Pattern to handle multiple persistence layers.
 - **API Design:** Structured Route Handlers with robust Zod validation and clear error handling.
 - **Frontend Engineering:** Implementation of loading states, empty states, and consistent UI transitions.
+- **E2E Testing:** A foundational Playwright test suite verifying critical user journeys (Auth, Leads, Notes).
+
+## Portfolio Context
+This project was built to demonstrate a **Junior+ level engineering mindset**. Key highlights for reviewers:
+- **Scalability:** The repository pattern allows swapping the entire database layer with zero changes to the UI or business logic.
+- **Resilience:** The hybrid persistence layer ensures the app remains functional even if cloud credentials are not configured.
+- **Testability:** Core flows are covered by E2E tests using stable `data-testid` selectors.
+- **AI Integration:** Real-world use of the Gemini API for practical business value (summaries and replies).
 
 ## Planned Next Steps
 - **Full Auth Migration:** Moving user sessions and profiles to Supabase Auth.
 - **Database-Level Analytics:** Optimizing metrics using PostgreSQL views and aggregations.
-- **E2E Testing:** Implementing Playwright tests for critical lead management journeys.
 
 ---
 *Note: Screenshots and demo visuals can be added here once the project is hosted.*

@@ -14,15 +14,15 @@ export default function HomePage() {
   const { loginAsDemo } = useUser()
   const router = useRouter()
 
-  const handleViewDemo = () => {
-    loginAsDemo()
+  const handleViewDemo = async () => {
+    await loginAsDemo()
     router.push("/dashboard")
     toast.success("Welcome to Demo Mode!")
   }
 
   const handlePlanChange = (plan: string) => {
     toast.success(`You've selected the ${plan} plan!`)
-    router.push("/auth/register")
+    router.push("/register")
   }
 
   return (
@@ -46,7 +46,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
               <Button size="lg" className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest shadow-xl shadow-primary/20 group" asChild>
-                <Link href="/auth/login" className="flex items-center gap-2">
+                <Link href="/register" className="flex items-center gap-2">
                   Get Started Free <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>

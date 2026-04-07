@@ -15,6 +15,19 @@ export default function DashboardPage() {
   const { isDemo } = useUser()
   const { data, isLoading, error } = useSWR("/api/analytics", fetcher)
 
+  if (error) {
+    return (
+      <div className="p-12 h-full flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-destructive font-bold uppercase tracking-widest text-xs">Failed to load analytics</p>
+          <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl">
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   const stats = [
     {
       title: "Total Leads",
@@ -31,7 +44,7 @@ export default function DashboardPage() {
       color: "text-primary",
     },
     {
-      title: "Converted Leads",
+      title: "Won Leads",
       value: data?.stats?.wonLeads || 0,
       icon: CheckCircle2,
       description: "Leads with 'Won' status",

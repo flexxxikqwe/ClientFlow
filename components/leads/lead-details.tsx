@@ -50,7 +50,6 @@ import { LeadInfoTab } from "./lead-info-tab"
 import { LeadAiTab } from "./lead-ai-tab"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/features/auth/context/user-context"
-import { MOCK_LEADS } from "@/lib/mock-data"
 
 interface LeadDetailsProps {
   lead: Lead | null

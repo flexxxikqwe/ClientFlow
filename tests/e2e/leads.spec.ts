@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Leads Management', () => {
   test.beforeEach(async ({ page }) => {
     // Login as demo user before each test
-    await page.goto('/auth/login');
+    await page.goto('/login');
     await page.getByTestId('demo-mode-button').click();
     await expect(page).toHaveURL(/\/dashboard/);
   });

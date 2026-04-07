@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 import { useUser } from "@/features/auth/context/user-context"
-import { MOCK_LEADS } from "@/lib/mock-data"
 
 import {
   Table,
