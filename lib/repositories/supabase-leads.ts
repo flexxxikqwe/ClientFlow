@@ -1,8 +1,22 @@
 import { supabase } from '@/lib/supabase'
 import { ILeadsRepository } from './interfaces'
 import { Lead, GetLeadsOptions, PipelineStage } from '@/lib/db'
+import { getUserById } from '@/lib/json-db'
 
 export class SupabaseLeadsRepository implements ILeadsRepository {
+  private resolveLeadRelations(lead: any): Lead {
+    if (!lead) return lead
+    
+    return {
+      ...lead,
+      owner: lead.owner_id ? getUserById(lead.owner_id) : null,
+      notes: (lead.notes || []).map((note: any) => ({
+        ...note,
+        author: note.author_id ? getUserById(note.author_id) : null
+      }))
+    } as Lead
+  }
+
   async getLeads(options: GetLeadsOptions = {}) {
     const {
       page = 1,
@@ -35,11 +49,13 @@ export class SupabaseLeadsRepository implements ILeadsRepository {
     if (error) throw error
 
     return {
-      data: (data || []) as Lead[],
-      total: count || 0,
-      page,
-      limit,
-      totalPages: Math.ceil((count || 0) / limit)
+      leads: (data || []).map(l => this.resolveLeadRelations(l)),
+      pagination: {
+        total: count || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
     }
   }
 
@@ -51,18 +67,28 @@ export class SupabaseLeadsRepository implements ILeadsRepository {
       .single()
 
     if (error) return undefined
-    return data as Lead
+    return this.resolveLeadRelations(data)
   }
 
   async createLead(leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'>) {
+    let finalData = { ...leadData }
+    
+    // If no stage_id, try to get the first stage
+    if (!finalData.stage_id) {
+      const stages = await this.getPipelineStages()
+      if (stages.length > 0) {
+        finalData.stage_id = stages[0].id
+      }
+    }
+
     const { data, error } = await supabase
       .from('leads')
-      .insert([leadData])
-      .select()
+      .insert([finalData])
+      .select('*, stage:pipeline_stages(*), notes(*)')
       .single()
 
     if (error) throw error
-    return data as Lead
+    return this.resolveLeadRelations(data)
   }
 
   async updateLead(id: string, updates: Partial<Lead>) {
@@ -70,11 +96,11 @@ export class SupabaseLeadsRepository implements ILeadsRepository {
       .from('leads')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select()
+      .select('*, stage:pipeline_stages(*), notes(*)')
       .single()
 
     if (error) throw error
-    return data as Lead
+    return this.resolveLeadRelations(data)
   }
 
   async deleteLead(id: string) {

@@ -1,165 +1,34 @@
-import fs from 'fs';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import bcrypt from 'bcryptjs';
 import { IUsersRepository, ILeadsRepository, INotesRepository, IAnalyticsRepository } from './repositories/interfaces';
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
 import { SupabaseLeadsRepository } from './repositories/supabase-leads';
 import { SupabaseAnalyticsRepository } from './repositories/supabase-analytics';
 import { SupabaseNotesRepository } from './repositories/supabase-notes';
+import { 
+  getDb, 
+  saveDb, 
+  getUserById, 
+  getUsers, 
+  getUserByEmail, 
+  createUser, 
+  updateUser,
+  User,
+  Lead,
+  Note,
+  PipelineStage
+} from './json-db';
 
-const DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
-
-export interface User {
-  id: string;
-  email: string;
-  full_name: string;
-  avatar_url?: string;
-  role: string;
-  password?: string;
-  created_at: string;
-  updated_at?: string;
-  plan?: string;
-  isDemo?: boolean;
-}
-
-export interface Lead {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email?: string | null;
-  phone?: string | null;
-  company?: string | null;
-  status: string;
-  source?: string | null;
-  message?: string | null;
-  value?: number | null;
-  owner_id?: string | null;
-  stage_id?: string | null;
-  created_at: string;
-  updated_at: string;
-  notes?: Note[];
-  owner?: Partial<User> | null;
-  stage?: { name: string } | null;
-}
-
-export interface Note {
-  id: string;
-  lead_id: string;
-  author_id: string;
-  content: string;
-  created_at: string;
-  author?: Partial<User>;
-}
-
-export interface PipelineStage {
-  id: string;
-  name: string;
-  order: number;
-  created_at: string;
-}
-
-interface DbSchema {
-  users: User[];
-  leads: Lead[];
-  pipeline_stages: PipelineStage[];
-  notes: Note[];
-}
-
-const initialData: DbSchema = {
-  users: [
-    {
-      id: '1',
-      email: 'admin@clientflow.com',
-      full_name: 'Admin User',
-      role: 'admin',
-      password: bcrypt.hashSync('password123', 10),
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 'demo-user',
-      email: 'demo@clientflow.com',
-      full_name: 'Demo User',
-      role: 'admin',
-      plan: 'professional',
-      isDemo: true,
-      created_at: new Date().toISOString(),
-    }
-  ],
-  leads: [
-    {
-      id: uuidv4(),
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@example.com',
-      company: 'Acme Corp',
-      status: 'new',
-      source: 'Website',
-      value: 5000,
-      owner_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: uuidv4(),
-      first_name: 'Jane',
-      last_name: 'Smith',
-      email: 'jane@test.com',
-      company: 'Global Tech',
-      status: 'contacted',
-      source: 'Referral',
-      value: 12000,
-      owner_id: '1',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  ],
-  pipeline_stages: [
-    { id: '1', name: 'New', order: 0, created_at: new Date().toISOString() },
-    { id: '2', name: 'Contacted', order: 1, created_at: new Date().toISOString() },
-    { id: '3', name: 'Qualified', order: 2, created_at: new Date().toISOString() },
-    { id: '4', name: 'Proposal', order: 3, created_at: new Date().toISOString() },
-    { id: '5', name: 'Negotiation', order: 4, created_at: new Date().toISOString() },
-    { id: '6', name: 'Closed Won', order: 5, created_at: new Date().toISOString() },
-    { id: '7', name: 'Closed Lost', order: 6, created_at: new Date().toISOString() },
-  ],
-  notes: []
+export { 
+  getDb, 
+  saveDb, 
+  getUserById, 
+  getUsers, 
+  getUserByEmail, 
+  createUser, 
+  updateUser
 };
 
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_FILE)) {
-    const dir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2));
-  }
-}
-
-export function getDb(): DbSchema {
-  ensureDataFile();
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading database:', error);
-    return initialData;
-  }
-}
-
-export function saveDb(data: DbSchema) {
-  const tempFile = `${DATA_FILE}.tmp`;
-  try {
-    fs.writeFileSync(tempFile, JSON.stringify(data, null, 2));
-    fs.renameSync(tempFile, DATA_FILE);
-  } catch (error) {
-    console.error('Error saving database:', error);
-    if (fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
-    }
-    throw new Error('Failed to save database');
-  }
-}
+export type { User, Lead, Note, PipelineStage };
 
 // Reusable Lead Functions
 export interface GetLeadsOptions {
@@ -171,7 +40,7 @@ export interface GetLeadsOptions {
   sortOrder?: 'asc' | 'desc';
 }
 
-export function getLeads(options: GetLeadsOptions = {}) {
+function getLeads(options: GetLeadsOptions = {}) {
   const {
     page = 1,
     limit = 10,
@@ -221,7 +90,7 @@ export function getLeads(options: GetLeadsOptions = {}) {
   const paginatedLeads = leads.slice(from, to);
 
   return {
-    data: paginatedLeads,
+    leads: paginatedLeads,
     pagination: {
       page,
       limit,
@@ -231,7 +100,7 @@ export function getLeads(options: GetLeadsOptions = {}) {
   };
 }
 
-export function getLeadById(id: string) {
+function getLeadById(id: string) {
   const data = getDb();
   const lead = data.leads.find(l => l.id === id);
   if (!lead) return null;
@@ -247,7 +116,7 @@ export function getLeadById(id: string) {
   };
 }
 
-export function createLead(leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'>) {
+function createLead(leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'>) {
   const data = getDb();
   const newLead: Lead = { 
     ...leadData, 
@@ -260,7 +129,7 @@ export function createLead(leadData: Omit<Lead, 'id' | 'created_at' | 'updated_a
   return newLead;
 }
 
-export function updateLead(id: string, updates: Partial<Lead>) {
+function updateLead(id: string, updates: Partial<Lead>) {
   const data = getDb();
   const index = data.leads.findIndex(l => l.id === id);
   if (index === -1) return null;
@@ -274,7 +143,7 @@ export function updateLead(id: string, updates: Partial<Lead>) {
   return data.leads[index];
 }
 
-export function deleteLead(id: string) {
+function deleteLead(id: string) {
   const data = getDb();
   data.leads = data.leads.filter(l => l.id !== id);
   data.notes = data.notes.filter(n => n.lead_id !== id);
@@ -282,43 +151,7 @@ export function deleteLead(id: string) {
   return true;
 }
 
-// User functions
-export function getUsers() {
-  return getDb().users;
-}
-
-export function getUserByEmail(email: string) {
-  return getDb().users.find(u => u.email === email);
-}
-
-export function getUserById(id: string) {
-  return getDb().users.find(u => u.id === id);
-}
-
-export function createUser(userData: Omit<User, 'id' | 'created_at'>) {
-  const data = getDb();
-  const newUser = { ...userData, id: uuidv4(), created_at: new Date().toISOString() };
-  data.users.push(newUser);
-  saveDb(data);
-  return newUser;
-}
-
-export function updateUser(id: string, updates: Partial<User>) {
-  const data = getDb();
-  const index = data.users.findIndex(u => u.id === id);
-  if (index === -1) return null;
-  
-  data.users[index] = { 
-    ...data.users[index], 
-    ...updates, 
-    updated_at: new Date().toISOString() 
-  };
-  saveDb(data);
-  return data.users[index];
-}
-
-// Note functions
-export function createNote(noteData: Omit<Note, 'id' | 'created_at'>) {
+function createNote(noteData: Omit<Note, 'id' | 'created_at'>) {
   const data = getDb();
   const newNote = { ...noteData, id: uuidv4(), created_at: new Date().toISOString() };
   data.notes.push(newNote);
@@ -326,8 +159,7 @@ export function createNote(noteData: Omit<Note, 'id' | 'created_at'>) {
   return newNote;
 }
 
-// Stage functions
-export function getPipelineStages() {
+function getPipelineStages() {
   return getDb().pipeline_stages;
 }
 

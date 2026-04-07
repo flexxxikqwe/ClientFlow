@@ -39,7 +39,10 @@ export class SupabaseAnalyticsRepository implements IAnalyticsRepository {
     }))
 
     const total = (leads || []).length
-    const won = (leads || []).filter((l) => l.status === "won" || l.status === "Closed Won").length
+    const won = (leads || []).filter((l) => {
+      const s = l.status?.toLowerCase()
+      return s === "won" || s === "closed won"
+    }).length
     const conversionRate = total > 0 ? (won / total) * 100 : 0
     
     const pipelineValue = (leads || []).reduce((acc, l) => acc + (Number(l.value) || 0), 0)

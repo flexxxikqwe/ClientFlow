@@ -1,8 +1,17 @@
 import { supabase } from '@/lib/supabase'
 import { INotesRepository } from './interfaces'
 import { Note } from '@/lib/db'
+import { getUserById } from '@/lib/json-db'
 
 export class SupabaseNotesRepository implements INotesRepository {
+  private resolveNoteRelations(note: any): Note {
+    if (!note) return note
+    return {
+      ...note,
+      author: note.author_id ? getUserById(note.author_id) : null
+    } as Note
+  }
+
   async createNote(noteData: Omit<Note, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('notes')
@@ -11,7 +20,7 @@ export class SupabaseNotesRepository implements INotesRepository {
       .single()
 
     if (error) throw error
-    return data as Note
+    return this.resolveNoteRelations(data)
   }
 
   async getNotesByLeadId(leadId: string) {
@@ -22,6 +31,6 @@ export class SupabaseNotesRepository implements INotesRepository {
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return data as Note[]
+    return (data || []).map(n => this.resolveNoteRelations(n))
   }
 }
