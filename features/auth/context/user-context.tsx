@@ -7,7 +7,7 @@ interface UserContextType {
   isLoading: boolean
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
-  refreshUser: () => void
+  refreshUser: () => Promise<any>
   loginAsDemo: () => Promise<void>
   logout: () => Promise<void>
 }
@@ -48,6 +48,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const refreshUser = async () => {
+    setIsLoading(true)
     try {
       const response = await fetch("/api/auth/me")
       const data = await response.json()
@@ -57,8 +58,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       } else {
         localStorage.removeItem("user")
       }
+      return data.user
     } catch (error) {
       console.error("Failed to refresh user", error)
+      return null
+    } finally {
+      setIsLoading(false)
     }
   }
 

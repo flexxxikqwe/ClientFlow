@@ -49,6 +49,7 @@ export function LoginForm() {
       }
 
       await refreshUser()
+      router.refresh()
       toast.success("Welcome back!")
       router.push("/dashboard")
     } catch (error: any) {
@@ -62,6 +63,7 @@ export function LoginForm() {
     setIsDemoLoading(true)
     try {
       await loginAsDemo()
+      router.refresh()
       toast.success("Welcome to Demo Mode!")
       router.push("/dashboard")
     } catch (error) {

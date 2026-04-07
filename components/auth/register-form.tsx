@@ -50,6 +50,7 @@ export function RegisterForm() {
       }
 
       await refreshUser()
+      router.refresh()
       toast.success("Account created! Welcome.")
       router.push("/dashboard")
     } catch (error: any) {

@@ -10,13 +10,20 @@ export function useAuth() {
   const { user, isLoading, logout: contextLogout } = useUser()
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      // If no user and not on auth pages, redirect to login
+    if (!isLoading) {
       const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
       const isLandingPage = pathname === "/"
       
-      if (!isAuthPage && !isLandingPage) {
-        router.push("/login")
+      if (user) {
+        // If logged in and on auth page, redirect to dashboard
+        if (isAuthPage) {
+          router.push("/dashboard")
+        }
+      } else {
+        // If no user and not on auth/landing pages, redirect to login
+        if (!isAuthPage && !isLandingPage) {
+          router.push("/login")
+        }
       }
     }
   }, [router, pathname, user, isLoading])

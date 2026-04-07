@@ -15,9 +15,14 @@ export default function HomePage() {
   const router = useRouter()
 
   const handleViewDemo = async () => {
-    await loginAsDemo()
-    router.push("/dashboard")
-    toast.success("Welcome to Demo Mode!")
+    try {
+      await loginAsDemo()
+      router.refresh()
+      router.push("/dashboard")
+      toast.success("Welcome to Demo Mode!")
+    } catch (error) {
+      toast.error("Demo login failed")
+    }
   }
 
   const handlePlanChange = (plan: string) => {
