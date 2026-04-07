@@ -8,7 +8,7 @@ interface UserContextType {
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
   refreshUser: () => Promise<any>
-  loginAsDemo: () => Promise<void>
+  loginAsDemo: () => Promise<any>
   logout: () => Promise<void>
 }
 
@@ -75,7 +75,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (data.user) {
         setUser(data.user)
         localStorage.setItem("user", JSON.stringify(data.user))
+        return data.user
       }
+      throw new Error(data.error || "Demo login failed")
     } catch (error) {
       console.error("Failed to login as demo", error)
       throw error

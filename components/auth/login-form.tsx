@@ -49,9 +49,9 @@ export function LoginForm() {
       }
 
       await refreshUser()
-      router.refresh()
       toast.success("Welcome back!")
-      router.push("/dashboard")
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -63,9 +63,9 @@ export function LoginForm() {
     setIsDemoLoading(true)
     try {
       await loginAsDemo()
-      router.refresh()
       toast.success("Welcome to Demo Mode!")
-      router.push("/dashboard")
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error) {
       toast.error("Demo login failed")
     } finally {

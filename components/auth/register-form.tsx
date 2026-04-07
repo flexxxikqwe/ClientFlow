@@ -50,9 +50,9 @@ export function RegisterForm() {
       }
 
       await refreshUser()
-      router.refresh()
       toast.success("Account created! Welcome.")
-      router.push("/dashboard")
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error: any) {
       toast.error(error.message)
     } finally {

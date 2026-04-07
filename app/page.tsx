@@ -17,9 +17,9 @@ export default function HomePage() {
   const handleViewDemo = async () => {
     try {
       await loginAsDemo()
-      router.refresh()
-      router.push("/dashboard")
       toast.success("Welcome to Demo Mode!")
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error) {
       toast.error("Demo login failed")
     }

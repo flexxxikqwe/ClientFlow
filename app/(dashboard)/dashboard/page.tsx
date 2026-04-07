@@ -12,8 +12,11 @@ import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
-  const { isDemo } = useUser()
-  const { data, isLoading, error } = useSWR("/api/analytics", fetcher)
+  const { user, isLoading: isUserLoading } = useUser()
+  const { data, isLoading, error } = useSWR(
+    (!isUserLoading && user) ? "/api/analytics" : null, 
+    fetcher
+  )
 
   if (error) {
     return (
