@@ -1,20 +1,19 @@
 # ClientFlow
 
 ## Overview
-ClientFlow is a CRM and lead management application designed to streamline sales workflows. It provides teams with a visual interface to track prospects through a pipeline, log activity, and generate AI-assisted insights for better engagement.
+ClientFlow is a CRM and lead management application designed to organize sales workflows. It provides teams with a visual interface to track prospects, log activity, and generate AI-assisted insights for better engagement.
 
-This project serves as a full-stack portfolio piece demonstrating a real-world migration strategy. It has evolved from a local JSON-based prototype into a hybrid architecture that leverages Supabase for scalable data persistence while maintaining a robust fallback system.
+This project serves as a full-stack portfolio piece demonstrating a real-world migration strategy. It has evolved from a local JSON-based prototype into a hybrid architecture that leverages Supabase for data persistence while maintaining a robust fallback system.
 
 ## Implemented Today
 - **Authentication:** Custom JWT-based session management with bcrypt hashing, currently backed by a local JSON store.
 - **Leads Management:** Full CRUD operations for leads, featuring a dedicated "New Lead" flow and detailed profile views.
-- **Sales Pipeline:** A drag-and-drop Kanban board for visual deal tracking across customizable stages.
 - **Activity Timeline:** A relational note-taking system to track chronological interactions for every lead.
 - **AI Insights:** Integration with Google Gemini to generate automated lead summaries and professional follow-up drafts.
 - **Analytics:** Dashboard metrics and trend charts for tracking conversion rates, pipeline value, and acquisition sources.
 - **Data Export:** Functional CSV export for lead data directly from the management interface.
-- **Demo Mode:** A one-click "Demo Mode" with honest state handling, allowing exploration without registration.
-- **Hybrid Persistence:** A production-ready repository pattern that switches between Supabase (Postgres) and local JSON storage based on environment configuration.
+- **Demo Mode:** A one-click "Demo Mode" with state handling, allowing exploration without registration.
+- **Hybrid Persistence:** A structured repository pattern that switches between Supabase (Postgres) and local JSON storage based on environment configuration.
 
 ## Tech Stack
 - **Framework:** Next.js 15 (App Router)
@@ -28,8 +27,8 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 ## Architecture
 - **Next.js App Router:** Utilizes modern React Server Components and optimized Route Handlers.
 - **Repository Pattern:** Data access is abstracted behind interfaces (`ILeadsRepository`, etc.), decoupling business logic from the storage layer.
-- **Hybrid Persistence:** The app detects `NEXT_PUBLIC_SUPABASE_URL` at runtime. If present, it uses Supabase repositories; otherwise, it falls back to a local `data.json` implementation for zero-config development.
-- **Stateless Auth:** Sessions are managed via HTTP-only cookies containing signed JWTs, ensuring security and scalability.
+- **Hybrid Persistence:** The app detects `NEXT_PUBLIC_SUPABASE_URL` at runtime. If present, it uses Supabase repositories; otherwise, it falls back to a local `data.json` implementation for development.
+- **Stateless Auth:** Sessions are managed via HTTP-only cookies containing signed JWTs.
 - **Feature-Driven Structure:** Code is organized by domain (e.g., `/features/leads`, `/features/auth`) to improve maintainability.
 
 ## Current Limitations
@@ -60,16 +59,15 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 
 ## Demo Flow
 1. **Entry:** Visit the `/login` page and click **"Try Demo Mode"**.
-2. **Dashboard:** View real-time sales metrics and acquisition trends.
+2. **Dashboard:** View sales metrics and acquisition trends.
 3. **Leads:** Manage the active pipeline and export data to CSV.
-4. **Pipeline:** Use the Kanban board to move deals through different stages.
-5. **Insights:** Open a lead and use the **AI Insights** tab to generate a summary via the Gemini API.
+4. **Insights:** Open a lead and use the **AI Insights** tab to generate a summary via the Gemini API.
 
 ## What This Project Demonstrates
-- **Migration Strategy:** Successfully transitioning a prototype from local files to a cloud database without breaking existing flows.
+- **Migration Strategy:** Transitioning a prototype from local files to a cloud database without breaking existing flows.
 - **Clean Architecture:** Effective use of the Repository Pattern to handle multiple persistence layers.
 - **API Design:** Structured Route Handlers with robust Zod validation and clear error handling.
-- **UI/UX Craft:** Professional interface design with a focus on loading states, empty states, and smooth transitions.
+- **Frontend Engineering:** Component design focused on loading states, empty states, and smooth transitions.
 
 ## Planned Next Steps
 - **Full Auth Migration:** Moving user sessions and profiles to Supabase Auth.
