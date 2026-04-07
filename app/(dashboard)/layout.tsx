@@ -30,7 +30,7 @@ export default function DashboardLayout({
       {isDemo && (
         <div className="bg-primary text-primary-foreground py-2.5 px-6 flex items-center justify-center gap-3 text-xs font-semibold tracking-wide sticky top-0 z-[100] shadow-sm">
           <Info className="w-3.5 h-3.5" />
-          <span>You are currently in Demo Mode. Data is prefilled and changes are not saved.</span>
+          <span>You are currently in Demo Mode. Data is prefilled for exploration. Changes you make will persist in this environment.</span>
           <button 
             onClick={() => {
               localStorage.removeItem("user")

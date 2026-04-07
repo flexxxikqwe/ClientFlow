@@ -23,6 +23,14 @@ const COLORS = [
 ]
 
 export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-[350px] w-full flex items-center justify-center border border-dashed rounded-xl border-border/50 bg-secondary/5">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40">No data available</p>
+      </div>
+    )
+  }
+
   return (
     <div className="h-[350px] w-full">
       <ResponsiveContainer width="100%" height="100%">

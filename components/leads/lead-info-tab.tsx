@@ -42,7 +42,7 @@ export function LeadInfoTab({
               <SelectItem value="contacted">Contacted</SelectItem>
               <SelectItem value="qualified">Qualified</SelectItem>
               <SelectItem value="lost">Lost</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
+              <SelectItem value="won">Won</SelectItem>
             </SelectContent>
           </Select>
         </div>
