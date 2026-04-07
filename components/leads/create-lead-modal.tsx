@@ -1,72 +1,48 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { toast } from "sonner"
-import { Loader2, Plus } from "lucide-react"
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from "@/components/ui/select"
-
-const leadSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email().nullable().optional().or(z.literal("")),
-  phone: z.string().nullable().optional(),
-  company: z.string().nullable().optional(),
-  status: z.string().default("new"),
-})
+import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface CreateLeadModalProps {
+  isOpen: boolean
+  onClose: () => void
   onSuccess: () => void
-  isOpen?: boolean
-  onClose?: () => void
 }
 
-export function CreateLeadModal({ onSuccess, isOpen: externalIsOpen, onClose: externalOnClose }: CreateLeadModalProps) {
-  const [internalIsOpen, setInternalIsOpen] = useState(false)
+export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalProps) {
   const [isLoading, setIsLoading] = useState(false)
-
-  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
-  const setIsOpen = (val: boolean) => {
-    if (externalOnClose && !val) {
-      externalOnClose()
-    } else {
-      setInternalIsOpen(val)
-    }
-  }
-
-  const form = useForm({
-    resolver: zodResolver(leadSchema),
-    defaultValues: {
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone: "",
-      company: "",
-      status: "new",
-    },
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    company: "",
+    value: "",
+    status: "new"
   })
 
-  const onSubmit = async (values: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     setIsLoading(true)
+
     try {
       const response = await fetch("/api/leads", {
         method: "POST",
@@ -74,8 +50,8 @@ export function CreateLeadModal({ onSuccess, isOpen: externalIsOpen, onClose: ex
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...values,
-          stage_id: values.status // Map status to stage_id for pipeline
+          ...formData,
+          value: formData.value ? parseFloat(formData.value) : 0,
         }),
       })
 
@@ -86,123 +62,127 @@ export function CreateLeadModal({ onSuccess, isOpen: externalIsOpen, onClose: ex
 
       toast.success("Lead created successfully")
       onSuccess()
-      setIsOpen(false)
-      form.reset()
-    } catch (err: any) {
-      toast.error(err.message)
+      onClose()
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        company: "",
+        value: "",
+        status: "new"
+      })
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {externalIsOpen === undefined && (
-        <DialogTrigger asChild>
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg h-10 px-6 shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]">
-            <Plus className="mr-2 h-4 w-4" /> Add Lead
-          </Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl rounded-xl">
-        <DialogHeader className="p-8 border-b border-border/50 bg-card/50">
-          <DialogTitle className="text-2xl font-semibold tracking-tight text-foreground">Create New Lead</DialogTitle>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest mt-1">Enter the details of the new lead to add them to your pipeline.</p>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px] rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold tracking-tight">Create New Lead</DialogTitle>
+          <DialogDescription className="text-muted-foreground/60">
+            Add a new potential client to your sales pipeline.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-8 bg-transparent">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2.5">
-              <Label htmlFor="first_name" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">First Name</Label>
-              <Input 
-                id="first_name" 
-                {...form.register("first_name")} 
-                className="h-10 rounded-lg border-border/50 bg-background/50 focus-visible:ring-primary/20"
+        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">First Name</Label>
+              <Input
+                id="first_name"
+                required
                 placeholder="John"
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
               />
-              {form.formState.errors.first_name && (
-                <p className="text-[10px] font-semibold text-destructive uppercase tracking-widest mt-1 ml-1">{form.formState.errors.first_name.message as string}</p>
-              )}
             </div>
-            <div className="space-y-2.5">
-              <Label htmlFor="last_name" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">Last Name</Label>
-              <Input 
-                id="last_name" 
-                {...form.register("last_name")} 
-                className="h-10 rounded-lg border-border/50 bg-background/50 focus-visible:ring-primary/20"
+            <div className="space-y-2">
+              <Label htmlFor="last_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Last Name</Label>
+              <Input
+                id="last_name"
+                required
                 placeholder="Doe"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
               />
-              {form.formState.errors.last_name && (
-                <p className="text-[10px] font-semibold text-destructive uppercase tracking-widest mt-1 ml-1">{form.formState.errors.last_name.message as string}</p>
-              )}
             </div>
           </div>
-          <div className="space-y-2.5">
-            <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">Email Address</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              {...form.register("email")} 
-              className="h-10 rounded-lg border-border/50 bg-background/50 focus-visible:ring-primary/20"
-              placeholder="john.doe@example.com"
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
             />
-            {form.formState.errors.email && (
-              <p className="text-[10px] font-semibold text-destructive uppercase tracking-widest mt-1 ml-1">{form.formState.errors.email.message as string}</p>
-            )}
           </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2.5">
-              <Label htmlFor="phone" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">Phone Number</Label>
-              <Input 
-                id="phone" 
-                {...form.register("phone")} 
-                className="h-10 rounded-lg border-border/50 bg-background/50 focus-visible:ring-primary/20"
-                placeholder="+1 (555) 000-0000"
+          <div className="space-y-2">
+            <Label htmlFor="company" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Company</Label>
+            <Input
+              id="company"
+              placeholder="Acme Inc."
+              value={formData.company}
+              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+              className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="value" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Est. Value ($)</Label>
+              <Input
+                id="value"
+                type="number"
+                placeholder="5000"
+                value={formData.value}
+                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
               />
             </div>
-            <div className="space-y-2.5">
-              <Label htmlFor="company" className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">Company Name</Label>
-              <Input 
-                id="company" 
-                {...form.register("company")} 
-                className="h-10 rounded-lg border-border/50 bg-background/50 focus-visible:ring-primary/20"
-                placeholder="Acme Corp"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="status" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Status</Label>
+              <Select 
+                value={formData.status} 
+                onValueChange={(val) => setFormData({ ...formData, status: val })}
+              >
+                <SelectTrigger className="h-11 bg-secondary/10 border-border/50">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent className="backdrop-blur-xl bg-card/95 border-border/50">
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="space-y-2.5">
-            <Label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70 ml-1">Initial Pipeline Stage</Label>
-            <Select 
-              value={form.watch("status")} 
-              onValueChange={(val) => form.setValue("status", val)}
-            >
-              <SelectTrigger className="h-10 rounded-lg border-border/50 bg-background/50 focus:ring-primary/20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg border-border/50 bg-card">
-                <SelectItem value="new" className="rounded-md">New Lead</SelectItem>
-                <SelectItem value="contacted" className="rounded-md">Contacted</SelectItem>
-                <SelectItem value="qualified" className="rounded-md">Qualified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-end gap-3 pt-4">
+          <DialogFooter className="pt-4">
             <Button 
               type="button" 
               variant="ghost" 
-              className="h-10 px-6 rounded-lg text-xs font-semibold uppercase tracking-widest"
-              onClick={() => setIsOpen(false)}
+              onClick={onClose}
+              className="h-11 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="h-10 px-8 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs uppercase tracking-widest shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Lead
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Create Lead"
+              )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

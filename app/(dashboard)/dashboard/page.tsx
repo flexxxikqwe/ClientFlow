@@ -110,11 +110,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="p-8 space-y-4">
             <Button asChild variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
-              <Link href="/dashboard/leads">
+              <Link href="/dashboard/leads?create=true">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
                   <UserPlus className="h-4 w-4 text-primary" />
                 </div>
-                Manage Leads
+                Add New Lead
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">

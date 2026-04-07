@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useMemo, useCallback, memo } from "react"
+import { useState, useMemo, useCallback, memo, useEffect } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, Download } from "lucide-react"
 import useSWR, { mutate } from "swr"
 import { toast } from "sonner"
+import { useSearchParams, useRouter } from "next/navigation"
 
 import { LeadsTable } from "@/components/leads/leads-table"
 import { LeadDetails } from "@/components/leads/lead-details"
+import { CreateLeadModal } from "@/components/leads/create-lead-modal"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,9 +17,22 @@ import { Lead } from "@/types/leads"
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export default function LeadsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get("create") === "true") {
+      setIsCreateModalOpen(true)
+      // Clear the param without a full refresh
+      const newParams = new URLSearchParams(searchParams.toString())
+      newParams.delete("create")
+      router.replace(`/dashboard/leads${newParams.toString() ? `?${newParams.toString()}` : ""}`)
+    }
+  }, [searchParams, router])
 
   const { data: analytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics?days=30", fetcher, {
     revalidateOnFocus: false,
@@ -126,6 +141,12 @@ export default function LeadsPage() {
             {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
             Export Data
           </Button>
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
+          >
+            <Plus className="h-4 w-4 mr-2" /> New Lead
+          </Button>
         </div>
       </div>
 
@@ -164,6 +185,12 @@ export default function LeadsPage() {
         isOpen={isDetailsOpen} 
         onClose={() => setIsDetailsOpen(false)} 
         onUpdate={handleUpdate}
+      />
+
+      <CreateLeadModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleUpdate}
       />
     </div>
   )
