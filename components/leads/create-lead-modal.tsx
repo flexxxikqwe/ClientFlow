@@ -102,6 +102,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                 className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                data-testid="first-name-input"
               />
             </div>
             <div className="space-y-2">
@@ -117,6 +118,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                data-testid="last-name-input"
               />
             </div>
           </div>
@@ -129,6 +131,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+              data-testid="email-input"
             />
           </div>
           <div className="space-y-2">
@@ -139,6 +142,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               value={formData.company}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+              data-testid="company-input"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -153,6 +157,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                 className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                data-testid="value-input"
               />
             </div>
             <div className="space-y-2">
@@ -161,7 +166,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 value={formData.status} 
                 onValueChange={(val) => setFormData({ ...formData, status: val })}
               >
-                <SelectTrigger className="h-11 bg-secondary/10 border-border/50">
+                <SelectTrigger className="h-11 bg-secondary/10 border-border/50" data-testid="status-select">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent className="backdrop-blur-xl bg-card/95 border-border/50">
@@ -187,6 +192,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               type="submit" 
               disabled={isLoading}
               className="h-11 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
+              data-testid="submit-lead-button"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

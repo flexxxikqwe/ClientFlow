@@ -124,7 +124,7 @@ export default function LeadsPage() {
   ], [analytics])
 
   return (
-    <div className="p-8 lg:p-12 space-y-10 max-w-[1600px] mx-auto">
+    <div className="p-8 lg:p-12 space-y-10 max-w-[1600px] mx-auto" data-testid="leads-page">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Leads Management</h1>
@@ -136,6 +136,7 @@ export default function LeadsPage() {
             className="shadow-sm" 
             onClick={handleExport}
             disabled={isExporting}
+            data-testid="export-data-button"
           >
             {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
             Export Data
@@ -143,6 +144,7 @@ export default function LeadsPage() {
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none"
+            data-testid="new-lead-button"
           >
             <Plus className="h-4 w-4 mr-2" /> New Lead
           </Button>

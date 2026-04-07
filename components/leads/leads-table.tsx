@@ -64,13 +64,14 @@ const LeadRow = memo(({ lead, onLeadClick, onDelete }: {
   <TableRow 
     className="group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20"
     onClick={() => onLeadClick(lead)}
+    data-testid={`lead-row-${lead.id}`}
   >
     <TableCell className="py-5 pl-8">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
           {lead.first_name[0]}{lead.last_name[0]}
         </div>
-        <div className="font-semibold text-foreground text-sm tracking-tight">
+        <div className="font-semibold text-foreground text-sm tracking-tight" data-testid="lead-name">
           {lead.first_name} {lead.last_name}
         </div>
       </div>

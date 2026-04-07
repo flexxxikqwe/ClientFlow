@@ -371,12 +371,14 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   className="min-h-[140px] rounded-2xl border-border/50 bg-background/50 backdrop-blur-sm focus:ring-primary/20 transition-all pr-16 py-6 text-sm font-medium resize-none"
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
+                  data-testid="note-input"
                 />
                 <Button 
                   size="icon" 
                   className="absolute bottom-4 right-4 h-12 w-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                   onClick={handleAddNote}
                   disabled={isActionLoading || !noteContent.trim()}
+                  data-testid="add-note-button"
                 >
                   {isActionLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-6 w-6" />}
                 </Button>

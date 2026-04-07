@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useUser } from "@/features/auth/context/user-context"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -21,7 +22,9 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const router = useRouter()
+  const { loginAsDemo } = useUser()
   const [isLoading, setIsLoading] = useState(false)
+  const [isDemoLoading, setIsDemoLoading] = useState(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -55,37 +58,74 @@ export function LoginForm() {
     }
   }
 
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true)
+    try {
+      await loginAsDemo()
+      toast.success("Welcome to Demo Mode!")
+      router.push("/dashboard")
+    } catch (error) {
+      toast.error("Demo login failed")
+    } finally {
+      setIsDemoLoading(false)
+    }
+  }
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="name@example.com"
-          disabled={isLoading}
-          {...form.register("email")}
-        />
-        {form.formState.errors.email && (
-          <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-        )}
+    <div className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="name@example.com"
+            disabled={isLoading || isDemoLoading}
+            {...form.register("email")}
+            data-testid="email-input"
+          />
+          {form.formState.errors.email && (
+            <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            disabled={isLoading || isDemoLoading}
+            {...form.register("password")}
+            data-testid="password-input"
+          />
+          {form.formState.errors.password && (
+            <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
+          )}
+        </div>
+        <Button type="submit" className="w-full" disabled={isLoading || isDemoLoading} data-testid="sign-in-button">
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Sign In
+        </Button>
+      </form>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border/50" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white dark:bg-slate-800 px-2 text-muted-foreground">Or continue with</span>
+        </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          disabled={isLoading}
-          {...form.register("password")}
-        />
-        {form.formState.errors.password && (
-          <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
-        )}
-      </div>
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Sign In
+
+      <Button 
+        variant="outline" 
+        className="w-full" 
+        onClick={handleDemoLogin} 
+        disabled={isLoading || isDemoLoading}
+        data-testid="demo-mode-button"
+      >
+        {isDemoLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Try Demo Mode
       </Button>
-    </form>
+    </div>
   )
 }
