@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3 } from "lucide-react"
 import useSWR from "swr"
+import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
 import { useUser } from "@/features/auth/context/user-context"
@@ -86,8 +87,8 @@ export default function DashboardPage() {
                 </CardTitle>
                 <p className="text-sm font-medium text-muted-foreground/60">Daily lead volume over the last 30 days</p>
               </div>
-              <Button variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] h-10 px-6 border-border/50 bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20">
-                View Reports
+              <Button asChild variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] h-10 px-6 border-border/50 bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20">
+                <Link href="/dashboard/analytics">View Reports</Link>
               </Button>
             </div>
           </CardHeader>
@@ -108,23 +109,21 @@ export default function DashboardPage() {
             <p className="text-sm font-medium text-muted-foreground/60">Common tasks to get you started</p>
           </CardHeader>
           <CardContent className="p-8 space-y-4">
-            <Button variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
-                <UserPlus className="h-4 w-4 text-primary" />
-              </div>
-              Add New Lead
+            <Button asChild variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
+              <Link href="/dashboard/leads">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
+                  <UserPlus className="h-4 w-4 text-primary" />
+                </div>
+                Manage Leads
+              </Link>
             </Button>
-            <Button variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
-                <BarChart3 className="h-4 w-4 text-primary" />
-              </div>
-              View Analytics
-            </Button>
-            <Button variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-              </div>
-              Review Pipeline
+            <Button asChild variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">
+              <Link href="/dashboard/analytics">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </div>
+                View Analytics
+              </Link>
             </Button>
             
             <div className="pt-10">

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useMemo, useCallback, memo } from "react"
-import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2 } from "lucide-react"
+import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, Download } from "lucide-react"
 import useSWR, { mutate } from "swr"
+import { toast } from "sonner"
 
 import { LeadsTable } from "@/components/leads/leads-table"
 import { LeadDetails } from "@/components/leads/lead-details"
@@ -16,6 +17,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json())
 export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   const { data: analytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics?days=30", fetcher, {
     revalidateOnFocus: false,
@@ -30,6 +32,50 @@ export default function LeadsPage() {
   const handleUpdate = useCallback(() => {
     mutate((key) => typeof key === 'string' && key.startsWith('/api/leads'))
     mutate("/api/analytics?days=30")
+  }, [])
+
+  const handleExport = useCallback(async () => {
+    setIsExporting(true)
+    try {
+      const res = await fetch('/api/leads?limit=1000')
+      const data = await res.json()
+      const leads = data.leads || []
+      
+      if (leads.length === 0) {
+        toast.error("No leads to export")
+        return
+      }
+
+      const headers = ["First Name", "Last Name", "Email", "Phone", "Company", "Status", "Value", "Created At"]
+      const csvContent = [
+        headers.join(","),
+        ...leads.map((l: any) => [
+          `"${l.first_name}"`,
+          `"${l.last_name}"`,
+          `"${l.email || ""}"`,
+          `"${l.phone || ""}"`,
+          `"${l.company || ""}"`,
+          `"${l.status}"`,
+          l.value || 0,
+          `"${l.created_at}"`
+        ].join(","))
+      ].join("\n")
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement("a")
+      const url = URL.createObjectURL(blob)
+      link.setAttribute("href", url)
+      link.setAttribute("download", `leads_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      toast.success("Leads exported successfully")
+    } catch (error) {
+      toast.error("Failed to export leads")
+    } finally {
+      setIsExporting(false)
+    }
   }, [])
 
   const stats = useMemo(() => [
@@ -71,11 +117,14 @@ export default function LeadsPage() {
           <p className="text-slate-500 dark:text-slate-400">Track and manage your sales pipeline efficiently.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="shadow-sm">
+          <Button 
+            variant="outline" 
+            className="shadow-sm" 
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
             Export Data
-          </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 dark:shadow-none">
-            <Plus className="h-4 w-4 mr-2" /> New Lead
           </Button>
         </div>
       </div>

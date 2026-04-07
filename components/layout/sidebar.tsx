@@ -30,12 +30,6 @@ const routes = [
     color: "text-violet-500",
   },
   {
-    label: "Pipeline",
-    icon: Kanban,
-    href: "/dashboard/pipeline",
-    color: "text-pink-700",
-  },
-  {
     label: "Analytics",
     icon: BarChart3,
     href: "/dashboard/analytics",
