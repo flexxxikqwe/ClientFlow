@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { useUser } from "@/features/auth/context/user-context"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +23,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
   const router = useRouter()
+  const { refreshUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<RegisterFormValues>({
@@ -47,9 +49,9 @@ export function RegisterForm() {
         throw new Error(data.error || "Registration failed")
       }
 
+      await refreshUser()
       toast.success("Account created! Welcome.")
       router.push("/dashboard")
-      router.refresh()
     } catch (error: any) {
       toast.error(error.message)
     } finally {

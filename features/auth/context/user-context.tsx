@@ -8,14 +8,20 @@ interface UserContextType {
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
   refreshUser: () => void
-  loginAsDemo: () => void
-  logout: () => void
+  loginAsDemo: () => Promise<void>
+  logout: () => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<any | null>(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem("user")
+      return storedUser ? JSON.parse(storedUser) : null
+    }
+    return null
+  })
   const [isLoading, setIsLoading] = useState(true)
 
   const isDemo = !!user?.isDemo
@@ -27,6 +33,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json()
         if (data.user) {
           setUser(data.user)
+          localStorage.setItem("user", JSON.stringify(data.user))
+        } else {
+          setUser(null)
+          localStorage.removeItem("user")
         }
       } catch (error) {
         console.error("Failed to fetch user", error)
@@ -42,6 +52,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch("/api/auth/me")
       const data = await response.json()
       setUser(data.user)
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user))
+      } else {
+        localStorage.removeItem("user")
+      }
     } catch (error) {
       console.error("Failed to refresh user", error)
     }
@@ -54,9 +69,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json()
       if (data.user) {
         setUser(data.user)
+        localStorage.setItem("user", JSON.stringify(data.user))
       }
     } catch (error) {
       console.error("Failed to login as demo", error)
+      throw error
     } finally {
       setIsLoading(false)
     }
@@ -66,8 +83,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
       setUser(null)
+      localStorage.removeItem("user")
     } catch (error) {
       console.error("Failed to logout", error)
+      throw error
     }
   }
 

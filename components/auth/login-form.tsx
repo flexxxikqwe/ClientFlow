@@ -22,7 +22,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const router = useRouter()
-  const { loginAsDemo } = useUser()
+  const { loginAsDemo, refreshUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
   const [isDemoLoading, setIsDemoLoading] = useState(false)
 
@@ -48,9 +48,9 @@ export function LoginForm() {
         throw new Error(data.error || "Login failed")
       }
 
+      await refreshUser()
       toast.success("Welcome back!")
       router.push("/dashboard")
-      router.refresh()
     } catch (error: any) {
       toast.error(error.message)
     } finally {

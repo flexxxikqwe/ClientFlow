@@ -1,33 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { useUser } from "../context/user-context"
 
 export function useAuth() {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem("user")
-      return storedUser ? JSON.parse(storedUser) : null
-    }
-    return null
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  const { user, isLoading, logout: contextLogout } = useUser()
 
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       // If no user and not on auth pages, redirect to login
-      if (!pathname.startsWith("/login") && !pathname.startsWith("/register") && pathname !== "/") {
+      const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
+      const isLandingPage = pathname === "/"
+      
+      if (!isAuthPage && !isLandingPage) {
         router.push("/login")
       }
     }
-  }, [router, pathname, user])
+  }, [router, pathname, user, isLoading])
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" })
-    localStorage.removeItem("user")
-    setUser(null)
+    await contextLogout()
     router.push("/login")
   }
 
