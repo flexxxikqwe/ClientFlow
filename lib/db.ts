@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { IUsersRepository, ILeadsRepository, INotesRepository, IAnalyticsRepository } from './repositories/interfaces';
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
+import { SupabaseLeadsRepository } from './repositories/supabase-leads';
+import { SupabaseAnalyticsRepository } from './repositories/supabase-analytics';
+import { SupabaseNotesRepository } from './repositories/supabase-notes';
 
 const DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
 
@@ -335,71 +338,79 @@ export const usersRepository: IUsersRepository = {
   updateUser: async (id, updates) => updateUser(id, updates),
 };
 
-export const leadsRepository: ILeadsRepository = {
-  getLeads: async (options) => getLeads(options),
-  getLeadById: async (id) => getLeadById(id),
-  createLead: async (leadData) => createLead(leadData),
-  updateLead: async (id, updates) => updateLead(id, updates),
-  deleteLead: async (id) => deleteLead(id),
-  getPipelineStages: async () => getPipelineStages(),
-};
+const isSupabaseEnabled = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const notesRepository: INotesRepository = {
-  createNote: async (noteData) => createNote(noteData),
-};
+export const leadsRepository: ILeadsRepository = isSupabaseEnabled 
+  ? new SupabaseLeadsRepository()
+  : {
+      getLeads: async (options) => getLeads(options),
+      getLeadById: async (id) => getLeadById(id),
+      createLead: async (leadData) => createLead(leadData),
+      updateLead: async (id, updates) => updateLead(id, updates),
+      deleteLead: async (id) => deleteLead(id),
+      getPipelineStages: async () => getPipelineStages(),
+    };
 
-export const analyticsRepository: IAnalyticsRepository = {
-  getAnalytics: async (days) => {
-    const startDate = startOfDay(subDays(new Date(), days - 1))
-    const endDate = endOfDay(new Date())
+export const notesRepository: INotesRepository = isSupabaseEnabled
+  ? new SupabaseNotesRepository()
+  : {
+      createNote: async (noteData) => createNote(noteData),
+    };
 
-    const { data: allLeads } = getLeads({ limit: 1000000 })
-    const leads = allLeads.filter(l => {
-      const createdAt = new Date(l.created_at)
-      return createdAt >= startDate && createdAt <= endDate
-    })
+export const analyticsRepository: IAnalyticsRepository = isSupabaseEnabled
+  ? new SupabaseAnalyticsRepository()
+  : {
+      getAnalytics: async (days) => {
+        const startDate = startOfDay(subDays(new Date(), days - 1))
+        const endDate = endOfDay(new Date())
 
-    const daysInterval = eachDayOfInterval({
-      start: startDate,
-      end: endDate,
-    })
+        const { data: allLeads } = getLeads({ limit: 1000000 })
+        const leads = allLeads.filter(l => {
+          const createdAt = new Date(l.created_at)
+          return createdAt >= startDate && createdAt <= endDate
+        })
 
-    const leadsPerDay = daysInterval.map((day) => {
-      const dayStr = format(day, "MMM dd")
-      const count = leads.filter((l) => 
-        format(new Date(l.created_at), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
-      ).length
-      return { date: dayStr, count }
-    })
+        const daysInterval = eachDayOfInterval({
+          start: startDate,
+          end: endDate,
+        })
 
-    const sourceCounts: Record<string, number> = {}
-    leads.forEach((l) => {
-      const source = l.source || "Unknown"
-      sourceCounts[source] = (sourceCounts[source] || 0) + 1
-    })
-    const leadsBySource = Object.entries(sourceCounts).map(([name, value]) => ({
-      name,
-      value,
-    }))
+        const leadsPerDay = daysInterval.map((day) => {
+          const dayStr = format(day, "MMM dd")
+          const count = leads.filter((l) => 
+            format(new Date(l.created_at), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
+          ).length
+          return { date: dayStr, count }
+        })
 
-    const total = leads.length
-    const won = leads.filter((l) => l.status === "won" || l.status === "Closed Won").length
-    const conversionRate = total > 0 ? (won / total) * 100 : 0
-    
-    const pipelineValue = leads.reduce((acc, l) => acc + (l.value || 0), 0)
+        const sourceCounts: Record<string, number> = {}
+        leads.forEach((l) => {
+          const source = l.source || "Unknown"
+          sourceCounts[source] = (sourceCounts[source] || 0) + 1
+        })
+        const leadsBySource = Object.entries(sourceCounts).map(([name, value]) => ({
+          name,
+          value,
+        }))
 
-    return {
-      leadsPerDay,
-      leadsBySource,
-      stats: {
-        totalLeads: total,
-        wonLeads: won,
-        conversionRate: conversionRate.toFixed(1),
-        pipelineValue,
-      },
-    }
-  }
-};
+        const total = leads.length
+        const won = leads.filter((l) => l.status === "won" || l.status === "Closed Won").length
+        const conversionRate = total > 0 ? (won / total) * 100 : 0
+        
+        const pipelineValue = leads.reduce((acc, l) => acc + (l.value || 0), 0)
+
+        return {
+          leadsPerDay,
+          leadsBySource,
+          stats: {
+            totalLeads: total,
+            wonLeads: won,
+            conversionRate: conversionRate.toFixed(1),
+            pipelineValue,
+          },
+        }
+      }
+    };
 
 // Keep db object for backward compatibility but encourage using standalone functions
 export const db = {
