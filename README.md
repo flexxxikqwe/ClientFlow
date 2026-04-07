@@ -13,7 +13,7 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 - **Analytics:** Dashboard metrics and trend charts for tracking conversion rates, pipeline value, and acquisition sources.
 - **Data Export:** Functional CSV export for lead data directly from the management interface.
 - **Demo Mode:** A one-click "Demo Mode" with state handling, allowing exploration without registration.
-- **Hybrid Persistence:** A structured repository pattern that switches between Supabase (Postgres) and local JSON storage based on environment configuration.
+- **Hybrid Persistence:** A repository pattern implementation that switches between Supabase (Postgres) and local JSON storage based on environment configuration.
 
 ## Tech Stack
 - **Framework:** Next.js 15 (App Router)
@@ -60,14 +60,14 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 ## Demo Flow
 1. **Entry:** Visit the `/login` page and click **"Try Demo Mode"**.
 2. **Dashboard:** View sales metrics and acquisition trends.
-3. **Leads:** Manage the active pipeline and export data to CSV.
+3. **Leads:** Browse leads and export data to CSV.
 4. **Insights:** Open a lead and use the **AI Insights** tab to generate a summary via the Gemini API.
 
 ## What This Project Demonstrates
 - **Migration Strategy:** Transitioning a prototype from local files to a cloud database without breaking existing flows.
 - **Clean Architecture:** Effective use of the Repository Pattern to handle multiple persistence layers.
 - **API Design:** Structured Route Handlers with robust Zod validation and clear error handling.
-- **Frontend Engineering:** Component design focused on loading states, empty states, and smooth transitions.
+- **Frontend Engineering:** Implementation of loading states, empty states, and consistent UI transitions.
 
 ## Planned Next Steps
 - **Full Auth Migration:** Moving user sessions and profiles to Supabase Auth.
