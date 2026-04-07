@@ -9,11 +9,13 @@ export interface IUsersRepository {
 
 export interface ILeadsRepository {
   getLeads(options?: GetLeadsOptions): Promise<{ 
-    data: Lead[], 
-    total: number, 
-    page: number, 
-    limit: number, 
-    totalPages: number 
+    leads: Lead[], 
+    pagination: {
+      total: number, 
+      page: number, 
+      limit: number, 
+      totalPages: number 
+    }
   }>
   getLeadById(id: string): Promise<Lead | undefined>
   createLead(leadData: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<Lead>

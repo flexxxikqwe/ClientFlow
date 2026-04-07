@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
 
@@ -130,4 +131,33 @@ export function saveDb(data: DbSchema) {
 
 export function getUserById(id: string) {
   return getDb().users.find(u => u.id === id);
+}
+
+export function getUsers() {
+  return getDb().users;
+}
+
+export function getUserByEmail(email: string) {
+  return getDb().users.find(u => u.email === email);
+}
+
+export function createUser(userData: Omit<User, 'id' | 'created_at'>) {
+  const data = getDb();
+  const newUser: User = {
+    ...userData,
+    id: uuidv4(),
+    created_at: new Date().toISOString()
+  };
+  data.users.push(newUser);
+  saveDb(data);
+  return newUser;
+}
+
+export function updateUser(id: string, updates: Partial<User>) {
+  const data = getDb();
+  const index = data.users.findIndex(u => u.id === id);
+  if (index === -1) return null;
+  data.users[index] = { ...data.users[index], ...updates, updated_at: new Date().toISOString() };
+  saveDb(data);
+  return data.users[index];
 }

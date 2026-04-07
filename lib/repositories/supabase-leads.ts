@@ -4,6 +4,13 @@ import { Lead, GetLeadsOptions, PipelineStage } from '@/lib/db'
 import { getUserById } from '@/lib/json-db'
 
 export class SupabaseLeadsRepository implements ILeadsRepository {
+  /**
+   * Resolves relational data for a lead.
+   * 
+   * IMPORTANT: During the hybrid migration phase, user data (owners and note authors) 
+   * is still fetched from the local JSON store because the 'users' table and 
+   * Supabase Auth migration are pending.
+   */
   private resolveLeadRelations(lead: any): Lead {
     if (!lead) return lead
     

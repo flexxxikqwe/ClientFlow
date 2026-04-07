@@ -4,6 +4,12 @@ import { Note } from '@/lib/db'
 import { getUserById } from '@/lib/json-db'
 
 export class SupabaseNotesRepository implements INotesRepository {
+  /**
+   * Resolves relational data for a note.
+   * 
+   * IMPORTANT: During the hybrid migration phase, author data is still fetched 
+   * from the local JSON store because the 'users' table migration is pending.
+   */
   private resolveNoteRelations(note: any): Note {
     if (!note) return note
     return {
