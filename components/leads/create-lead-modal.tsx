@@ -90,10 +90,14 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="first_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">First Name</Label>
+              <Label htmlFor="first_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                First Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="first_name"
                 required
+                minLength={1}
+                maxLength={50}
                 placeholder="John"
                 value={formData.first_name}
                 onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
@@ -101,10 +105,14 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Last Name</Label>
+              <Label htmlFor="last_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                Last Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="last_name"
                 required
+                minLength={1}
+                maxLength={50}
                 placeholder="Doe"
                 value={formData.last_name}
                 onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
@@ -135,10 +143,12 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="value" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Est. Value ($)</Label>
+              <Label htmlFor="value" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Value ($)</Label>
               <Input
                 id="value"
                 type="number"
+                min="0"
+                step="0.01"
                 placeholder="5000"
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
@@ -158,6 +168,8 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                   <SelectItem value="new">New</SelectItem>
                   <SelectItem value="contacted">Contacted</SelectItem>
                   <SelectItem value="qualified">Qualified</SelectItem>
+                  <SelectItem value="lost">Lost</SelectItem>
+                  <SelectItem value="won">Won</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -45,8 +45,7 @@ export default function LeadsPage() {
   }, [])
 
   const handleUpdate = useCallback(() => {
-    mutate((key) => typeof key === 'string' && key.startsWith('/api/leads'))
-    mutate("/api/analytics?days=30")
+    mutate((key) => typeof key === 'string' && (key.startsWith('/api/leads') || key.startsWith('/api/analytics')))
   }, [])
 
   const handleExport = useCallback(async () => {
