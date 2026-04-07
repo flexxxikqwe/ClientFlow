@@ -1,6 +1,5 @@
 import useSWR from "swr"
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { fetcher } from "@/lib/utils/fetcher"
 
 export function useUsers() {
   const { data, error, isLoading } = useSWR("/api/users", fetcher, {

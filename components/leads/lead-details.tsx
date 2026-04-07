@@ -59,8 +59,6 @@ interface LeadDetailsProps {
   onUpdate: () => void
 }
 
-import { LocalStore } from "@/lib/store"
-
 export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: LeadDetailsProps) {
   const { isDemo } = useUser()
   const [isEditing, setIsEditing] = useState(false)
@@ -72,14 +70,8 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
   const [aiReply, setAiReply] = useState<{ subject: string, body: string } | null>(null)
   const [isAiLoading, setIsAiLoading] = useState(false)
 
-  const { lead: realLead, isLoading: isRealLoading, mutate: mutateLead } = useLead(isDemo ? null : initialLead?.id || null)
+  const { lead, isLoading, mutate: mutateLead } = useLead(initialLead?.id || null)
   
-  const lead = useMemo(() => {
-    if (!isDemo) return realLead
-    return LocalStore.getLead(initialLead?.id || "")
-  }, [isDemo, realLead, initialLead])
-
-  const isLoading = isDemo ? false : isRealLoading
   const { users } = useUsers()
 
   useEffect(() => {
@@ -102,13 +94,25 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     if (!lead) return
     setIsActionLoading(true)
     try {
-      LocalStore.updateLead(lead.id, formData)
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to update lead")
+      }
+
       toast.success("Lead updated successfully")
       setIsEditing(false)
       mutateLead()
       onUpdate()
-    } catch (error) {
-      toast.error("Failed to update lead")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update lead")
     } finally {
       setIsActionLoading(false)
     }
@@ -118,22 +122,27 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     if (!lead || !noteContent.trim()) return
     setIsActionLoading(true)
     try {
-      const newNote = {
-        id: Math.random().toString(36).substr(2, 9),
-        lead_id: lead.id,
-        author_id: "demo-user",
-        content: noteContent,
-        created_at: new Date().toISOString(),
-        author: { full_name: "Demo User" }
+      const response = await fetch(`/api/leads/${lead.id}/notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: noteContent,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to add note")
       }
-      const updatedNotes = [newNote, ...(lead.notes || [])]
-      LocalStore.updateLead(lead.id, { notes: updatedNotes })
+
       toast.success("Note added")
       setNoteContent("")
       mutateLead()
       onUpdate()
-    } catch (error) {
-      toast.error("Failed to add note")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to add note")
     } finally {
       setIsActionLoading(false)
     }
@@ -143,12 +152,20 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     if (!lead || !confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return
     setIsActionLoading(true)
     try {
-      LocalStore.deleteLead(lead.id)
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to delete lead")
+      }
+
       toast.success("Lead deleted successfully")
       onClose()
       onUpdate()
-    } catch (error) {
-      toast.error("Failed to delete lead")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete lead")
     } finally {
       setIsActionLoading(false)
     }

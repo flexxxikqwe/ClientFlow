@@ -25,12 +25,12 @@ import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
 import { LeadsBySourceChart } from "@/components/analytics/leads-by-source-chart"
 
 import { useUser } from "@/features/auth/context/user-context"
-import { LocalStore } from "@/lib/store"
+import { fetcher } from "@/lib/utils/fetcher"
 
 export default function AnalyticsPage() {
   const { isDemo } = useUser()
   const [days, setDays] = useState("30")
-  const { data, error, isLoading, mutate } = useSWR("local_analytics", () => LocalStore.getAnalytics())
+  const { data, error, isLoading, mutate } = useSWR(`/api/analytics?days=${days}`, fetcher)
 
   if (error) return (
     <div className="p-12 text-center border border-dashed rounded-xl border-destructive/20 bg-destructive/5 m-12">

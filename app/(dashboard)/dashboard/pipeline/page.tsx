@@ -8,13 +8,15 @@ import { CreateLeadModal } from "@/components/leads/create-lead-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 import useSWR from "swr"
 
+import { useLeads } from "@/features/leads/hooks/use-leads"
+import { fetcher } from "@/lib/utils/fetcher"
 import { useUser } from "@/features/auth/context/user-context"
-import { LocalStore } from "@/lib/store"
 
 export default function PipelinePage() {
   const { isDemo } = useUser()
-  const { data: leads, isLoading: isLeadsLoading, mutate: mutateLeads } = useSWR("local_leads", () => LocalStore.getLeads())
-  const { data: stages, isLoading: isStagesLoading } = useSWR("local_stages", () => LocalStore.getStages())
+  const { leads, isLoading: isLeadsLoading, mutate: mutateLeads } = useLeads({ limit: 1000 })
+  const { data: stagesData, isLoading: isStagesLoading } = useSWR("/api/pipeline", fetcher)
+  const stages = stagesData?.stages || []
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const isLoading = isLeadsLoading || isStagesLoading

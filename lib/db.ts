@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+import { IUsersRepository, ILeadsRepository, INotesRepository, IAnalyticsRepository } from './repositories/interfaces';
+import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
 
 const DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
 
@@ -12,6 +15,9 @@ export interface User {
   role: string;
   password?: string;
   created_at: string;
+  updated_at?: string;
+  plan?: string;
+  isDemo?: boolean;
 }
 
 export interface Lead {
@@ -64,7 +70,16 @@ const initialData: DbSchema = {
       email: 'admin@clientflow.com',
       full_name: 'Admin User',
       role: 'admin',
-      password: 'password123',
+      password: bcrypt.hashSync('password123', 10),
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: 'demo-user',
+      email: 'demo@clientflow.com',
+      full_name: 'Demo User',
+      role: 'admin',
+      plan: 'professional',
+      isDemo: true,
       created_at: new Date().toISOString(),
     }
   ],
@@ -285,6 +300,20 @@ export function createUser(userData: Omit<User, 'id' | 'created_at'>) {
   return newUser;
 }
 
+export function updateUser(id: string, updates: Partial<User>) {
+  const data = getDb();
+  const index = data.users.findIndex(u => u.id === id);
+  if (index === -1) return null;
+  
+  data.users[index] = { 
+    ...data.users[index], 
+    ...updates, 
+    updated_at: new Date().toISOString() 
+  };
+  saveDb(data);
+  return data.users[index];
+}
+
 // Note functions
 export function createNote(noteData: Omit<Note, 'id' | 'created_at'>) {
   const data = getDb();
@@ -299,13 +328,87 @@ export function getPipelineStages() {
   return getDb().pipeline_stages;
 }
 
+export const usersRepository: IUsersRepository = {
+  getUserByEmail: async (email) => getUserByEmail(email),
+  getUserById: async (id) => getUserById(id),
+  createUser: async (userData) => createUser(userData),
+  updateUser: async (id, updates) => updateUser(id, updates),
+};
+
+export const leadsRepository: ILeadsRepository = {
+  getLeads: async (options) => getLeads(options),
+  getLeadById: async (id) => getLeadById(id),
+  createLead: async (leadData) => createLead(leadData),
+  updateLead: async (id, updates) => updateLead(id, updates),
+  deleteLead: async (id) => deleteLead(id),
+  getPipelineStages: async () => getPipelineStages(),
+};
+
+export const notesRepository: INotesRepository = {
+  createNote: async (noteData) => createNote(noteData),
+};
+
+export const analyticsRepository: IAnalyticsRepository = {
+  getAnalytics: async (days) => {
+    const startDate = startOfDay(subDays(new Date(), days - 1))
+    const endDate = endOfDay(new Date())
+
+    const { data: allLeads } = getLeads({ limit: 1000000 })
+    const leads = allLeads.filter(l => {
+      const createdAt = new Date(l.created_at)
+      return createdAt >= startDate && createdAt <= endDate
+    })
+
+    const daysInterval = eachDayOfInterval({
+      start: startDate,
+      end: endDate,
+    })
+
+    const leadsPerDay = daysInterval.map((day) => {
+      const dayStr = format(day, "MMM dd")
+      const count = leads.filter((l) => 
+        format(new Date(l.created_at), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
+      ).length
+      return { date: dayStr, count }
+    })
+
+    const sourceCounts: Record<string, number> = {}
+    leads.forEach((l) => {
+      const source = l.source || "Unknown"
+      sourceCounts[source] = (sourceCounts[source] || 0) + 1
+    })
+    const leadsBySource = Object.entries(sourceCounts).map(([name, value]) => ({
+      name,
+      value,
+    }))
+
+    const total = leads.length
+    const won = leads.filter((l) => l.status === "won" || l.status === "Closed Won").length
+    const conversionRate = total > 0 ? (won / total) * 100 : 0
+    
+    const pipelineValue = leads.reduce((acc, l) => acc + (l.value || 0), 0)
+
+    return {
+      leadsPerDay,
+      leadsBySource,
+      stats: {
+        totalLeads: total,
+        wonLeads: won,
+        conversionRate: conversionRate.toFixed(1),
+        pipelineValue,
+      },
+    }
+  }
+};
+
 // Keep db object for backward compatibility but encourage using standalone functions
 export const db = {
   users: {
     getAll: getUsers,
     getById: getUserById,
     getByEmail: getUserByEmail,
-    create: createUser
+    create: createUser,
+    update: updateUser
   },
   leads: {
     getAll: () => getLeads().data,

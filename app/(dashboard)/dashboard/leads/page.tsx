@@ -14,7 +14,7 @@ import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 
 import { useUser } from "@/features/auth/context/user-context"
-import { LocalStore } from "@/lib/store"
+import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 
 export default function LeadsPage() {
@@ -23,7 +23,7 @@ export default function LeadsPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  const { data: analytics, mutate: mutateAnalytics, isLoading: isAnalyticsLoading } = useSWR("local_analytics", () => LocalStore.getAnalytics())
+  const { data: analytics, mutate: mutateAnalytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics", fetcher)
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)

@@ -31,8 +31,6 @@ interface KanbanBoardProps {
   onUpdate?: () => void
 }
 
-import { LocalStore } from "@/lib/store"
-
 export function KanbanBoard({ initialLeads, stages, onUpdate }: KanbanBoardProps) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [activeLead, setActiveLead] = useState<Lead | null>(null)
@@ -118,11 +116,25 @@ export function KanbanBoard({ initialLeads, stages, onUpdate }: KanbanBoardProps
     if (newStageId && activeLead.stage_id !== newStageId) {
       setIsUpdating(true)
       try {
-        LocalStore.updateLead(activeId as string, { stage_id: newStageId })
+        const response = await fetch(`/api/leads/${activeId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ stage_id: newStageId }),
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || "Failed to move lead")
+        }
+
         toast.success("Lead moved successfully")
         onUpdate?.()
-      } catch (error) {
-        toast.error("Failed to move lead")
+      } catch (error: any) {
+        toast.error(error.message || "Failed to move lead")
+        // Revert local state if needed, but SWR revalidation will handle it
+        onUpdate?.()
       } finally {
         setIsUpdating(false)
       }

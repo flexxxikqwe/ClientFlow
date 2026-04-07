@@ -18,7 +18,6 @@ import { format } from "date-fns"
 import { useLeads } from "@/features/leads/hooks/use-leads"
 import { useDebounce } from "@/lib/hooks/use-debounce"
 import { LeadStatusBadge } from "./lead-status-badge"
-import { LocalStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
@@ -156,11 +155,19 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
     if (!confirm("Are you sure you want to delete this lead?")) return
     
     try {
-      LocalStore.deleteLead(id)
+      const response = await fetch(`/api/leads/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to delete lead")
+      }
+
       toast.success("Lead deleted successfully")
       mutate()
-    } catch (error) {
-      toast.error("Failed to delete lead")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete lead")
     }
   }, [mutate])
 

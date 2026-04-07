@@ -1,31 +1,26 @@
-import { getUserByEmail, createUser } from '@/lib/db'
+import { usersRepository } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { createSession } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
   const { email, password, fullName } = await request.json()
   
-  const existingUser = getUserByEmail(email)
+  const existingUser = await usersRepository.getUserByEmail(email)
   if (existingUser) {
     return NextResponse.json({ error: 'User already exists' }, { status: 400 })
   }
 
-  const user = createUser({
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  const user = await usersRepository.createUser({
     email,
-    password,
+    password: hashedPassword,
     full_name: fullName,
     role: 'user'
   })
 
-  // Set a simple session cookie
-  const cookieStore = await cookies()
-  cookieStore.set('session_user_id', user.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7 // 1 week
-  })
+  await createSession(user.id)
 
   const { password: _, ...userWithoutPassword } = user
   return NextResponse.json({ 

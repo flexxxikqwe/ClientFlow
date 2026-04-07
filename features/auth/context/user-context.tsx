@@ -1,8 +1,6 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from "react"
-import { LocalStore } from "@/lib/store"
-import { DEMO_USER } from "@/lib/mock-data"
 
 interface UserContextType {
   user: any | null
@@ -17,36 +15,77 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(() => {
-    if (typeof window !== "undefined") {
-      return LocalStore.getUser()
-    }
-    return null
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  const [user, setUser] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const isDemo = !!user?.isDemo
 
-  const refreshUser = () => {
-    const storedUser = LocalStore.getUser()
-    setUser(storedUser)
+  useEffect(() => {
+    async function initAuth() {
+      try {
+        const response = await fetch("/api/auth/me")
+        const data = await response.json()
+        if (data.user) {
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error("Failed to fetch user", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    initAuth()
+  }, [])
+
+  const refreshUser = async () => {
+    try {
+      const response = await fetch("/api/auth/me")
+      const data = await response.json()
+      setUser(data.user)
+    } catch (error) {
+      console.error("Failed to refresh user", error)
+    }
   }
 
-  const loginAsDemo = () => {
-    setUser(DEMO_USER)
-    LocalStore.setUser(DEMO_USER)
+  const loginAsDemo = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/auth/demo", { method: "POST" })
+      const data = await response.json()
+      if (data.user) {
+        setUser(data.user)
+      }
+    } catch (error) {
+      console.error("Failed to login as demo", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const logout = () => {
-    setUser(null)
-    LocalStore.clearUser()
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+      setUser(null)
+    } catch (error) {
+      console.error("Failed to logout", error)
+    }
   }
 
   const updatePlan = async (newPlan: string) => {
     if (!user) return
-    const updatedUser = { ...user, plan: newPlan }
-    setUser(updatedUser)
-    LocalStore.setUser(updatedUser)
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: newPlan }),
+      })
+      const updatedUser = await response.json()
+      if (updatedUser && !updatedUser.error) {
+        setUser(updatedUser)
+      }
+    } catch (error) {
+      console.error("Failed to update plan", error)
+    }
   }
 
   return (

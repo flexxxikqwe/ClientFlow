@@ -7,12 +7,12 @@ import useSWR from "swr"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
 import { useUser } from "@/features/auth/context/user-context"
-import { LocalStore } from "@/lib/store"
+import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
   const { isDemo } = useUser()
-  const { data, isLoading } = useSWR("local_analytics", () => LocalStore.getAnalytics())
+  const { data, isLoading, error } = useSWR("/api/analytics", fetcher)
 
   const stats = [
     {

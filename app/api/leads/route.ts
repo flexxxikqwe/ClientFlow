@@ -1,4 +1,4 @@
-import { getLeads, createLead } from '@/lib/db'
+import { leadsRepository } from '@/lib/db'
 import { getSessionUser } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const result = getLeads({
+    const result = await leadsRepository.getLeads({
       page,
       limit,
       status,
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const data = createLead(validatedData as any)
+    const data = await leadsRepository.createLead(validatedData as any)
 
     logger.info('Lead created successfully', { leadId: data.id })
 

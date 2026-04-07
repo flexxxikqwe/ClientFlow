@@ -40,8 +40,6 @@ interface CreateLeadModalProps {
   onClose?: () => void
 }
 
-import { LocalStore } from "@/lib/store"
-
 export function CreateLeadModal({ onSuccess, isOpen: externalIsOpen, onClose: externalOnClose }: CreateLeadModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -70,10 +68,22 @@ export function CreateLeadModal({ onSuccess, isOpen: externalIsOpen, onClose: ex
   const onSubmit = async (values: any) => {
     setIsLoading(true)
     try {
-      LocalStore.addLead({
-        ...values,
-        stage_id: values.status // Map status to stage_id for pipeline
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...values,
+          stage_id: values.status // Map status to stage_id for pipeline
+        }),
       })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to create lead")
+      }
+
       toast.success("Lead created successfully")
       onSuccess()
       setIsOpen(false)

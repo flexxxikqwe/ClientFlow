@@ -1,25 +1,23 @@
-import { getUserByEmail } from '@/lib/db'
+import { usersRepository } from '@/lib/db'
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { createSession } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
   
-  const user = getUserByEmail(email)
+  const user = await usersRepository.getUserByEmail(email)
 
-  if (!user || user.password !== password) {
+  if (!user || !user.password) {
     return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
   }
 
-  // Set a simple session cookie
-  const cookieStore = await cookies()
-  cookieStore.set('session_user_id', user.id, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7 // 1 week
-  })
+  const isPasswordValid = await bcrypt.compare(password, user.password)
+  if (!isPasswordValid) {
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+  }
+
+  await createSession(user.id)
 
   const { password: _, ...userWithoutPassword } = user
   return NextResponse.json({ 
