@@ -6,14 +6,23 @@ const getJwtSecret = () => {
   const secret = process.env.JWT_SECRET
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET environment variable is required in production')
+      // We don't throw at the top level to avoid breaking the build process
+      // if secrets are missing during the build phase.
+      return null
     }
     return new TextEncoder().encode('clientflow_dev_fallback_secret_32_chars_min')
   }
   return new TextEncoder().encode(secret)
 }
 
-const JWT_SECRET = getJwtSecret()
+const JWT_SECRET_VAL = getJwtSecret()
+
+function getActiveSecret() {
+  if (!JWT_SECRET_VAL) {
+    throw new Error('JWT_SECRET environment variable is required in production')
+  }
+  return JWT_SECRET_VAL
+}
 
 export async function getSessionUser() {
   const cookieStore = await cookies()
@@ -22,7 +31,7 @@ export async function getSessionUser() {
   if (!token) return null
   
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const { payload } = await jwtVerify(token, getActiveSecret())
     const userId = payload.sub as string
     
     const user = await usersRepository.getUserById(userId)
@@ -40,7 +49,7 @@ export async function createSession(userId: string) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_SECRET)
+    .sign(getActiveSecret())
 
   const cookieStore = await cookies()
   const isProd = process.env.NODE_ENV === 'production'
