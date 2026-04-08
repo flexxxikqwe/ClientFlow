@@ -243,19 +243,22 @@ export default function HomePage() {
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -8 }}
                 className={cn(
-                  "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col group",
+                  "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col group relative overflow-hidden",
                   plan.popular 
-                    ? "border-primary shadow-2xl shadow-primary/10 relative bg-card scale-105 z-10" 
-                    : "border-border/50 bg-card/30 hover:bg-card/50"
+                    ? "border-primary/50 shadow-2xl shadow-primary/10 bg-card scale-105 z-10" 
+                    : "border-border/50 bg-card/80 hover:border-primary/30 shadow-xl shadow-black/5"
                 )}
               >
                 {plan.popular && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    Most Popular
-                  </div>
+                  <>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-primary/20">
+                      Most Popular
+                    </div>
+                  </>
                 )}
                 <div className="space-y-2 mb-8">
-                  <h3 className="text-xl font-bold tracking-tight">{plan.name}</h3>
+                  <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 overflow-hidden h-12">
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -267,9 +270,7 @@ export default function HomePage() {
                         className="flex items-baseline gap-1"
                       >
                         <span className="text-4xl font-black tracking-tighter">
-                          {typeof plan.monthlyPrice === "number" 
-                            ? (billingCycle === "monthly" ? `$${plan.monthlyPrice}` : `$${plan.yearlyPrice}`)
-                            : plan.monthlyPrice}
+                          {plan.price === "Custom" ? "Custom" : (billingCycle === "monthly" ? `$${plan.monthlyPrice}` : `$${plan.yearlyPrice}`)}
                         </span>
                         {typeof plan.monthlyPrice === "number" && (
                           <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">/mo</span>
@@ -280,18 +281,20 @@ export default function HomePage() {
                 </div>
                 <ul className="space-y-5 mb-12 flex-1">
                   {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    <li key={j} className="flex items-center gap-3 text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                      <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Button 
                   size="lg"
-                  variant={plan.popular ? "default" : "outline"}
+                  variant={plan.popular ? "default" : "secondary"}
                   className={cn(
-                    "w-full h-14 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
-                    plan.popular ? "shadow-lg shadow-primary/20" : "border-border/50 group-hover:border-primary/30"
+                    "w-full h-14 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer",
+                    plan.popular 
+                      ? "shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]" 
+                      : "bg-secondary/50 hover:bg-primary hover:text-primary-foreground hover:scale-[1.02] active:scale-[0.98]"
                   )}
                   onClick={() => handlePlanChange(plan.name)}
                 >

@@ -1,3 +1,5 @@
+"use client"
+
 import { RegisterForm } from "@/components/auth/register-form"
 import Link from "next/link"
 import { Sparkles, CheckCircle2 } from "lucide-react"
