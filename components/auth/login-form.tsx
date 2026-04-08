@@ -64,8 +64,8 @@ export function LoginForm() {
     try {
       await loginAsDemo()
       toast.success("Welcome to Demo Mode!")
-      // Hard redirect to ensure session is stable and fresh
-      window.location.href = "/dashboard"
+      // Hard redirect to dashboard with explicit demo bootstrap parameter
+      window.location.href = "/dashboard?demo=1"
     } catch (error) {
       toast.error("Demo login failed")
     } finally {

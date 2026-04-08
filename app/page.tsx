@@ -59,9 +59,9 @@ export default function HomePage() {
                 size="lg" 
                 variant="outline" 
                 className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest border-border/50 hover:bg-secondary/50"
-                onClick={handleViewDemo}
+                asChild
               >
-                View Demo
+                <Link href="/demo/dashboard">View Demo</Link>
               </Button>
             </div>
           </div>

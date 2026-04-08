@@ -16,30 +16,32 @@ import { LogoutButton } from "@/components/auth/logout-button"
 import { useUser } from "@/features/auth/context/user-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-const routes = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-    color: "text-sky-500",
-  },
-  {
-    label: "Leads",
-    icon: Users,
-    href: "/dashboard/leads",
-    color: "text-violet-500",
-  },
-  {
-    label: "Analytics",
-    icon: BarChart3,
-    href: "/dashboard/analytics",
-    color: "text-orange-700",
-  },
-]
-
 export function Sidebar() {
   const pathname = usePathname()
-  const { user } = useUser()
+  const { user, isDemo } = useUser()
+
+  const basePath = isDemo && pathname.startsWith("/demo") ? "/demo" : "/dashboard"
+
+  const routes = [
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      href: basePath === "/demo" ? "/demo/dashboard" : "/dashboard",
+      color: "text-sky-500",
+    },
+    {
+      label: "Leads",
+      icon: Users,
+      href: basePath === "/demo" ? "/demo/leads" : "/dashboard/leads",
+      color: "text-violet-500",
+    },
+    {
+      label: "Analytics",
+      icon: BarChart3,
+      href: basePath === "/demo" ? "/demo/analytics" : "/dashboard/analytics",
+      color: "text-orange-700",
+    },
+  ]
 
   return (
     <div className="flex flex-col h-full bg-card/20 backdrop-blur-xl text-muted-foreground border-r border-border/30">

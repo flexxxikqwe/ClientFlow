@@ -38,11 +38,9 @@ export async function createSession(userId: string) {
   
   cookieStore.set('session_token', token, {
     httpOnly: true,
-    // Secure must be true for sameSite: 'none'
-    // On localhost, we disable secure to avoid issues with non-HTTPS setups
-    secure: isProd, 
-    // 'none' is required for cross-site iframes (AI Studio preview)
-    // 'lax' is better for standard development and security
+    // 'none' and secure: true are required for cross-site iframes (AI Studio preview)
+    // On localhost, we use 'lax' and secure: false to avoid issues with non-HTTPS
+    secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',

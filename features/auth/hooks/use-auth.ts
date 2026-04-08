@@ -1,40 +1,43 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useUser } from "../context/user-context"
 
 export function useAuth() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isLoading, logout: contextLogout } = useUser()
+  const { user, isLoading, refreshUser, logout: contextLogout } = useUser()
+  const hasAttemptedRef = useRef(false)
+
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
+  const isLandingPage = pathname === "/"
+  const isDashboardPage = !isAuthPage && !isLandingPage
 
   useEffect(() => {
-    if (!isLoading) {
-      const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
-      const isLandingPage = pathname === "/"
-      
-      if (user) {
-        // If logged in and on auth page, redirect to dashboard
-        if (isAuthPage) {
-          router.push("/dashboard")
-        }
+    // Don't do anything while the initial user check is in progress
+    if (isLoading) return
+
+    if (user) {
+      // If logged in and on auth page, redirect to dashboard
+      if (isAuthPage) {
+        router.push("/dashboard")
+      }
+    } else if (isDashboardPage) {
+      // If no user on a dashboard page, try one-time bootstrap/refresh
+      // This handles the case where cookies might not be immediately available in iframes
+      if (!hasAttemptedRef.current) {
+        hasAttemptedRef.current = true
+        const timer = setTimeout(() => {
+          refreshUser()
+        }, 500)
+        return () => clearTimeout(timer)
       } else {
-        // If no user and not on auth/landing pages, redirect to login
-        if (!isAuthPage && !isLandingPage) {
-          // We use a small delay before redirecting to /login
-          // This allows the UserProvider to finish its initial check
-          // and handles potential cookie propagation delays in iframe environments.
-          const timer = setTimeout(() => {
-            if (!user && !isLoading) {
-              router.push("/login")
-            }
-          }, 500)
-          return () => clearTimeout(timer)
-        }
+        // If still no user after one retry, redirect to login
+        router.push("/login")
       }
     }
-  }, [router, pathname, user, isLoading])
+  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isDashboardPage])
 
   const logout = async () => {
     await contextLogout()

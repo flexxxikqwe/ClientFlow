@@ -21,7 +21,7 @@ export function LogoutButton() {
 
       logout()
       toast.success("Logged out successfully")
-      router.push("/login")
+      router.push(isDemo ? "/" : "/login")
       router.refresh()
     } catch (error) {
       toast.error("Failed to logout")
