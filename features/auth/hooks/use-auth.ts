@@ -21,8 +21,8 @@ export function useAuth() {
 
     if (user) {
       // If logged in and on auth page, redirect to dashboard
-      // Note: We do NOT redirect to dashboard if on an onboarding page
-      if (isAuthPage) {
+      // We explicitly check if we're NOT already on or heading to an onboarding page
+      if (isAuthPage && !isOnboardingPage) {
         router.push("/dashboard")
       }
     } else if (isProtectedPage) {
@@ -32,18 +32,18 @@ export function useAuth() {
         hasAttemptedRef.current = true
         const bootstrapTimer = setTimeout(() => {
           refreshUser().then((refreshedUser) => {
+            // Only redirect to login if the bootstrap definitively failed to find a user
             if (!refreshedUser) {
               router.push("/login")
             }
           })
-        }, 600) // Reduced slightly, but kept for stability in AI Studio iframes
+        }, 600)
         return () => clearTimeout(bootstrapTimer)
-      } else {
-        // Fallback for cases where bootstrap logic was already attempted
-        router.push("/login")
       }
+      // Note: We removed the aggressive 'else' redirect here to prevent 
+      // race conditions during transitional routes like onboarding.
     }
-  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage])
+  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage, isOnboardingPage])
 
   const logout = async () => {
     await contextLogout()

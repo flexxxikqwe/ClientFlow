@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 
 interface UserContextType {
   user: any | null
@@ -18,6 +18,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const isDemo = !!user?.isDemo
+
+  const refreshUser = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/auth/me")
+      const data = await response.json()
+      setUser(data.user)
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user))
+      } else {
+        localStorage.removeItem("user")
+      }
+      return data.user
+    } catch (error) {
+      console.error("Failed to refresh user", error)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     async function initAuth() {
@@ -41,27 +61,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     initAuth()
   }, [])
 
-  const refreshUser = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/auth/me")
-      const data = await response.json()
-      setUser(data.user)
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user))
-      } else {
-        localStorage.removeItem("user")
-      }
-      return data.user
-    } catch (error) {
-      console.error("Failed to refresh user", error)
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
       setUser(null)
@@ -70,9 +70,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       console.error("Failed to logout", error)
       throw error
     }
-  }
+  }, [])
 
-  const updatePlan = async (newPlan: string) => {
+  const updatePlan = useCallback(async (newPlan: string) => {
     if (!user) return
     try {
       const response = await fetch(`/api/users/${user.id}`, {
@@ -87,7 +87,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Failed to update plan", error)
     }
-  }
+  }, [user])
 
   return (
     <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser, logout }}>
