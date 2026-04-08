@@ -11,15 +11,16 @@ import { useUser } from "@/features/auth/context/user-context"
 import { toast } from "sonner"
 
 export default function HomePage() {
-  const { loginAsDemo } = useUser()
+  const { loginAsDemo, refreshUser } = useUser()
   const router = useRouter()
 
   const handleViewDemo = async () => {
     try {
       await loginAsDemo()
+      await refreshUser()
       toast.success("Welcome to Demo Mode!")
-      // Hard redirect to ensure session is stable and fresh
-      window.location.href = "/dashboard"
+      router.replace("/dashboard")
+      router.refresh()
     } catch (error) {
       toast.error("Demo login failed")
     }

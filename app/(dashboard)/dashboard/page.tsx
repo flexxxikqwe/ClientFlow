@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3 } from "lucide-react"
@@ -12,8 +13,9 @@ import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
-  const { user, isLoading: isUserLoading } = useUser()
-  const { data, isLoading, error } = useSWR(
+  const { user, isLoading: isUserLoading, refreshUser } = useUser()
+  const hasRetriedUnauthorized = useRef(false)
+  const { data, isLoading, error, mutate } = useSWR(
     (!isUserLoading && user) ? [`/api/analytics`, user.id] : null, 
     ([url]) => fetcher(url)
   )
@@ -21,6 +23,23 @@ export default function DashboardPage() {
   // If we have a 401 error, it means the session is invalid.
   // We should wait for useAuth to redirect us instead of showing an error screen.
   const isUnauthorized = error?.status === 401
+
+  useEffect(() => {
+    if (!isUnauthorized || hasRetriedUnauthorized.current || !user) {
+      return
+    }
+
+    hasRetriedUnauthorized.current = true
+
+    const retryAfterSessionRefresh = async () => {
+      const refreshedUser = await refreshUser()
+      if (refreshedUser) {
+        await mutate()
+      }
+    }
+
+    retryAfterSessionRefresh()
+  }, [isUnauthorized, user, refreshUser, mutate])
 
   if (error && !isUnauthorized) {
     return (
