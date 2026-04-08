@@ -18,10 +18,8 @@ export default function HomePage() {
     try {
       await loginAsDemo()
       toast.success("Welcome to Demo Mode!")
-      // Small delay to ensure session cookie is processed by the browser
-      setTimeout(() => {
-        window.location.href = "/dashboard"
-      }, 500)
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error) {
       toast.error("Demo login failed")
     }

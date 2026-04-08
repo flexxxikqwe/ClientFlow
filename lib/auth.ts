@@ -34,10 +34,16 @@ export async function createSession(userId: string) {
     .sign(JWT_SECRET)
 
   const cookieStore = await cookies()
+  const isProd = process.env.NODE_ENV === 'production'
+  
   cookieStore.set('session_token', token, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    // Secure must be true for sameSite: 'none'
+    // On localhost, we disable secure to avoid issues with non-HTTPS setups
+    secure: isProd, 
+    // 'none' is required for cross-site iframes (AI Studio preview)
+    // 'lax' is better for standard development and security
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   })

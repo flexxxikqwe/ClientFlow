@@ -51,10 +51,8 @@ export function RegisterForm() {
 
       await refreshUser()
       toast.success("Account created! Welcome.")
-      // Small delay to ensure session cookie is processed by the browser
-      setTimeout(() => {
-        window.location.href = "/dashboard"
-      }, 500)
+      // Hard redirect to ensure session is stable and fresh
+      window.location.href = "/dashboard"
     } catch (error: any) {
       toast.error(error.message)
     } finally {
