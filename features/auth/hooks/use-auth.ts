@@ -9,6 +9,12 @@ export function useAuth() {
   const pathname = usePathname()
   const { user, isLoading, refreshUser, logout: contextLogout } = useUser()
   const hasAttemptedRef = useRef(false)
+  const userRef = useRef(user)
+
+  // Keep userRef in sync with the latest user state
+  useEffect(() => {
+    userRef.current = user
+  }, [user])
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
   const isOnboardingPage = pathname.startsWith("/onboarding")
@@ -32,24 +38,19 @@ export function useAuth() {
         hasAttemptedRef.current = true
         const bootstrapTimer = setTimeout(() => {
           refreshUser().then((refreshedUser) => {
-            // Only redirect to login if the bootstrap definitively failed to find a user.
-            // If it failed due to a transient error (refreshedUser is null but server might be down),
-            // we are more patient on onboarding routes.
-            if (!refreshedUser) {
+            // Only redirect to login if BOTH the bootstrap result is null 
+            // AND the current user state (via ref to avoid stale closure) is still null.
+            if (!refreshedUser && !userRef.current) {
               if (isOnboardingPage) {
-                // On onboarding, we give it one more chance or just wait.
-                // If it's a real 401, refreshUser would have cleared the state.
                 console.warn("Onboarding bootstrap failed, waiting for stability...")
               } else {
                 router.push("/login")
               }
             }
           })
-        }, 800) // Increased slightly for better stability in AI Studio
+        }, 800)
         return () => clearTimeout(bootstrapTimer)
       }
-      // Note: We removed the aggressive 'else' redirect here to prevent 
-      // race conditions during transitional routes like onboarding.
     }
   }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage, isOnboardingPage])
 

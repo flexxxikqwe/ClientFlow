@@ -20,11 +20,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const isDemo = !!user?.isDemo
 
   const refreshUser = useCallback(async () => {
+    // If already loading, don't start another refresh
+    if (isLoading && user) return user;
+    
     setIsLoading(true)
     try {
       const response = await fetch("/api/auth/me")
       
-      // Check if response is valid JSON
+      if (response.status === 401) {
+        setUser(null)
+        localStorage.removeItem("user")
+        return null
+      }
+
       const contentType = response.headers.get("content-type")
       if (!response.ok || !contentType || !contentType.includes("application/json")) {
         throw new Error(`Invalid response: ${response.status}`)
@@ -40,19 +48,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return data.user
     } catch (error) {
       console.error("Failed to refresh user", error)
-      // On transient errors, we don't necessarily want to wipe the local user immediately
-      // but for security/consistency we should probably return null to the caller
       return null
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [isLoading, user])
 
   useEffect(() => {
+    let isMounted = true;
     async function initAuth() {
       try {
         const response = await fetch("/api/auth/me")
-        
+        if (!isMounted) return;
+
         const contentType = response.headers.get("content-type")
         if (response.ok && contentType && contentType.includes("application/json")) {
           const data = await response.json()
@@ -64,17 +72,21 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             localStorage.removeItem("user")
           }
         } else {
+          // If it's not a 200 JSON response, we don't necessarily wipe the user
+          // if we already have one (e.g. from a previous session or refresh)
+          // but for the initial load, we default to null.
           setUser(null)
           localStorage.removeItem("user")
         }
       } catch (error) {
         console.error("Failed to fetch user", error)
-        setUser(null)
+        if (isMounted) setUser(null)
       } finally {
-        setIsLoading(false)
+        if (isMounted) setIsLoading(false)
       }
     }
     initAuth()
+    return () => { isMounted = false }
   }, [])
 
   const logout = useCallback(async () => {
