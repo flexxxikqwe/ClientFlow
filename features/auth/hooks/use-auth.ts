@@ -11,8 +11,9 @@ export function useAuth() {
   const hasAttemptedRef = useRef(false)
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
+  const isOnboardingPage = pathname.startsWith("/onboarding")
   const isLandingPage = pathname === "/"
-  const isDashboardPage = !isAuthPage && !isLandingPage
+  const isProtectedPage = !isAuthPage && !isLandingPage
 
   useEffect(() => {
     // Don't do anything while the initial user check is in progress
@@ -20,24 +21,24 @@ export function useAuth() {
 
     if (user) {
       // If logged in and on auth page, redirect to dashboard
+      // Note: We do NOT redirect to dashboard if on an onboarding page
       if (isAuthPage) {
         router.push("/dashboard")
       }
-    } else if (isDashboardPage) {
-      // If no user on a dashboard page, try one-time bootstrap/refresh
-      // This handles the case where cookies might not be immediately available in iframes
+    } else if (isProtectedPage) {
+      // If no user on a protected page (dashboard or onboarding), try one-time bootstrap/refresh
       if (!hasAttemptedRef.current) {
         hasAttemptedRef.current = true
         const timer = setTimeout(() => {
           refreshUser()
-        }, 500)
+        }, 800) // Increased delay slightly for stability in iframes
         return () => clearTimeout(timer)
       } else {
-        // If still no user after one retry, redirect to login
+        // If still no user after retry, redirect to login
         router.push("/login")
       }
     }
-  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isDashboardPage])
+  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage])
 
   const logout = async () => {
     await contextLogout()

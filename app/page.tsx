@@ -17,8 +17,7 @@ export default function HomePage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
 
   const handlePlanChange = (plan: string) => {
-    toast.success(`You've selected the ${plan} plan!`)
-    router.push("/register")
+    router.push(`/register?plan=${plan}`)
   }
 
   const plans = [

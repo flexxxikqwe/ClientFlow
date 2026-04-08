@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion } from "motion/react"
 import { CheckCircle2, CreditCard, ShieldCheck, Sparkles, ArrowRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,9 +9,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 
-export default function MockBillingPage() {
+function BillingContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isProcessing, setIsProcessing] = useState(false)
+
+  const plan = searchParams.get("plan") || "Professional"
+  
+  const planPrices: Record<string, string> = {
+    "Starter": "29",
+    "Professional": "79",
+    "Enterprise": "Custom"
+  }
+
+  const price = planPrices[plan] || "79"
 
   const handleActivate = async () => {
     setIsProcessing(true)
@@ -30,7 +41,7 @@ export default function MockBillingPage() {
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">Confirm your plan</h1>
         <p className="text-sm font-medium text-muted-foreground/80 leading-relaxed">
-          You&apos;ve selected the <span className="text-foreground font-bold">Professional Plan</span>. 
+          You&apos;ve selected the <span className="text-foreground font-bold">{plan} Plan</span>. 
           Complete this mock step to activate your full CRM dashboard.
         </p>
       </div>
@@ -43,10 +54,10 @@ export default function MockBillingPage() {
             <div className="p-6 rounded-2xl bg-secondary/20 border border-border/50 flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Selected Plan</p>
-                <p className="text-lg font-bold">Professional Plan</p>
+                <p className="text-lg font-bold">{plan} Plan</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-black">$79<span className="text-xs font-bold text-muted-foreground">/mo</span></p>
+                <p className="text-2xl font-black">{price === "Custom" ? "Custom" : `$${price}`}{price !== "Custom" && <span className="text-xs font-bold text-muted-foreground">/mo</span>}</p>
                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest">14-Day Free Trial</p>
               </div>
             </div>
@@ -123,5 +134,13 @@ export default function MockBillingPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function MockBillingPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center p-12"><Sparkles className="h-8 w-8 animate-pulse text-primary/20" /></div>}>
+      <BillingContent />
+    </Suspense>
   )
 }

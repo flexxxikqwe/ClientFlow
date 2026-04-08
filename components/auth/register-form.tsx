@@ -22,7 +22,7 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>
 
-export function RegisterForm() {
+export function RegisterForm({ plan = "Professional" }: { plan?: string }) {
   const router = useRouter()
   const { refreshUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
@@ -52,8 +52,8 @@ export function RegisterForm() {
 
       await refreshUser()
       toast.success("Account created! Welcome.")
-      // Redirect to mock onboarding billing step
-      router.push("/onboarding/billing")
+      // Redirect to mock onboarding billing step with the selected plan
+      router.push(`/onboarding/billing?plan=${plan}`)
     } catch (error: any) {
       toast.error(error.message)
     } finally {
