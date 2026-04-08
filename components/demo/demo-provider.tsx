@@ -11,7 +11,6 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     isDemo: true,
     updatePlan: async () => {},
     refreshUser: async () => DEMO_USER,
-    loginAsDemo: async () => DEMO_USER,
     logout: async () => {
       window.location.href = "/"
     },

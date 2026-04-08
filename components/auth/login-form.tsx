@@ -68,7 +68,7 @@ export function LoginForm() {
             id="email"
             type="email"
             placeholder="name@example.com"
-            disabled={isLoading || isDemoLoading}
+            disabled={isLoading}
             {...form.register("email")}
             data-testid="email-input"
           />
@@ -81,7 +81,7 @@ export function LoginForm() {
           <Input
             id="password"
             type="password"
-            disabled={isLoading || isDemoLoading}
+            disabled={isLoading}
             {...form.register("password")}
             data-testid="password-input"
           />
@@ -89,7 +89,7 @@ export function LoginForm() {
             <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
           )}
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading || isDemoLoading} data-testid="sign-in-button">
+        <Button type="submit" className="w-full" disabled={isLoading} data-testid="sign-in-button">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Sign In
         </Button>

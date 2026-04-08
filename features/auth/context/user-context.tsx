@@ -8,7 +8,6 @@ interface UserContextType {
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
   refreshUser: () => Promise<any>
-  loginAsDemo: () => Promise<any>
   logout: () => Promise<void>
 }
 
@@ -62,25 +61,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const loginAsDemo = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/auth/demo", { method: "POST" })
-      const data = await response.json()
-      if (data.user) {
-        setUser(data.user)
-        localStorage.setItem("user", JSON.stringify(data.user))
-        return data.user
-      }
-      throw new Error(data.error || "Demo login failed")
-    } catch (error) {
-      console.error("Failed to login as demo", error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const logout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" })
@@ -110,7 +90,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser, loginAsDemo, logout }}>
+    <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser, logout }}>
       {children}
     </UserContext.Provider>
   )
