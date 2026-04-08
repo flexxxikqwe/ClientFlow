@@ -61,6 +61,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const waitForSession = async (maxAttempts = 3, delayMs = 150) => {
+    let currentUser = await refreshUser()
+
+    for (let attempt = 1; !currentUser && attempt < maxAttempts; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+      currentUser = await refreshUser()
+    }
+
+    return currentUser
+  }
+
   const loginAsDemo = async () => {
     setIsLoading(true)
     try {
@@ -109,7 +120,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser, loginAsDemo, logout }}>
+    <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser: waitForSession, loginAsDemo, logout }}>
       {children}
     </UserContext.Provider>
   )
