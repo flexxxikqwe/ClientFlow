@@ -23,6 +23,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function initAuth() {
       try {
+        // Small delay to allow cookies to settle in iframe environments
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         const response = await fetch("/api/auth/me")
         const data = await response.json()
         if (data.user) {

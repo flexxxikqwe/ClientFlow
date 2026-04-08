@@ -50,8 +50,10 @@ export function LoginForm() {
 
       await refreshUser()
       toast.success("Welcome back!")
-      // Hard redirect to ensure session is stable and fresh
-      window.location.href = "/dashboard"
+      // Small delay to ensure session cookie is processed by the browser
+      setTimeout(() => {
+        window.location.href = "/dashboard"
+      }, 500)
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -64,8 +66,10 @@ export function LoginForm() {
     try {
       await loginAsDemo()
       toast.success("Welcome to Demo Mode!")
-      // Hard redirect to ensure session is stable and fresh
-      window.location.href = "/dashboard"
+      // Small delay to ensure session cookie is processed by the browser
+      setTimeout(() => {
+        window.location.href = "/dashboard"
+      }, 500)
     } catch (error) {
       toast.error("Demo login failed")
     } finally {

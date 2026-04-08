@@ -22,7 +22,12 @@ export function useAuth() {
       } else {
         // If no user and not on auth/landing pages, redirect to login
         if (!isAuthPage && !isLandingPage) {
-          router.push("/login")
+          // Add a small delay before bouncing to login to handle transient states
+          // This prevents "bouncing" during initial auth settling
+          const timer = setTimeout(() => {
+            router.push("/login")
+          }, 800)
+          return () => clearTimeout(timer)
         }
       }
     }
