@@ -8,9 +8,9 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { isLoading } = useAuth()
+  const { isInitialLoading } = useAuth()
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

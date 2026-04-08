@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 interface UserContextType {
   user: any | null
   isLoading: boolean
+  isInitialLoading: boolean
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
   refreshUser: () => Promise<any>
@@ -16,14 +17,12 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   const isDemo = !!user?.isDemo
 
   const refreshUser = useCallback(async () => {
-    // If already loading, don't start another refresh
-    if (isLoading && user) return user;
-    
-    setIsLoading(true)
+    // Background refresh doesn't trigger global isLoading
     try {
       const response = await fetch("/api/auth/me")
       
@@ -35,7 +34,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       const contentType = response.headers.get("content-type")
       if (!response.ok || !contentType || !contentType.includes("application/json")) {
-        throw new Error(`Invalid response: ${response.status}`)
+        // Transient error - don't wipe state
+        return null
       }
 
       const data = await response.json()
@@ -51,8 +51,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return null
     } finally {
       setIsLoading(false)
+      setIsInitialLoading(false)
     }
-  }, [isLoading, user])
+  }, [])
 
   useEffect(() => {
     let isMounted = true;
@@ -71,18 +72,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             setUser(null)
             localStorage.removeItem("user")
           }
-        } else {
-          // If it's not a 200 JSON response, we don't necessarily wipe the user
-          // if we already have one (e.g. from a previous session or refresh)
-          // but for the initial load, we default to null.
+        } else if (response.status === 401) {
           setUser(null)
           localStorage.removeItem("user")
         }
       } catch (error) {
         console.error("Failed to fetch user", error)
-        if (isMounted) setUser(null)
       } finally {
-        if (isMounted) setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+          setIsInitialLoading(false)
+        }
       }
     }
     initAuth()
@@ -122,7 +122,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [user])
 
   return (
-    <UserContext.Provider value={{ user, isLoading, isDemo, updatePlan, refreshUser, logout }}>
+    <UserContext.Provider value={{ user, isLoading, isInitialLoading, isDemo, updatePlan, refreshUser, logout }}>
       {children}
     </UserContext.Provider>
   )

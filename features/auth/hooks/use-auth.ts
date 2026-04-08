@@ -7,7 +7,7 @@ import { useUser } from "../context/user-context"
 export function useAuth() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isLoading, refreshUser, logout: contextLogout } = useUser()
+  const { user, isLoading, isInitialLoading, refreshUser, logout: contextLogout } = useUser()
   const hasAttemptedRef = useRef(false)
   const userRef = useRef(user)
 
@@ -23,41 +23,39 @@ export function useAuth() {
 
   useEffect(() => {
     // Don't do anything while the initial user check is in progress
-    if (isLoading) return
+    if (isInitialLoading) return
 
     if (user) {
       // If logged in and on auth page, redirect to dashboard
-      // We explicitly check if we're NOT already on or heading to an onboarding page
       if (isAuthPage && !isOnboardingPage) {
         router.push("/dashboard")
       }
     } else if (isProtectedPage) {
       // If no user on a protected page, attempt a one-time session bootstrap.
-      // We use a small delay to allow cross-site cookies to stabilize in preview/iframe environments.
       if (!hasAttemptedRef.current) {
         hasAttemptedRef.current = true
         const bootstrapTimer = setTimeout(() => {
           refreshUser().then((refreshedUser) => {
             // Only redirect to login if BOTH the bootstrap result is null 
-            // AND the current user state (via ref to avoid stale closure) is still null.
+            // AND the current user state is still null.
             if (!refreshedUser && !userRef.current) {
-              if (isOnboardingPage) {
-                console.warn("Onboarding bootstrap failed, waiting for stability...")
-              } else {
+              if (!isOnboardingPage) {
                 router.push("/login")
+              } else {
+                console.warn("Onboarding bootstrap failed, waiting for stability...")
               }
             }
           })
-        }, 800)
+        }, 1000) // Increased slightly for stability
         return () => clearTimeout(bootstrapTimer)
       }
     }
-  }, [user, isLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage, isOnboardingPage])
+  }, [user, isInitialLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage, isOnboardingPage])
 
   const logout = async () => {
     await contextLogout()
     router.push("/login")
   }
 
-  return { user, isLoading, logout }
+  return { user, isLoading, isInitialLoading, logout }
 }
