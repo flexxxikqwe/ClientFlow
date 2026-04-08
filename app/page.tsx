@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, BarChart3, Users, Zap, ShieldCheck, Globe, Sparkles, ArrowRight } from "lucide-react"
+import { motion, AnimatePresence } from "motion/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LeadForm } from "@/components/marketing/lead-form"
@@ -12,11 +14,34 @@ import { toast } from "sonner"
 
 export default function HomePage() {
   const router = useRouter()
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
 
   const handlePlanChange = (plan: string) => {
     toast.success(`You've selected the ${plan} plan!`)
     router.push("/register")
   }
+
+  const plans = [
+    {
+      name: "Starter",
+      monthlyPrice: 29,
+      yearlyPrice: 24,
+      features: ["Up to 3 users", "Basic lead tracking", "Email support", "5GB storage"]
+    },
+    {
+      name: "Professional",
+      monthlyPrice: 79,
+      yearlyPrice: 69,
+      popular: true,
+      features: ["Up to 10 users", "Advanced analytics", "Priority support", "25GB storage", "Custom stages"]
+    },
+    {
+      name: "Enterprise",
+      monthlyPrice: "Custom",
+      yearlyPrice: "Custom",
+      features: ["Unlimited users", "Full API access", "Dedicated manager", "Unlimited storage", "SAML SSO"]
+    }
+  ]
 
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20">
@@ -170,36 +195,61 @@ export default function HomePage() {
       {/* Pricing Section */}
       <section id="pricing" className="py-32">
         <div className="container px-8 mx-auto max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto mb-24 space-y-4">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">Pricing</p>
             <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">Simple, transparent pricing</h2>
             <p className="text-lg text-muted-foreground">Choose the plan that fits your team&apos;s needs.</p>
           </div>
+
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-16">
+            <div className="relative p-1 bg-secondary/30 rounded-full flex items-center border border-border/50">
+              <motion.div
+                className="absolute h-[calc(100%-8px)] bg-background rounded-full shadow-sm border border-border/50"
+                initial={false}
+                animate={{
+                  width: billingCycle === "monthly" ? "100px" : "120px",
+                  x: billingCycle === "monthly" ? 4 : 104,
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={cn(
+                  "relative z-10 px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300",
+                  billingCycle === "monthly" ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle("yearly")}
+                className={cn(
+                  "relative z-10 px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300",
+                  billingCycle === "yearly" ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                Yearly <span className="text-[8px] text-primary ml-1">-20%</span>
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                name: "Starter",
-                price: "$29",
-                features: ["Up to 3 users", "Basic lead tracking", "Email support", "5GB storage"]
-              },
-              {
-                name: "Professional",
-                price: "$79",
-                popular: true,
-                features: ["Up to 10 users", "Advanced analytics", "Priority support", "25GB storage", "Custom stages"]
-              },
-              {
-                name: "Enterprise",
-                price: "Custom",
-                features: ["Unlimited users", "Full API access", "Dedicated manager", "Unlimited storage", "SAML SSO"]
-              }
-            ].map((plan, i) => (
-              <div key={i} className={cn(
-                "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col",
-                plan.popular 
-                  ? "border-primary shadow-2xl shadow-primary/10 relative bg-card scale-105 z-10" 
-                  : "border-border/50 bg-card/30 hover:bg-card/50"
-              )}>
+            {plans.map((plan, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -8 }}
+                className={cn(
+                  "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col group",
+                  plan.popular 
+                    ? "border-primary shadow-2xl shadow-primary/10 relative bg-card scale-105 z-10" 
+                    : "border-border/50 bg-card/30 hover:bg-card/50"
+                )}
+              >
                 {plan.popular && (
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground px-6 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
                     Most Popular
@@ -207,9 +257,26 @@ export default function HomePage() {
                 )}
                 <div className="space-y-2 mb-8">
                   <h3 className="text-xl font-bold tracking-tight">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black tracking-tighter">{plan.price}</span>
-                    <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">/mo</span>
+                  <div className="flex items-baseline gap-1 overflow-hidden h-12">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={billingCycle}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-baseline gap-1"
+                      >
+                        <span className="text-4xl font-black tracking-tighter">
+                          {typeof plan.monthlyPrice === "number" 
+                            ? (billingCycle === "monthly" ? `$${plan.monthlyPrice}` : `$${plan.yearlyPrice}`)
+                            : plan.monthlyPrice}
+                        </span>
+                        {typeof plan.monthlyPrice === "number" && (
+                          <span className="text-sm font-bold text-muted-foreground uppercase tracking-widest">/mo</span>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
                 </div>
                 <ul className="space-y-5 mb-12 flex-1">
@@ -224,14 +291,14 @@ export default function HomePage() {
                   size="lg"
                   variant={plan.popular ? "default" : "outline"}
                   className={cn(
-                    "w-full h-14 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em]",
-                    plan.popular ? "shadow-lg shadow-primary/20" : "border-border/50"
+                    "w-full h-14 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
+                    plan.popular ? "shadow-lg shadow-primary/20" : "border-border/50 group-hover:border-primary/30"
                   )}
                   onClick={() => handlePlanChange(plan.name)}
                 >
                   Choose {plan.name}
                 </Button>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
