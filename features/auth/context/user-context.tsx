@@ -15,13 +15,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem("user")
-      return storedUser ? JSON.parse(storedUser) : null
-    }
-    return null
-  })
+  const [user, setUser] = useState<any | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const isDemo = !!user?.isDemo

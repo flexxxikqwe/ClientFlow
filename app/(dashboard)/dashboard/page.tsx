@@ -14,15 +14,20 @@ import { cn } from "@/lib/utils"
 export default function DashboardPage() {
   const { user, isLoading: isUserLoading } = useUser()
   const { data, isLoading, error } = useSWR(
-    (!isUserLoading && user) ? "/api/analytics" : null, 
-    fetcher
+    (!isUserLoading && user) ? [`/api/analytics`, user.id] : null, 
+    ([url]) => fetcher(url)
   )
 
-  if (error) {
+  // If we have a 401 error, it means the session is invalid.
+  // We should wait for useAuth to redirect us instead of showing an error screen.
+  const isUnauthorized = error?.status === 401
+
+  if (error && !isUnauthorized) {
     return (
       <div className="p-12 h-full flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-destructive font-bold uppercase tracking-widest text-xs">Failed to load analytics</p>
+          <p className="text-[10px] text-muted-foreground max-w-xs mx-auto">{error.info?.details || error.message}</p>
           <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl">
             Retry
           </Button>
@@ -34,33 +39,35 @@ export default function DashboardPage() {
   const stats = [
     {
       title: "Total Leads",
-      value: data?.stats?.totalLeads || 0,
+      value: data?.stats?.totalLeads ?? 0,
       icon: Users,
       description: "Total leads in database",
       color: "text-primary",
     },
     {
       title: "New Leads",
-      value: data?.leadsPerDay?.[data.leadsPerDay.length - 1]?.count || 0,
+      value: data?.leadsPerDay?.[data.leadsPerDay.length - 1]?.count ?? 0,
       icon: UserPlus,
       description: "Leads added today",
       color: "text-primary",
     },
     {
       title: "Won Leads",
-      value: data?.stats?.wonLeads || 0,
+      value: data?.stats?.wonLeads ?? 0,
       icon: CheckCircle2,
       description: "Leads with 'Won' status",
       color: "text-primary",
     },
     {
       title: "Conversion Rate",
-      value: `${data?.stats?.conversionRate || 0}%`,
+      value: `${data?.stats?.conversionRate ?? 0}%`,
       icon: TrendingUp,
       description: "Won / Total ratio",
       color: "text-primary",
     }
   ]
+
+  const isDataLoading = isLoading || isUserLoading || isUnauthorized
 
   return (
     <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
@@ -79,7 +86,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {isDataLoading ? (
                 <Skeleton className="h-10 w-24 mt-1 bg-secondary/20" />
               ) : (
                 <div className="text-4xl font-semibold tracking-tight text-foreground">{stat.value}</div>
@@ -109,7 +116,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="p-8">
-            {isLoading ? (
+            {isDataLoading ? (
               <Skeleton className="h-[400px] w-full rounded-xl bg-secondary/10" />
             ) : (
               <div className="h-[400px] w-full">
