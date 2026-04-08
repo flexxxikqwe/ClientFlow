@@ -26,15 +26,20 @@ export function useAuth() {
         router.push("/dashboard")
       }
     } else if (isProtectedPage) {
-      // If no user on a protected page (dashboard or onboarding), try one-time bootstrap/refresh
+      // If no user on a protected page, attempt a one-time session bootstrap.
+      // We use a small delay to allow cross-site cookies to stabilize in preview/iframe environments.
       if (!hasAttemptedRef.current) {
         hasAttemptedRef.current = true
-        const timer = setTimeout(() => {
-          refreshUser()
-        }, 800) // Increased delay slightly for stability in iframes
-        return () => clearTimeout(timer)
+        const bootstrapTimer = setTimeout(() => {
+          refreshUser().then((refreshedUser) => {
+            if (!refreshedUser) {
+              router.push("/login")
+            }
+          })
+        }, 600) // Reduced slightly, but kept for stability in AI Studio iframes
+        return () => clearTimeout(bootstrapTimer)
       } else {
-        // If still no user after retry, redirect to login
+        // Fallback for cases where bootstrap logic was already attempted
         router.push("/login")
       }
     }

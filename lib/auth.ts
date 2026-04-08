@@ -2,9 +2,18 @@ import { cookies } from 'next/headers'
 import { usersRepository } from './db'
 import { SignJWT, jwtVerify } from 'jose'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'clientflow_secret_fallback_123'
-)
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable is required in production')
+    }
+    return new TextEncoder().encode('clientflow_dev_fallback_secret_32_chars_min')
+  }
+  return new TextEncoder().encode(secret)
+}
+
+const JWT_SECRET = getJwtSecret()
 
 export async function getSessionUser() {
   const cookieStore = await cookies()
@@ -38,9 +47,11 @@ export async function createSession(userId: string) {
   
   cookieStore.set('session_token', token, {
     httpOnly: true,
-    // 'none' and secure: true are required for cross-site iframes (AI Studio preview)
-    // On localhost, we use 'lax' and secure: false to avoid issues with non-HTTPS
-    secure: isProd,
+    // Secure must be true for sameSite: 'none'
+    // On localhost, we disable secure to avoid issues with non-HTTPS setups
+    secure: isProd, 
+    // 'none' is required for cross-site iframes (AI Studio preview)
+    // 'lax' is better for standard development and security
     sameSite: isProd ? 'none' : 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',

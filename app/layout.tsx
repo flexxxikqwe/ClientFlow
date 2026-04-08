@@ -4,6 +4,7 @@ import './globals.css';
 import { UserProvider } from '@/features/auth/context/user-context';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { Toaster } from 'sonner';
+import { ErrorBoundary } from '@/components/layout/error-boundary';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -20,21 +21,23 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <UserProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-1">
-                {children}
-              </main>
-            </div>
-            <Toaster position="top-center" richColors />
-          </ThemeProvider>
-        </UserProvider>
+        <ErrorBoundary>
+          <UserProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="flex flex-col min-h-screen">
+                <main className="flex-1">
+                  {children}
+                </main>
+              </div>
+              <Toaster position="top-center" richColors />
+            </ThemeProvider>
+          </UserProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
