@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -22,9 +23,8 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const router = useRouter()
-  const { loginAsDemo, refreshUser } = useUser()
+  const { refreshUser } = useUser()
   const [isLoading, setIsLoading] = useState(false)
-  const [isDemoLoading, setIsDemoLoading] = useState(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -56,20 +56,6 @@ export function LoginForm() {
       toast.error(error.message)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleDemoLogin = async () => {
-    setIsDemoLoading(true)
-    try {
-      await loginAsDemo()
-      toast.success("Welcome to Demo Mode!")
-      // Hard redirect to dashboard with explicit demo bootstrap parameter
-      window.location.href = "/dashboard?demo=1"
-    } catch (error) {
-      toast.error("Demo login failed")
-    } finally {
-      setIsDemoLoading(false)
     }
   }
 
@@ -121,12 +107,11 @@ export function LoginForm() {
       <Button 
         variant="outline" 
         className="w-full" 
-        onClick={handleDemoLogin} 
-        disabled={isLoading || isDemoLoading}
+        asChild
+        disabled={isLoading}
         data-testid="demo-mode-button"
       >
-        {isDemoLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Try Demo Mode
+        <Link href="/demo/dashboard">Try Demo Mode</Link>
       </Button>
     </div>
   )
