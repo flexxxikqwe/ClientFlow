@@ -22,8 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
 import { LeadsBySourceChart } from "@/components/analytics/leads-by-source-chart"
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { fetcher } from "@/lib/utils/fetcher"
 
 export default function AnalyticsPage() {
   const [days, setDays] = useState("30")

@@ -32,12 +32,20 @@ export function useAuth() {
         hasAttemptedRef.current = true
         const bootstrapTimer = setTimeout(() => {
           refreshUser().then((refreshedUser) => {
-            // Only redirect to login if the bootstrap definitively failed to find a user
+            // Only redirect to login if the bootstrap definitively failed to find a user.
+            // If it failed due to a transient error (refreshedUser is null but server might be down),
+            // we are more patient on onboarding routes.
             if (!refreshedUser) {
-              router.push("/login")
+              if (isOnboardingPage) {
+                // On onboarding, we give it one more chance or just wait.
+                // If it's a real 401, refreshUser would have cleared the state.
+                console.warn("Onboarding bootstrap failed, waiting for stability...")
+              } else {
+                router.push("/login")
+              }
             }
           })
-        }, 600)
+        }, 800) // Increased slightly for better stability in AI Studio
         return () => clearTimeout(bootstrapTimer)
       }
       // Note: We removed the aggressive 'else' redirect here to prevent 

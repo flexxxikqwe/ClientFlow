@@ -23,6 +23,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true)
     try {
       const response = await fetch("/api/auth/me")
+      
+      // Check if response is valid JSON
+      const contentType = response.headers.get("content-type")
+      if (!response.ok || !contentType || !contentType.includes("application/json")) {
+        throw new Error(`Invalid response: ${response.status}`)
+      }
+
       const data = await response.json()
       setUser(data.user)
       if (data.user) {
@@ -33,6 +40,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return data.user
     } catch (error) {
       console.error("Failed to refresh user", error)
+      // On transient errors, we don't necessarily want to wipe the local user immediately
+      // but for security/consistency we should probably return null to the caller
       return null
     } finally {
       setIsLoading(false)
@@ -43,10 +52,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     async function initAuth() {
       try {
         const response = await fetch("/api/auth/me")
-        const data = await response.json()
-        if (data.user) {
-          setUser(data.user)
-          localStorage.setItem("user", JSON.stringify(data.user))
+        
+        const contentType = response.headers.get("content-type")
+        if (response.ok && contentType && contentType.includes("application/json")) {
+          const data = await response.json()
+          if (data.user) {
+            setUser(data.user)
+            localStorage.setItem("user", JSON.stringify(data.user))
+          } else {
+            setUser(null)
+            localStorage.removeItem("user")
+          }
         } else {
           setUser(null)
           localStorage.removeItem("user")
@@ -80,9 +96,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: newPlan }),
       })
-      const updatedUser = await response.json()
-      if (updatedUser && !updatedUser.error) {
-        setUser(updatedUser)
+      
+      const contentType = response.headers.get("content-type")
+      if (response.ok && contentType && contentType.includes("application/json")) {
+        const updatedUser = await response.json()
+        if (updatedUser && !updatedUser.error) {
+          setUser(updatedUser)
+        }
       }
     } catch (error) {
       console.error("Failed to update plan", error)

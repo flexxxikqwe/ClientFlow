@@ -13,8 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Lead } from "@/types/leads"
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+import { fetcher } from "@/lib/utils/fetcher"
 
 export default function LeadsPage() {
   const searchParams = useSearchParams()
