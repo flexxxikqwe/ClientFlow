@@ -1,15 +1,21 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3, TrendingUp, Users, Target } from "lucide-react"
+import { BarChart3, TrendingUp, Users, Target, PieChart as PieChartIcon } from "lucide-react"
 import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
-import { DEMO_STATS, DEMO_LEADS_PER_DAY } from "@/lib/demo-data"
+import { LeadsBySourceChart } from "@/components/analytics/leads-by-source-chart"
+import { DEMO_STATS, DEMO_LEADS_PER_DAY, DEMO_LEADS_BY_SOURCE } from "@/lib/demo-data"
 
 export default function DemoAnalyticsPage() {
   return (
     <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Analytics & Reports</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground">Analytics & Reports</h2>
+          <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+            Showcase
+          </div>
+        </div>
         <p className="text-sm font-medium text-muted-foreground/80">Deep dive into your sales performance and lead acquisition trends.</p>
       </div>
 
@@ -28,38 +34,56 @@ export default function DemoAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-8">
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" />
-                Conversion Goal
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{DEMO_STATS.conversionRate}%</div>
-              <div className="w-full bg-secondary/30 h-2 rounded-full mt-4 overflow-hidden">
-                <div 
-                  className="bg-primary h-full rounded-full transition-all duration-1000" 
-                  style={{ width: `${DEMO_STATS.conversionRate}%` }} 
-                />
-              </div>
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-4">Target: 45%</p>
-            </CardContent>
-          </Card>
+        <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+          <CardHeader className="p-8 border-b border-border/30">
+            <CardTitle className="text-xl font-semibold flex items-center gap-3">
+              <PieChartIcon className="h-5 w-5 text-primary" />
+              Leads by Source
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="h-[400px] w-full">
+              <LeadsBySourceChart data={DEMO_LEADS_BY_SOURCE} />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Lead Volume
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{DEMO_STATS.totalLeads}</div>
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-4">+12% from last month</p>
-            </CardContent>
-          </Card>
+      <div className="grid gap-10 grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-10">
+          <div className="grid gap-10 grid-cols-1 sm:grid-cols-2">
+            <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-primary" />
+                  Conversion Goal
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{DEMO_STATS.conversionRate}%</div>
+                <div className="w-full bg-secondary/30 h-2 rounded-full mt-4 overflow-hidden">
+                  <div 
+                    className="bg-primary h-full rounded-full transition-all duration-1000" 
+                    style={{ width: `${DEMO_STATS.conversionRate}%` }} 
+                  />
+                </div>
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-4">Target: 45%</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/50 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Lead Volume
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{DEMO_STATS.totalLeads}</div>
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest mt-4">+12% from last month</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

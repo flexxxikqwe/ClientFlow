@@ -54,7 +54,12 @@ export default function DemoLeadsPage() {
     <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Leads Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Leads Management</h1>
+            <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+              Showcase
+            </div>
+          </div>
           <p className="text-sm font-medium text-muted-foreground/80">Track, manage and convert your sales opportunities with ease.</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">

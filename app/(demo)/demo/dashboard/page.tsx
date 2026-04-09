@@ -48,8 +48,13 @@ export default function DemoDashboardPage() {
   return (
     <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Dashboard Overview</h2>
-        <p className="text-sm font-medium text-muted-foreground/80">Welcome back! Here is what is happening with your leads today.</p>
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground">Dashboard Overview</h2>
+          <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+            Showcase
+          </div>
+        </div>
+        <p className="text-sm font-medium text-muted-foreground/80">Welcome to the ClientFlow portfolio preview. Explore the core CRM features below.</p>
       </div>
       
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">

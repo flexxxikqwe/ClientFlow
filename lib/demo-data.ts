@@ -99,3 +99,11 @@ export const DEMO_LEADS = [
     created_at: "2026-04-05T16:20:00Z",
   }
 ];
+
+export const DEMO_LEADS_BY_SOURCE = [
+  { name: "Direct", value: 450 },
+  { name: "Referral", value: 320 },
+  { name: "Social Media", value: 210 },
+  { name: "Email", value: 180 },
+  { name: "Other", value: 88 },
+];

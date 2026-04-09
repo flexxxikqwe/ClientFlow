@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
   PieChart,
   Pie,
@@ -23,6 +24,13 @@ const COLORS = [
 ]
 
 export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true)
+  }, [])
+
   if (!data || data.length === 0) {
     return (
       <div className="h-[350px] w-full flex items-center justify-center border border-dashed rounded-xl border-border/50 bg-secondary/5">
@@ -31,9 +39,13 @@ export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
     )
   }
 
+  if (!isMounted) {
+    return <div className="h-[350px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+  }
+
   return (
-    <div className="h-[350px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-[350px] w-full min-h-[350px]">
+      <ResponsiveContainer width="100%" height="100%" debounce={100}>
         <PieChart>
           <Pie
             data={data}
