@@ -16,7 +16,7 @@ export default function DemoLeadsPage() {
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)
-    toast.info("Lead details view is limited in demo mode")
+    toast.info("Showcase Mode: Detailed lead profiles are available in the full version.")
   }, [])
 
   const stats = useMemo(() => [
@@ -58,11 +58,11 @@ export default function DemoLeadsPage() {
           <p className="text-sm font-medium text-muted-foreground/80">Track, manage and convert your sales opportunities with ease.</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <Button variant="outline" className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" onClick={() => toast.info("Export not available in demo")}>
+          <Button variant="outline" className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" onClick={() => toast.info("Showcase Mode: Data export is simulated.")}>
             Export CSV
           </Button>
           <Button 
-            onClick={() => toast.info("Create lead not available in demo")}
+            onClick={() => toast.info("Showcase Mode: Lead creation is disabled in this preview.")}
             className="flex-1 md:flex-none h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="h-4 w-4 mr-2" /> New Lead

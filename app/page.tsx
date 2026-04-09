@@ -70,10 +70,10 @@ export default function HomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest border-border/50 hover:bg-secondary/50"
+                className="rounded-full px-10 h-14 text-sm font-bold uppercase tracking-widest border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all"
                 asChild
               >
-                <Link href="/demo/dashboard">View Demo</Link>
+                <Link href="/demo/dashboard">View Live Demo</Link>
               </Button>
             </div>
           </div>

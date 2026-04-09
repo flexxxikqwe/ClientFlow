@@ -119,8 +119,11 @@ export default function DemoDashboardPage() {
             
             <div className="pt-10">
               <div className="p-8 rounded-2xl bg-primary/5 border border-primary/10 space-y-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/60">Pro Tip</p>
-                <p className="text-xs font-medium leading-relaxed text-muted-foreground/80">Use the AI Assistant in Lead Details to quickly summarize long inquiries and generate professional replies.</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/60">Demo Intelligence</p>
+                <p className="text-xs font-medium leading-relaxed text-muted-foreground/80">
+                  This demo environment is populated with 30 days of realistic sales activity. 
+                  Explore the <Link href="/demo/analytics" className="text-primary hover:underline">Analytics</Link> tab to see how ClientFlow tracks conversion trends and acquisition volume.
+                </p>
               </div>
             </div>
           </CardContent>

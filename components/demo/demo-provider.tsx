@@ -8,6 +8,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const demoValue = {
     user: DEMO_USER,
     isLoading: false,
+    isInitialLoading: false,
     isDemo: true,
     updatePlan: async () => {},
     refreshUser: async () => DEMO_USER,

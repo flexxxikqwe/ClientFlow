@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import {
   LineChart,
   Line,
@@ -17,6 +18,13 @@ interface LeadsPerDayChartProps {
 }
 
 export function LeadsPerDayChart({ data }: LeadsPerDayChartProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true)
+  }, [])
+
   if (!data || data.length === 0) {
     return (
       <div className="h-[350px] w-full flex items-center justify-center border border-dashed rounded-xl border-border/50 bg-secondary/5">
@@ -25,8 +33,12 @@ export function LeadsPerDayChart({ data }: LeadsPerDayChartProps) {
     )
   }
 
+  if (!isMounted) {
+    return <div className="h-[350px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+  }
+
   return (
-    <div className="h-[350px] w-full">
+    <div className="h-[350px] w-full min-h-[350px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
