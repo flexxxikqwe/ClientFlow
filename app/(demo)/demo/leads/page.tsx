@@ -1,25 +1,13 @@
-"use client"
-
-import { useState, useMemo, useCallback } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock } from "lucide-react"
 
-import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
+import { DemoLeadsTableWrapper } from "@/components/demo/demo-leads-table-wrapper"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Lead } from "@/types/leads"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { DEMO_STATS } from "@/lib/demo-data"
 
 export default function DemoLeadsPage() {
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
-
-  const handleLeadClick = useCallback((lead: Lead) => {
-    setSelectedLead(lead)
-    toast.info("Showcase Mode: Detailed lead profiles are available in the full version.")
-  }, [])
-
-  const stats = useMemo(() => [
+  const stats = [
     {
       title: "Total Leads",
       value: DEMO_STATS.totalLeads.toLocaleString(),
@@ -48,7 +36,7 @@ export default function DemoLeadsPage() {
       description: "Excluding Won",
       color: "text-primary"
     }
-  ], [])
+  ]
 
   return (
     <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
@@ -63,15 +51,7 @@ export default function DemoLeadsPage() {
           <p className="text-sm font-medium text-muted-foreground/80">Track, manage and convert your sales opportunities with ease.</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <Button variant="outline" className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" onClick={() => toast.info("Showcase Mode: Data export is simulated.")}>
-            Export CSV
-          </Button>
-          <Button 
-            onClick={() => toast.info("Showcase Mode: Lead creation is disabled in this preview.")}
-            className="flex-1 md:flex-none h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Plus className="h-4 w-4 mr-2" /> New Lead
-          </Button>
+          <DemoLeadsTableWrapper />
         </div>
       </div>
 
@@ -100,7 +80,7 @@ export default function DemoLeadsPage() {
           </div>
           <div className="h-px flex-1 bg-border/30 mx-12 hidden md:block" />
         </div>
-        <DemoLeadsTable onLeadClick={handleLeadClick} />
+        <DemoLeadsTableWrapper isTableOnly />
       </div>
     </div>
   )

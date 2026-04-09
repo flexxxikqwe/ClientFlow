@@ -1,10 +1,8 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3 } from "lucide-react"
 import Link from "next/link"
-import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
+import { LeadsPerDayChartClient } from "@/components/analytics/leads-per-day-chart-client"
 import { cn } from "@/lib/utils"
 import { DEMO_STATS, DEMO_LEADS_PER_DAY } from "@/lib/demo-data"
 
@@ -94,7 +92,7 @@ export default function DemoDashboardPage() {
           </CardHeader>
           <CardContent className="p-8">
             <div className="h-[400px] w-full">
-              <LeadsPerDayChart data={data.leadsPerDay} />
+              <LeadsPerDayChartClient data={data.leadsPerDay} />
             </div>
           </CardContent>
         </Card>

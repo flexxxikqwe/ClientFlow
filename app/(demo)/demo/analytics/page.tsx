@@ -1,9 +1,7 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, TrendingUp, Users, Target, PieChart as PieChartIcon } from "lucide-react"
-import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
-import { LeadsBySourceChart } from "@/components/analytics/leads-by-source-chart"
+import { LeadsPerDayChartClient } from "@/components/analytics/leads-per-day-chart-client"
+import { LeadsBySourceChartClient } from "@/components/analytics/leads-by-source-chart-client"
 import { DEMO_STATS, DEMO_LEADS_PER_DAY, DEMO_LEADS_BY_SOURCE } from "@/lib/demo-data"
 
 export default function DemoAnalyticsPage() {
@@ -29,7 +27,7 @@ export default function DemoAnalyticsPage() {
           </CardHeader>
           <CardContent className="p-8">
             <div className="h-[400px] w-full">
-              <LeadsPerDayChart data={DEMO_LEADS_PER_DAY} />
+              <LeadsPerDayChartClient data={DEMO_LEADS_PER_DAY} />
             </div>
           </CardContent>
         </Card>
@@ -43,7 +41,7 @@ export default function DemoAnalyticsPage() {
           </CardHeader>
           <CardContent className="p-8">
             <div className="h-[400px] w-full">
-              <LeadsBySourceChart data={DEMO_LEADS_BY_SOURCE} />
+              <LeadsBySourceChartClient data={DEMO_LEADS_BY_SOURCE} />
             </div>
           </CardContent>
         </Card>
