@@ -1,19 +1,25 @@
 # ClientFlow
 
-## Overview
-ClientFlow is a CRM and lead management application designed to organize sales workflows. It provides teams with a visual interface to track prospects, log activity, and generate AI-assisted insights for better engagement.
+## Project Overview
+ClientFlow is a polished CRM and lead management application designed to demonstrate modern full-stack engineering patterns. It features a visual interface for tracking prospects, managing sales pipelines, and generating AI-assisted insights for better engagement.
 
-This project serves as a full-stack portfolio piece demonstrating a real-world migration strategy. It has evolved from a local JSON-based prototype into a hybrid architecture that leverages Supabase for data persistence while maintaining a robust fallback system.
+This project is positioned as a **portfolio showcase**, prioritizing a stable, high-fidelity demonstration experience over production-ready infrastructure.
+
+## 🚀 Live Demo
+The best way to explore ClientFlow is through the **Showcase Mode**. This path is pre-configured with realistic data and bypasses the authentication flow for immediate evaluation.
+
+**[View Live Demo](/demo/dashboard)**
+
+---
 
 ## Implemented Today
-- **Authentication:** Custom JWT-based session management with bcrypt hashing, currently backed by a local JSON store.
+- **Showcase Mode:** A stable, read-only demonstration path with pre-populated leads and stats.
 - **Leads Management:** Full CRUD operations for leads, featuring a dedicated "New Lead" flow and detailed profile views.
 - **Activity Timeline:** A relational note-taking system to track chronological interactions for every lead.
 - **AI Insights:** Integration with Google Gemini to generate automated lead summaries and professional follow-up drafts.
 - **Analytics:** Dashboard metrics and trend charts for tracking conversion rates, pipeline value, and acquisition sources.
 - **Data Export:** Functional CSV export for lead data directly from the management interface.
-- **Demo Mode:** A one-click "Demo Mode" with state handling, allowing exploration without registration.
-- **Hybrid Persistence:** A repository pattern implementation that switches between Supabase (Postgres) and local JSON storage based on environment configuration.
+- **Hybrid Persistence:** A repository pattern implementation that switches between Supabase (Postgres) and local JSON storage.
 
 ## Tech Stack
 - **Framework:** Next.js 15 (App Router)
@@ -22,19 +28,23 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
 - **Data Fetching:** SWR (Stale-While-Revalidate)
 - **AI:** Google Generative AI (@google/genai)
 - **Validation:** Zod (Schema-based API validation)
-- **Auth:** jose (JWT), bcryptjs
+- **Auth:** jose (JWT), bcryptjs (Note: Primary showcase uses a mock auth provider)
 
-## Architecture
-- **Next.js App Router:** Utilizes modern React Server Components and optimized Route Handlers.
-- **Repository Pattern:** Data access is abstracted behind interfaces (`ILeadsRepository`, etc.), decoupling business logic from the storage layer.
-- **Hybrid Persistence:** The app detects `NEXT_PUBLIC_SUPABASE_URL` at runtime. If present, it uses Supabase repositories; otherwise, it falls back to a local `data.json` implementation for development.
-- **Stateless Auth:** Sessions are managed via HTTP-only cookies containing signed JWTs.
-- **Feature-Driven Structure:** Code is organized by domain (e.g., `/features/leads`, `/features/auth`) to improve maintainability.
+## Architecture Overview
+- **Repository Pattern:** Data access is abstracted behind interfaces, allowing the app to swap between Supabase and local JSON storage with zero changes to business logic.
+- **Demo-First Design:** The `/demo` route uses a dedicated `DemoProvider` that injects a stable state, ensuring a consistent experience for reviewers.
+- **Stateless Session Management:** Normal auth uses HTTP-only cookies and signed JWTs, though the `/demo` path is the recommended evaluation route.
 
-## Current Limitations
-- **Auth Migration:** Authentication and user profiles are still managed via the JSON store; migration to Supabase Auth is pending.
-- **Real-time Updates:** UI synchronization relies on SWR revalidation rather than native Supabase Realtime/WebSockets.
-- **Analytics Processing:** Metrics are currently calculated at the application level rather than using database-level aggregations.
+## Demo-First Showcase Mode
+The Showcase Mode (`/demo/*`) is the intentional primary experience for this project. It demonstrates:
+- **UI/UX Polish:** Smooth transitions, responsive layouts, and consistent design language.
+- **Feature Depth:** Real-world CRM workflows including lead scoring, activity logging, and analytics.
+- **AI Integration:** Practical application of LLMs for business value.
+
+## Current Limitations & Honesty
+- **Auth Flow:** The normal login/register flow is functional but remains secondary to the stable `/demo` path.
+- **Billing:** Pricing pages and plan selection are UI-only; no real payment gateway is integrated.
+- **Real-time:** UI synchronization relies on SWR revalidation rather than native WebSockets.
 
 ## Local Setup
 1. **Install dependencies:**
@@ -42,44 +52,29 @@ This project serves as a full-stack portfolio piece demonstrating a real-world m
    npm install
    ```
 2. **Configure Environment Variables:**
-   Create a `.env.local` file:
+   Create a `.env.local` file. Only the Gemini key is required for the demo:
    ```env
-   JWT_SECRET=your_secret_key
+   # Required for AI Features
    NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
    
-   # Optional: Add these to enable Supabase persistence
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   # Optional: For normal auth flow
+   JWT_SECRET=your_secret_key
    ```
 3. **Run the development server:**
    ```bash
    npm run dev
    ```
-   *Note: If Supabase keys are missing, the app will automatically use `lib/data.json` for storage.*
-
-## Demo Flow
-1. **Entry:** Visit the `/login` page and click **"Try Demo Mode"**.
-2. **Dashboard:** View sales metrics and acquisition trends.
-3. **Leads:** Browse leads and export data to CSV.
-4. **Insights:** Open a lead and use the **AI Insights** tab to generate a summary via the Gemini API.
+   *Note: The app defaults to local JSON storage if Supabase keys are missing.*
 
 ## What This Project Demonstrates
-- **Migration Strategy:** Transitioning a prototype from local files to a cloud database without breaking existing flows.
-- **Clean Architecture:** Effective use of the Repository Pattern to handle multiple persistence layers.
-- **API Design:** Structured Route Handlers with robust Zod validation and clear error handling.
-- **Frontend Engineering:** Implementation of loading states, empty states, and consistent UI transitions.
-- **E2E Testing:** A foundational Playwright test suite verifying critical user journeys (Auth, Leads, Notes).
-
-## Portfolio Context
-This project was built to demonstrate a **Junior+ level engineering mindset**. Key highlights for reviewers:
-- **Scalability:** The repository pattern allows swapping the entire database layer with zero changes to the UI or business logic.
-- **Resilience:** The hybrid persistence layer ensures the app remains functional even if cloud credentials are not configured.
-- **Testability:** Core flows are covered by E2E tests using stable `data-testid` selectors.
-- **AI Integration:** Real-world use of the Gemini API for practical business value (summaries and replies).
+- **Clean Architecture:** Effective use of patterns to handle multiple persistence layers.
+- **Frontend Engineering:** Implementation of loading states, empty states, and polished transitions.
+- **AI Implementation:** Real-world use of the Gemini API for summaries and replies.
+- **Portfolio Mindset:** Prioritizing the reviewer's experience through a dedicated showcase path.
 
 ## Planned Next Steps
-- **Full Auth Migration:** Moving user sessions and profiles to Supabase Auth.
-- **Database-Level Analytics:** Optimizing metrics using PostgreSQL views and aggregations.
+- **Full Supabase Auth Integration:** Moving user sessions to a managed cloud provider.
+- **Advanced Lead Scoring:** Enhancing the AI layer with more complex data points.
 
 ---
-*Note: Screenshots and demo visuals can be added here once the project is hosted.*
+*Built as a demonstration of modern web engineering and product design.*
