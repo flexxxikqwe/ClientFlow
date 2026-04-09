@@ -50,8 +50,7 @@ export function LoginForm() {
 
       await refreshUser()
       toast.success("Welcome back!")
-      // Hard redirect to ensure session is stable and fresh
-      window.location.href = "/dashboard"
+      router.push("/dashboard")
     } catch (error: any) {
       toast.error(error.message)
     } finally {
