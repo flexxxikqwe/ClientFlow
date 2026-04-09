@@ -6,6 +6,7 @@ import { User } from "@/types"
 interface AppUser extends User {
   isDemo?: boolean
   plan?: string
+  role?: string
 }
 
 interface UserContextType {

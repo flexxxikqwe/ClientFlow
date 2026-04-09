@@ -62,7 +62,7 @@ export default function LeadsPage() {
       const headers = ["First Name", "Last Name", "Email", "Phone", "Company", "Status", "Value", "Created At"]
       const csvContent = [
         headers.join(","),
-        ...leads.map((l: any) => [
+        ...leads.map((l: Lead) => [
           `"${l.first_name}"`,
           `"${l.last_name}"`,
           `"${l.email || ""}"`,

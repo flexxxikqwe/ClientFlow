@@ -22,14 +22,14 @@ export class SupabaseAnalyticsRepository implements IAnalyticsRepository {
 
     const leadsPerDay = daysInterval.map((day) => {
       const dayStr = format(day, "MMM dd")
-      const count = (leads || []).filter((l) => 
+      const count = (leads || []).filter((l: { created_at: string }) => 
         format(new Date(l.created_at), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")
       ).length
       return { date: dayStr, count }
     })
 
     const sourceCounts: Record<string, number> = {}
-    ;(leads || []).forEach((l) => {
+    ;(leads || []).forEach((l: { source?: string }) => {
       const source = l.source || "Unknown"
       sourceCounts[source] = (sourceCounts[source] || 0) + 1
     })
@@ -39,13 +39,13 @@ export class SupabaseAnalyticsRepository implements IAnalyticsRepository {
     }))
 
     const total = (leads || []).length
-    const won = (leads || []).filter((l) => {
+    const won = (leads || []).filter((l: { status?: string }) => {
       const s = l.status?.toLowerCase()
       return s === "won" || s === "closed won"
     }).length
     const conversionRate = total > 0 ? (won / total) * 100 : 0
     
-    const pipelineValue = (leads || []).reduce((acc, l) => acc + (Number(l.value) || 0), 0)
+    const pipelineValue = (leads || []).reduce((acc: number, l: { value?: number | string }) => acc + (Number(l.value) || 0), 0)
 
     return {
       leadsPerDay,

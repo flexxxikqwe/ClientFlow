@@ -96,12 +96,14 @@ export function Sidebar() {
               <Avatar className="h-10 w-10 border-2 border-border/50 transition-all group-hover:border-primary/50">
                 <AvatarImage src={`https://avatar.vercel.sh/${user.email}`} />
                 <AvatarFallback className="bg-secondary text-foreground text-xs font-bold">
-                  {user.full_name.charAt(0)}
+                  {user.full_name?.[0] || user.email?.[0] || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col overflow-hidden">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">{user.full_name}</span>
+                  <span className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
+                    {user.full_name || user.email}
+                  </span>
                   {user.isDemo && (
                     <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/20">
                       Demo

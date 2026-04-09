@@ -37,6 +37,6 @@ export class SupabaseNotesRepository implements INotesRepository {
       .order('created_at', { ascending: false })
 
     if (error) throw error
-    return (data || []).map(n => this.resolveNoteRelations(n))
+    return (data || []).map((n: any) => this.resolveNoteRelations(n))
   }
 }

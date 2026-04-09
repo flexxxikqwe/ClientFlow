@@ -292,7 +292,7 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                leads.map((lead) => (
+                leads.map((lead: Lead) => (
                   <LeadRow 
                     key={lead.id} 
                     lead={lead} 

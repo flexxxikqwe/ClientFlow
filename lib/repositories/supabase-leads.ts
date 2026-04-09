@@ -56,7 +56,7 @@ export class SupabaseLeadsRepository implements ILeadsRepository {
     if (error) throw error
 
     return {
-      leads: (data || []).map(l => this.resolveLeadRelations(l)),
+      leads: (data || []).map((l: any) => this.resolveLeadRelations(l)),
       pagination: {
         total: count || 0,
         page,

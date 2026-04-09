@@ -340,7 +340,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                 </div>
               ) : (
                 <div className="space-y-8">
-                  {lead?.notes?.map((note) => (
+                  {lead?.notes?.map((note: { id: string, author?: { full_name: string }, created_at: string, content: string }) => (
                     <div key={note.id} className="bg-card/40 p-6 rounded-2xl border border-border/30 space-y-4 transition-all hover:border-primary/30 hover:bg-card/60 group">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">

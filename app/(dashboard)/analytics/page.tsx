@@ -118,7 +118,15 @@ export default function AnalyticsPage() {
   )
 }
 
-function StatsCard({ title, value, icon: Icon, loading, color = "text-muted-foreground" }: any) {
+interface StatsCardProps {
+  title: string
+  value: string | number | undefined
+  icon: any
+  loading?: boolean
+  color?: string
+}
+
+function StatsCard({ title, value, icon: Icon, loading, color = "text-muted-foreground" }: StatsCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
