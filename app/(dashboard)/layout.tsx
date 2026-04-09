@@ -11,12 +11,16 @@ export default function DashboardLayout({
 }) {
   const { user, isInitialLoading } = useAuth()
 
-  if (isInitialLoading || !user) {
+  if (isInitialLoading) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
       </div>
     )
+  }
+
+  if (!user) {
+    return null // useAuth will handle the redirect
   }
 
   const isDemo = (user as any).isDemo

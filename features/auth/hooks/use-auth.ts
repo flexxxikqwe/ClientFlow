@@ -1,20 +1,13 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useUser } from "../context/user-context"
 
 export function useAuth() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isLoading, isInitialLoading, refreshUser, logout: contextLogout } = useUser()
-  const hasAttemptedRef = useRef(false)
-  const userRef = useRef(user)
-
-  // Keep userRef in sync with the latest user state
-  useEffect(() => {
-    userRef.current = user
-  }, [user])
+  const { user, isLoading, isInitialLoading, logout: contextLogout } = useUser()
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register")
   const isOnboardingPage = pathname.startsWith("/onboarding")
@@ -31,26 +24,14 @@ export function useAuth() {
         router.push("/dashboard")
       }
     } else if (isProtectedPage) {
-      // If no user on a protected page, attempt a one-time session bootstrap.
-      if (!hasAttemptedRef.current) {
-        hasAttemptedRef.current = true
-        const bootstrapTimer = setTimeout(() => {
-          refreshUser().then((refreshedUser) => {
-            // Only redirect to login if BOTH the bootstrap result is null 
-            // AND the current user state is still null.
-            if (!refreshedUser && !userRef.current) {
-              if (!isOnboardingPage) {
-                router.push("/login")
-              } else {
-                console.warn("Onboarding bootstrap failed, waiting for stability...")
-              }
-            }
-          })
-        }, 1000) // Increased slightly for stability
-        return () => clearTimeout(bootstrapTimer)
+      // If no user on a protected page after initial check, redirect to login
+      if (!isOnboardingPage) {
+        router.push("/login")
+      } else {
+        console.warn("Onboarding session not found, waiting for stability...")
       }
     }
-  }, [user, isInitialLoading, pathname, refreshUser, router, isAuthPage, isProtectedPage, isOnboardingPage])
+  }, [user, isInitialLoading, pathname, router, isAuthPage, isProtectedPage, isOnboardingPage])
 
   const logout = async () => {
     await contextLogout()
