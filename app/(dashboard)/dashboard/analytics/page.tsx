@@ -143,7 +143,7 @@ export default function AnalyticsPage() {
               <Skeleton className="h-[450px] w-full rounded-2xl bg-secondary/10" />
             ) : (
               <div className="h-[450px] w-full">
-                <LeadsBySourceChart data={(data?.leadsBySource || []).map(item => ({ name: item.source, value: item.count }))} />
+                <LeadsBySourceChart data={(data?.leadsBySource || []).map((item: { source: string; count: number }) => ({ name: item.source, value: item.count }))} />
               </div>
             )}
           </CardContent>

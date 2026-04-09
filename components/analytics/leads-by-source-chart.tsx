@@ -24,11 +24,12 @@ const COLORS = [
 ]
 
 export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
-  const [isMounted, setIsMounted] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true)
+    // Small delay to ensure parent dimensions are settled and avoid hydration mismatch
+    const timer = setTimeout(() => setIsReady(true), 100)
+    return () => clearTimeout(timer)
   }, [])
 
   if (!data || data.length === 0) {
@@ -39,13 +40,13 @@ export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
     )
   }
 
-  if (!isMounted) {
+  if (!isReady) {
     return <div className="h-[350px] w-full bg-secondary/5 animate-pulse rounded-xl" />
   }
 
   return (
-    <div className="h-[350px] w-full min-h-[350px]">
-      <ResponsiveContainer width="100%" height="100%" debounce={100}>
+    <div className="h-[350px] w-full min-h-[350px] relative">
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
         <PieChart>
           <Pie
             data={data}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, memo } from "react"
+import { useState, useMemo, memo, useEffect } from "react"
 import { 
   Search, 
   Filter, 
@@ -110,24 +110,35 @@ LeadRow.displayName = "LeadRow"
 
 export function DemoLeadsTable({ onLeadClick }: DemoLeadsTableProps) {
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [status, setStatus] = useState("all")
+
+  // Debounce search input to avoid filtering on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const filteredLeads = useMemo(() => {
     return DEMO_LEADS.filter(lead => {
       const matchesSearch = 
-        lead.first_name.toLowerCase().includes(search.toLowerCase()) ||
-        lead.last_name.toLowerCase().includes(search.toLowerCase()) ||
-        lead.email.toLowerCase().includes(search.toLowerCase()) ||
-        lead.company.toLowerCase().includes(search.toLowerCase())
+        debouncedSearch === "" ||
+        lead.first_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        lead.last_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        lead.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        lead.company.toLowerCase().includes(debouncedSearch.toLowerCase())
       
       const matchesStatus = status === "all" || lead.status.toLowerCase() === status.toLowerCase()
       
       return matchesSearch && matchesStatus
     })
-  }, [search, status])
+  }, [debouncedSearch, status])
 
   const handleClearFilters = () => {
     setSearch("")
+    setDebouncedSearch("")
     setStatus("all")
   }
 
