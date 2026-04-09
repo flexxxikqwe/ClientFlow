@@ -166,8 +166,9 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
 
       toast.success("Lead deleted successfully")
       mutate()
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete lead")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to delete lead"
+      toast.error(message)
     }
   }, [mutate])
 

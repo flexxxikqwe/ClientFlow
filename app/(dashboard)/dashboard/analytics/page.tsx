@@ -153,7 +153,16 @@ export default function AnalyticsPage() {
   )
 }
 
-function StatsCard({ title, value, icon: Icon, loading, color = "text-primary", description }: any) {
+interface StatsCardProps {
+  title: string
+  value: string | number | undefined
+  icon: any
+  loading?: boolean
+  color?: string
+  description: string
+}
+
+function StatsCard({ title, value, icon: Icon, loading, color = "text-primary", description }: StatsCardProps) {
   return (
     <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:bg-card/50 group">
       <CardHeader className="flex flex-row items-center justify-between pb-6 space-y-0">

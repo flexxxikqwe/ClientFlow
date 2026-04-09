@@ -51,8 +51,9 @@ export function LoginForm() {
       await refreshUser()
       toast.success("Welcome back!")
       router.push("/dashboard")
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Login failed"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

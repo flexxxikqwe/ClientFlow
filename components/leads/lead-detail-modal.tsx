@@ -92,7 +92,7 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: LeadDetailM
     if (isOpen) fetchUsers()
   }, [isOpen])
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof leadSchema>) => {
     if (!lead) return
     setIsSaving(true)
     try {
@@ -104,8 +104,9 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: LeadDetailM
       toast.success("Lead updated successfully")
       onUpdate()
       onClose()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update lead"
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -120,8 +121,9 @@ export function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: LeadDetailM
       toast.success("Lead deleted")
       onUpdate()
       onClose()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to delete lead"
+      toast.error(message)
     } finally {
       setIsDeleting(false)
     }

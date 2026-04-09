@@ -33,8 +33,9 @@ export async function GET(
     if (!data) return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
     
     return NextResponse.json(data)
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -57,11 +58,12 @@ export async function PATCH(
     if (!data) return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
 
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues[0].message }, { status: 400 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : "Internal Server Error"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -79,7 +81,8 @@ export async function DELETE(
     await leadsRepository.deleteLead(id)
 
     return NextResponse.json({ message: 'Lead deleted successfully' })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

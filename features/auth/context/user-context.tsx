@@ -1,21 +1,27 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
+import { User } from "@/types"
+
+interface AppUser extends User {
+  isDemo?: boolean
+  plan?: string
+}
 
 interface UserContextType {
-  user: any | null
+  user: AppUser | null
   isLoading: boolean
   isInitialLoading: boolean
   isDemo: boolean
   updatePlan: (newPlan: string) => Promise<void>
-  refreshUser: () => Promise<any>
+  refreshUser: () => Promise<AppUser | null>
   logout: () => Promise<void>
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<AppUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
 

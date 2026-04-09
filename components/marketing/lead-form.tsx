@@ -55,8 +55,9 @@ export function LeadForm() {
 
       toast.success("Thank you! We'll be in touch soon.")
       form.reset()
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to submit"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

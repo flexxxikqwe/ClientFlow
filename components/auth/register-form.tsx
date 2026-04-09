@@ -54,8 +54,9 @@ export function RegisterForm({ plan = "Professional" }: { plan?: string }) {
       toast.success("Account created! Welcome.")
       // Redirect to mock onboarding billing step with the selected plan
       router.push(`/onboarding/billing?plan=${plan}`)
-    } catch (error: any) {
-      toast.error(error.message)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Registration failed"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

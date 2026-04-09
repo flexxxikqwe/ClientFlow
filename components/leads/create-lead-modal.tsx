@@ -71,8 +71,9 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
         value: "",
         status: "new"
       })
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Something went wrong"
+      toast.error(message)
     } finally {
       setIsLoading(false)
     }

@@ -110,8 +110,9 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       setIsEditing(false)
       mutateLead()
       onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update lead")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to update lead"
+      toast.error(message)
     } finally {
       setIsActionLoading(false)
     }
@@ -140,8 +141,9 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       setNoteContent("")
       mutateLead()
       onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || "Failed to add note")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to add note"
+      toast.error(message)
     } finally {
       setIsActionLoading(false)
     }
@@ -163,8 +165,9 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       toast.success("Lead deleted successfully")
       onClose()
       onUpdate()
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete lead")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to delete lead"
+      toast.error(message)
     } finally {
       setIsActionLoading(false)
     }
@@ -179,7 +182,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       Status: ${lead.status}
       Value: ${lead.value}
       Message: ${lead.message}
-      Notes: ${lead.notes?.map(n => n.content).join("; ")}
+      Notes: ${lead.notes?.map((n: { content: string }) => n.content).join("; ")}
     `
     try {
       if (action === "summary") {

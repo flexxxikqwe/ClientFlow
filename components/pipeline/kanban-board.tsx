@@ -131,8 +131,9 @@ export function KanbanBoard({ initialLeads, stages, onUpdate }: KanbanBoardProps
 
         toast.success("Lead moved successfully")
         onUpdate?.()
-      } catch (error: any) {
-        toast.error(error.message || "Failed to move lead")
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Failed to move lead"
+        toast.error(message)
         // Revert local state if needed, but SWR revalidation will handle it
         onUpdate?.()
       } finally {
