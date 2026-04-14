@@ -27,26 +27,26 @@ export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    // Small delay to ensure parent dimensions are settled and avoid hydration mismatch
-    const timer = setTimeout(() => setIsReady(true), 100)
+    // Increase delay to ensure parent dimensions are fully settled
+    const timer = setTimeout(() => setIsReady(true), 200)
     return () => clearTimeout(timer)
   }, [])
 
   if (!data || data.length === 0) {
     return (
-      <div className="h-[350px] w-full flex items-center justify-center border border-dashed rounded-xl border-border/50 bg-secondary/5">
+      <div className="h-[400px] w-full flex items-center justify-center border border-dashed rounded-xl border-border/50 bg-secondary/5">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40">No data available</p>
       </div>
     )
   }
 
   if (!isReady) {
-    return <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
+    return <div className="h-[400px] w-full bg-secondary/5 animate-pulse rounded-xl" />
   }
 
   return (
-    <div className="h-full w-full relative min-h-[300px]">
-      <ResponsiveContainer width="100%" height="100%" debounce={100}>
+    <div className="h-[400px] w-full relative">
+      <ResponsiveContainer width="100%" height="100%" debounce={200}>
         <PieChart>
           <Pie
             data={data}

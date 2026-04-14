@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 
 const Chart = dynamic(() => import("./leads-per-day-chart").then(mod => mod.LeadsPerDayChart), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
+  loading: () => <div className="h-[400px] w-full bg-secondary/5 animate-pulse rounded-xl" />
 })
 
 export function LeadsPerDayChartClient({ data }: { data: { date: string; count: number }[] }) {
@@ -31,11 +31,11 @@ export function LeadsPerDayChartClient({ data }: { data: { date: string; count: 
   }, [])
 
   return (
-    <div ref={containerRef} className="h-full w-full min-h-[350px]">
+    <div ref={containerRef} className="h-[400px] w-full">
       {isVisible ? (
         <Chart data={data} />
       ) : (
-        <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
+        <div className="h-[400px] w-full bg-secondary/5 animate-pulse rounded-xl" />
       )}
     </div>
   )
