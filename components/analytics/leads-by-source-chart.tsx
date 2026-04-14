@@ -41,12 +41,12 @@ export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
   }
 
   if (!isReady) {
-    return <div className="h-[350px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+    return <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
   }
 
   return (
-    <div className="h-[350px] w-full min-h-[350px] relative">
-      <ResponsiveContainer width="100%" height="100%" debounce={50}>
+    <div className="h-full w-full relative min-h-[300px]">
+      <ResponsiveContainer width="100%" height="100%" debounce={100}>
         <PieChart>
           <Pie
             data={data}

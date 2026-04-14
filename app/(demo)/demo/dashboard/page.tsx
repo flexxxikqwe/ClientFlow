@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3 } from "lucide-react"
+import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { LeadsPerDayChartClient } from "@/components/analytics/leads-per-day-chart-client"
 import { cn } from "@/lib/utils"
@@ -44,13 +44,29 @@ export default function DemoDashboardPage() {
   ]
 
   return (
-    <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+    <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+      <div className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-br from-primary/10 via-background to-secondary/10 border border-primary/20 shadow-2xl shadow-primary/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-10 opacity-10">
+          <Sparkles className="h-32 w-32 text-primary" />
+        </div>
+        <div className="relative space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em]">
+              Showcase Mode
+            </div>
+            <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Live Portfolio Preview</span>
+          </div>
+          <h1 className="text-5xl font-bold tracking-tighter text-foreground">Welcome to ClientFlow</h1>
+          <p className="text-lg font-medium text-muted-foreground/80 max-w-2xl leading-relaxed">
+            This is a high-fidelity demonstration of a modern CRM. Explore real-world sales workflows, 
+            AI-assisted lead insights, and interactive analytics—all pre-populated with 30 days of stable demo data.
+          </p>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <h2 className="text-3xl font-semibold tracking-tight text-foreground">Dashboard Overview</h2>
-          <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-            Showcase
-          </div>
         </div>
         <p className="text-sm font-medium text-muted-foreground/80">Welcome to the ClientFlow portfolio preview. Explore the core CRM features below.</p>
       </div>
@@ -91,7 +107,7 @@ export default function DemoDashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="p-8">
-            <div className="h-[400px] w-full">
+            <div className="h-[400px] w-full relative">
               <LeadsPerDayChartClient data={data.leadsPerDay} />
             </div>
           </CardContent>
@@ -108,7 +124,7 @@ export default function DemoDashboardPage() {
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
                   <UserPlus className="h-4 w-4 text-primary" />
                 </div>
-                Add New Lead
+                Manage Leads
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start h-14 rounded-xl bg-secondary/20 hover:bg-secondary/40 border-border/50 text-foreground font-bold text-[10px] uppercase tracking-[0.2em] gap-5 transition-all hover:translate-x-2 group">

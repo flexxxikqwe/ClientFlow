@@ -6,15 +6,28 @@ import { DEMO_STATS, DEMO_LEADS_PER_DAY, DEMO_LEADS_BY_SOURCE } from "@/lib/demo
 
 export default function DemoAnalyticsPage() {
   return (
-    <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <h2 className="text-3xl font-semibold tracking-tight text-foreground">Analytics & Reports</h2>
-          <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-            Showcase
+    <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground">Analytics & Reports</h2>
+            <div className="px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
+              Showcase
+            </div>
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/80">Deep dive into your sales performance and lead acquisition trends.</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-secondary/20 border border-border/50 flex items-center gap-6">
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Data Period</p>
+            <p className="text-sm font-bold">Last 30 Days</p>
+          </div>
+          <div className="w-px h-8 bg-border/50" />
+          <div className="space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Sample Size</p>
+            <p className="text-sm font-bold">{DEMO_STATS.totalLeads} Leads</p>
           </div>
         </div>
-        <p className="text-sm font-medium text-muted-foreground/80">Deep dive into your sales performance and lead acquisition trends.</p>
       </div>
 
       <div className="grid gap-10 grid-cols-1 lg:grid-cols-3">
@@ -26,7 +39,7 @@ export default function DemoAnalyticsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
-            <div className="h-[400px] w-full">
+            <div className="h-[400px] w-full relative">
               <LeadsPerDayChartClient data={DEMO_LEADS_PER_DAY} />
             </div>
           </CardContent>
@@ -40,7 +53,7 @@ export default function DemoAnalyticsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
-            <div className="h-[400px] w-full">
+            <div className="h-[400px] w-full relative">
               <LeadsBySourceChartClient data={DEMO_LEADS_BY_SOURCE} />
             </div>
           </CardContent>

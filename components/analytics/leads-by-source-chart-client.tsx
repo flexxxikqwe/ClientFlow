@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 
 const Chart = dynamic(() => import("./leads-by-source-chart").then(mod => mod.LeadsBySourceChart), {
   ssr: false,
-  loading: () => <div className="h-[400px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+  loading: () => <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
 })
 
 export function LeadsBySourceChartClient({ data }: { data: { name: string; value: number }[] }) {
@@ -31,11 +31,11 @@ export function LeadsBySourceChartClient({ data }: { data: { name: string; value
   }, [])
 
   return (
-    <div ref={containerRef} className="h-[400px] w-full">
+    <div ref={containerRef} className="h-full w-full min-h-[350px]">
       {isVisible ? (
         <Chart data={data} />
       ) : (
-        <div className="h-[400px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+        <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
       )}
     </div>
   )

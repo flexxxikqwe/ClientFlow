@@ -17,6 +17,11 @@ export interface Lead {
   owner?: { id: string; full_name: string; avatar_url: string | null } | null
   stage?: { id: string; name: string } | null
   notes?: LeadNote[]
+  ai_insights?: {
+    summary?: { summary: string, keyPoints: string[] }
+    classification?: { priority: string, reasoning: string }
+    reply?: { subject: string, body: string }
+  }
 }
 
 export interface LeadNote {

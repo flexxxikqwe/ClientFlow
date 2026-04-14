@@ -35,12 +35,12 @@ export function LeadsPerDayChart({ data }: LeadsPerDayChartProps) {
   }
 
   if (!isReady) {
-    return <div className="h-[350px] w-full bg-secondary/5 animate-pulse rounded-xl" />
+    return <div className="h-full w-full bg-secondary/5 animate-pulse rounded-xl" />
   }
 
   return (
-    <div className="h-[350px] w-full min-h-[350px] relative">
-      <ResponsiveContainer width="100%" height="100%" debounce={50}>
+    <div className="h-full w-full relative min-h-[300px]">
+      <ResponsiveContainer width="100%" height="100%" debounce={100}>
         <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">

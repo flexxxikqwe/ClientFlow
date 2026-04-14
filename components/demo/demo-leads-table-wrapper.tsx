@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Download } from "lucide-react"
 import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
 import { Button } from "@/components/ui/button"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
+import { LeadDetails } from "@/components/leads/lead-details"
 
 interface DemoLeadsTableWrapperProps {
   isTableOnly?: boolean
@@ -13,14 +14,25 @@ interface DemoLeadsTableWrapperProps {
 
 export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWrapperProps) {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)
-    toast.info("Showcase Mode: Detailed lead profiles are available in the full version.")
+    setIsDetailsOpen(true)
   }, [])
 
   if (isTableOnly) {
-    return <DemoLeadsTable onLeadClick={handleLeadClick} />
+    return (
+      <>
+        <DemoLeadsTable onLeadClick={handleLeadClick} />
+        <LeadDetails 
+          lead={selectedLead} 
+          isOpen={isDetailsOpen} 
+          onClose={() => setIsDetailsOpen(false)} 
+          onUpdate={() => {}} 
+        />
+      </>
+    )
   }
 
   return (
@@ -30,7 +42,7 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
         className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" 
         onClick={() => toast.info("Showcase Mode: Data export is simulated.")}
       >
-        Export CSV
+        <Download className="h-4 w-4 mr-2" /> Export CSV
       </Button>
       <Button 
         onClick={() => toast.info("Showcase Mode: Lead creation is disabled in this preview.")}
@@ -38,6 +50,13 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
       >
         <Plus className="h-4 w-4 mr-2" /> New Lead
       </Button>
+      
+      <LeadDetails 
+        lead={selectedLead} 
+        isOpen={isDetailsOpen} 
+        onClose={() => setIsDetailsOpen(false)} 
+        onUpdate={() => {}} 
+      />
     </>
   )
 }

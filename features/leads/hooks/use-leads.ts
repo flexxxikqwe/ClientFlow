@@ -1,6 +1,7 @@
 import useSWR from "swr"
 import { Lead } from "@/types/leads"
 import { fetcher } from "@/lib/utils/fetcher"
+import { DEMO_LEADS } from "@/lib/demo-data"
 
 export function useLeads(params: {
   page?: number
@@ -42,10 +43,22 @@ export function useLeads(params: {
 }
 
 export function useLead(id: string | null) {
+  const isDemoId = id?.startsWith("demo-")
+  
   const { data: lead, mutate, isLoading, error } = useSWR(
-    id ? `/api/leads/${id}` : null, 
+    id && !isDemoId ? `/api/leads/${id}` : null, 
     fetcher
   )
+
+  if (isDemoId) {
+    const demoLead = DEMO_LEADS.find(l => l.id === id)
+    return {
+      lead: demoLead as Lead,
+      isLoading: false,
+      error: null,
+      mutate: async () => demoLead as Lead,
+    }
+  }
 
   return {
     lead,

@@ -39,12 +39,12 @@ export default function DemoLeadsPage() {
   ]
 
   return (
-    <div className="p-12 space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+    <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">Leads Management</h1>
-            <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+            <div className="px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
               Showcase
             </div>
           </div>

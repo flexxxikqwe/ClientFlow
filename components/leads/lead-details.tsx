@@ -91,6 +91,10 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
   const handleUpdate = useCallback(async () => {
     if (!lead) return
+    if (isDemo) {
+      toast.info("Showcase Mode: Lead updates are disabled in this preview.")
+      return
+    }
     setIsActionLoading(true)
     try {
       const response = await fetch(`/api/leads/${lead.id}`, {
@@ -116,10 +120,14 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, formData, mutateLead, onUpdate])
+  }, [lead, formData, mutateLead, onUpdate, isDemo])
 
   const handleAddNote = useCallback(async () => {
     if (!lead || !noteContent.trim()) return
+    if (isDemo) {
+      toast.info("Showcase Mode: Adding notes is disabled in this preview.")
+      return
+    }
     setIsActionLoading(true)
     try {
       const response = await fetch(`/api/leads/${lead.id}/notes`, {
@@ -147,10 +155,15 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, noteContent, mutateLead, onUpdate])
+  }, [lead, noteContent, mutateLead, onUpdate, isDemo])
 
   const handleDelete = useCallback(async () => {
-    if (!lead || !confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return
+    if (!lead) return
+    if (isDemo) {
+      toast.info("Showcase Mode: Lead deletion is disabled in this preview.")
+      return
+    }
+    if (!confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return
     setIsActionLoading(true)
     try {
       const response = await fetch(`/api/leads/${lead.id}`, {
@@ -171,11 +184,33 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, onClose, onUpdate])
+  }, [lead, onClose, onUpdate, isDemo])
 
   const handleAiAction = useCallback(async (action: "summary" | "classify" | "reply") => {
     if (!lead) return
     setIsAiLoading(true)
+
+    // Handle Demo Mode Mock AI
+    if (isDemo && lead.id.startsWith("demo-")) {
+      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate "thinking"
+      
+      const insights = lead.ai_insights
+      if (insights) {
+        if (action === "summary" && insights.summary) {
+          setAiSummary(insights.summary)
+          toast.success("Summary generated (Demo Mode)")
+        } else if (action === "classify" && insights.classification) {
+          setAiClassification(insights.classification)
+          toast.success("Lead classified (Demo Mode)")
+        } else if (action === "reply" && insights.reply) {
+          setAiReply(insights.reply)
+          toast.success("Reply generated (Demo Mode)")
+        }
+        setIsAiLoading(false)
+        return
+      }
+    }
+
     const context = `
       Name: ${lead.first_name} ${lead.last_name}
       Company: ${lead.company}
@@ -203,7 +238,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsAiLoading(false)
     }
-  }, [lead])
+  }, [lead, isDemo])
 
   const handleCopyReply = useCallback(() => {
     if (aiReply) {
