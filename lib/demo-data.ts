@@ -1,3 +1,5 @@
+import { subDays, format, startOfToday, subHours, subMinutes } from "date-fns";
+
 export const DEMO_USER = {
   id: "demo-user-123",
   email: "demo@clientflow.com",
@@ -13,39 +15,25 @@ export const DEMO_STATS = {
   conversionRate: 38.6,
 };
 
-export const DEMO_LEADS_PER_DAY = [
-  { date: "2026-03-09", count: 12 },
-  { date: "2026-03-10", count: 18 },
-  { date: "2026-03-11", count: 15 },
-  { date: "2026-03-12", count: 22 },
-  { date: "2026-03-13", count: 19 },
-  { date: "2026-03-14", count: 8 },
-  { date: "2026-03-15", count: 10 },
-  { date: "2026-03-16", count: 25 },
-  { date: "2026-03-17", count: 21 },
-  { date: "2026-03-18", count: 17 },
-  { date: "2026-03-19", count: 28 },
-  { date: "2026-03-20", count: 24 },
-  { date: "2026-03-21", count: 12 },
-  { date: "2026-03-22", count: 14 },
-  { date: "2026-03-23", count: 32 },
-  { date: "2026-03-24", count: 29 },
-  { date: "2026-03-25", count: 26 },
-  { date: "2026-03-26", count: 35 },
-  { date: "2026-03-27", count: 31 },
-  { date: "2026-03-28", count: 15 },
-  { date: "2026-03-29", count: 18 },
-  { date: "2026-03-30", count: 42 },
-  { date: "2026-03-31", count: 38 },
-  { date: "2026-04-01", count: 35 },
-  { date: "2026-04-02", count: 45 },
-  { date: "2026-04-03", count: 41 },
-  { date: "2026-04-04", count: 22 },
-  { date: "2026-04-05", count: 25 },
-  { date: "2026-04-06", count: 48 },
-  { date: "2026-04-07", count: 52 },
-  { date: "2026-04-08", count: 47 },
-];
+// Generate last 30 days of lead counts for the chart
+const generateLeadsPerDay = () => {
+  const data = [];
+  const today = startOfToday();
+  // Base counts with some random-ish but stable variation
+  const baseCounts = [12, 18, 15, 22, 19, 8, 10, 25, 21, 17, 28, 24, 12, 14, 32, 29, 26, 35, 31, 15, 18, 42, 38, 35, 45, 41, 22, 25, 48, 52, 47];
+  
+  for (let i = 30; i >= 0; i--) {
+    data.push({
+      date: format(subDays(today, i), "yyyy-MM-dd"),
+      count: baseCounts[30 - i] || 10
+    });
+  }
+  return data;
+};
+
+export const DEMO_LEADS_PER_DAY = generateLeadsPerDay();
+
+const today = new Date();
 
 export const DEMO_LEADS = [
   {
@@ -59,10 +47,10 @@ export const DEMO_LEADS = [
     source: "Referral",
     value: 12500,
     message: "Interested in our enterprise plan for their 50-person engineering team. Specifically looking for advanced analytics and priority support.",
-    created_at: "2026-04-07T10:00:00Z",
+    created_at: subDays(subHours(today, 4), 2).toISOString(),
     notes: [
-      { id: "n1", content: "Initial discovery call completed. Very positive feedback on the dashboard UI.", created_at: "2026-04-07T11:00:00Z", author: { full_name: "Alex Thompson" } },
-      { id: "n2", content: "Sent over the custom proposal. They are reviewing it with their CTO.", created_at: "2026-04-08T09:30:00Z", author: { full_name: "Alex Thompson" } }
+      { id: "n1", content: "Initial discovery call completed. Very positive feedback on the dashboard UI.", created_at: subDays(subHours(today, 2), 2).toISOString(), author: { full_name: "Alex Thompson" } },
+      { id: "n2", content: "Sent over the custom proposal. They are reviewing it with their CTO.", created_at: subDays(subHours(today, 1), 1).toISOString(), author: { full_name: "Alex Thompson" } }
     ],
     ai_insights: {
       summary: {
@@ -95,9 +83,9 @@ export const DEMO_LEADS = [
     source: "Direct",
     value: 8400,
     message: "Evaluating CRM alternatives. Current solution is too bloated for their needs. They love the clean interface of ClientFlow.",
-    created_at: "2026-04-07T14:30:00Z",
+    created_at: subDays(subHours(today, 2), 3).toISOString(),
     notes: [
-      { id: "n3", content: "Demo session scheduled for next Tuesday.", created_at: "2026-04-07T15:00:00Z", author: { full_name: "Alex Thompson" } }
+      { id: "n3", content: "Demo session scheduled for next Tuesday.", created_at: subDays(subHours(today, 1), 3).toISOString(), author: { full_name: "Alex Thompson" } }
     ],
     ai_insights: {
       summary: {
@@ -130,7 +118,7 @@ export const DEMO_LEADS = [
     source: "Social Media",
     value: 5000,
     message: "Saw our post on LinkedIn about the new AI features. Wants to see how the automated follow-up drafts work.",
-    created_at: "2026-04-08T09:15:00Z",
+    created_at: subHours(today, 5).toISOString(),
     notes: [],
     ai_insights: {
       summary: {
@@ -163,9 +151,9 @@ export const DEMO_LEADS = [
     source: "Email",
     value: 15000,
     message: "Traditional manufacturing firm looking to digitize their sales process. Might be a bit too early for them.",
-    created_at: "2026-04-06T11:45:00Z",
+    created_at: subDays(subHours(today, 8), 5).toISOString(),
     notes: [
-      { id: "n4", content: "Decided to stick with their current spreadsheet system for now. Budget constraints.", created_at: "2026-04-09T10:00:00Z", author: { full_name: "Alex Thompson" } }
+      { id: "n4", content: "Decided to stick with their current spreadsheet system for now. Budget constraints.", created_at: subDays(subHours(today, 2), 4).toISOString(), author: { full_name: "Alex Thompson" } }
     ],
     ai_insights: {
       summary: {
@@ -198,9 +186,9 @@ export const DEMO_LEADS = [
     source: "Other",
     value: 22000,
     message: "Large-scale retail operation. Interested in the multi-user collaboration features and lead assignment logic.",
-    created_at: "2026-04-05T16:20:00Z",
+    created_at: subDays(subHours(today, 1), 6).toISOString(),
     notes: [
-      { id: "n5", content: "Technical review of our API documentation in progress.", created_at: "2026-04-06T09:00:00Z", author: { full_name: "Alex Thompson" } }
+      { id: "n5", content: "Technical review of our API documentation in progress.", created_at: subDays(subHours(today, 12), 5).toISOString(), author: { full_name: "Alex Thompson" } }
     ],
     ai_insights: {
       summary: {
