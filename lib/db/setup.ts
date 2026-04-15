@@ -69,7 +69,18 @@ export async function setupNeon() {
   
   try {
     console.info('🛠️ ClientFlow: Setting up Neon database schema...');
-    await db.execute(sql.raw(schema));
+    
+    // Split schema into individual statements and execute them one by one
+    // Filter out empty lines and comments
+    const statements = schema
+      .split(';')
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && !s.startsWith('--'));
+
+    for (const statement of statements) {
+      await db.execute(sql.raw(statement));
+    }
+
     console.info('✅ ClientFlow: Neon database schema ready.');
   } catch (error) {
     console.error('❌ ClientFlow: Neon setup failed:', error);
