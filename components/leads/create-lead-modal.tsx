@@ -22,6 +22,8 @@ import {
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { safeJson } from "@/lib/utils/safe-json"
+import { useUser } from "@/features/auth/context/user-context"
+import { useDemoLeads } from "@/components/demo/demo-leads-context"
 
 interface CreateLeadModalProps {
   isOpen: boolean
@@ -30,6 +32,8 @@ interface CreateLeadModalProps {
 }
 
 export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalProps) {
+  const { isDemo } = useUser()
+  const demoLeads = useDemoLeads()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     first_name: "",
@@ -45,23 +49,41 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/leads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      if (isDemo && demoLeads) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800))
+        
+        demoLeads.addLead({
           ...formData,
           value: formData.value ? parseFloat(formData.value) : 0,
-        }),
-      })
+          source: "Direct",
+          priority: "medium",
+          message: "Lead created during demo session.",
+          owner_id: "demo-user-123",
+          stage_id: "1"
+        })
+        
+        toast.success("Lead created successfully (Demo Mode)")
+      } else {
+        const response = await fetch("/api/leads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            value: formData.value ? parseFloat(formData.value) : 0,
+          }),
+        })
 
-      if (!response.ok) {
-        const data = await safeJson(response)
-        throw new Error(data?.error || "Failed to create lead")
+        if (!response.ok) {
+          const data = await safeJson(response)
+          throw new Error(data?.error || "Failed to create lead")
+        }
+
+        toast.success("Lead created successfully")
       }
 
-      toast.success("Lead created successfully")
       onSuccess()
       onClose()
       setFormData({

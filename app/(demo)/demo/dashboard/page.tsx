@@ -1,47 +1,55 @@
+"use client"
+
+import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { LeadsPerDayChartClient } from "@/components/analytics/leads-per-day-chart-client"
 import { cn } from "@/lib/utils"
-import { DEMO_STATS, DEMO_LEADS_PER_DAY } from "@/lib/demo-data"
+import { DEMO_LEADS_PER_DAY } from "@/lib/demo-data"
+import { useDemoLeads } from "@/components/demo/demo-leads-context"
 
 export default function DemoDashboardPage() {
-  const data = {
-    stats: DEMO_STATS,
-    leadsPerDay: DEMO_LEADS_PER_DAY
-  }
-
-  const stats = [
-    {
-      title: "Total Leads",
-      value: data.stats.totalLeads,
-      icon: Users,
-      description: "Total leads in database",
-      color: "text-primary",
-    },
-    {
-      title: "New Leads",
-      value: data.leadsPerDay[data.leadsPerDay.length - 1].count,
-      icon: UserPlus,
-      description: "Leads added today",
-      color: "text-primary",
-    },
-    {
-      title: "Won Leads",
-      value: data.stats.wonLeads,
-      icon: CheckCircle2,
-      description: "Leads with 'Won' status",
-      color: "text-primary",
-    },
-    {
-      title: "Conversion Rate",
-      value: `${data.stats.conversionRate}%`,
-      icon: TrendingUp,
-      description: "Won / Total ratio",
-      color: "text-primary",
-    }
-  ]
+  const demoLeads = useDemoLeads()
+  const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
+  
+  const stats = useMemo(() => {
+    const totalLeads = leads.length
+    const wonLeads = leads.filter(l => l.status.toLowerCase() === "won").length
+    const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0.0"
+    
+    return [
+      {
+        title: "Total Leads",
+        value: totalLeads.toLocaleString(),
+        icon: Users,
+        description: "Total leads in session",
+        color: "text-primary",
+      },
+      {
+        title: "New Leads",
+        value: DEMO_LEADS_PER_DAY[DEMO_LEADS_PER_DAY.length - 1].count,
+        icon: UserPlus,
+        description: "Leads added today",
+        color: "text-primary",
+      },
+      {
+        title: "Won Leads",
+        value: wonLeads.toLocaleString(),
+        icon: CheckCircle2,
+        description: "Leads with 'Won' status",
+        color: "text-primary",
+      },
+      {
+        title: "Conversion Rate",
+        value: `${conversionRate}%`,
+        icon: TrendingUp,
+        description: "Won / Total ratio",
+        color: "text-primary",
+      }
+    ]
+  }, [leads])
 
   return (
     <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">

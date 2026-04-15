@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 import { LeadDetails } from "@/components/leads/lead-details"
-import { DEMO_LEADS } from "@/lib/demo-data"
+import { CreateLeadModal } from "@/components/leads/create-lead-modal"
+import { useDemoLeads } from "@/components/demo/demo-leads-context"
 import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 interface DemoLeadsTableWrapperProps {
@@ -15,8 +16,11 @@ interface DemoLeadsTableWrapperProps {
 }
 
 export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWrapperProps) {
+  const demoLeads = useDemoLeads()
+  const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
 
   // Filter state moved from DemoLeadsTable to support export
@@ -29,19 +33,19 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
   }, [])
 
   const filteredLeads = useMemo(() => {
-    return DEMO_LEADS.filter(lead => {
+    return leads.filter(lead => {
       const matchesSearch = 
         search === "" ||
         lead.first_name.toLowerCase().includes(search.toLowerCase()) ||
         lead.last_name.toLowerCase().includes(search.toLowerCase()) ||
-        lead.email.toLowerCase().includes(search.toLowerCase()) ||
-        lead.company.toLowerCase().includes(search.toLowerCase())
+        (lead.email && lead.email.toLowerCase().includes(search.toLowerCase())) ||
+        (lead.company && lead.company.toLowerCase().includes(search.toLowerCase()))
       
       const matchesStatus = status === "all" || lead.status.toLowerCase() === status.toLowerCase()
       
       return matchesSearch && matchesStatus
     })
-  }, [search, status])
+  }, [leads, search, status])
 
   const handleExport = async () => {
     setIsExporting(true)
@@ -72,6 +76,7 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
     return (
       <>
         <DemoLeadsTable 
+          leads={leads}
           onLeadClick={handleLeadClick} 
           search={search}
           setSearch={setSearch}
@@ -108,7 +113,7 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
         )}
       </Button>
       <Button 
-        onClick={() => toast.info("Showcase Mode: Lead creation is disabled in this preview.")}
+        onClick={() => setIsCreateModalOpen(true)}
         className="flex-1 md:flex-none h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
         <Plus className="h-4 w-4 mr-2" /> New Lead
@@ -119,6 +124,12 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
         isOpen={isDetailsOpen} 
         onClose={() => setIsDetailsOpen(false)} 
         onUpdate={() => {}} 
+      />
+
+      <CreateLeadModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {}}
       />
     </>
   )

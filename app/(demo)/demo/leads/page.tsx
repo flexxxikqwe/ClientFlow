@@ -1,42 +1,55 @@
+"use client"
+
+import { useMemo } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock } from "lucide-react"
 
 import { DemoLeadsTableWrapper } from "@/components/demo/demo-leads-table-wrapper"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { DEMO_STATS } from "@/lib/demo-data"
+import { useDemoLeads } from "@/components/demo/demo-leads-context"
 
 export default function DemoLeadsPage() {
-  const stats = [
-    {
-      title: "Total Leads",
-      value: DEMO_STATS.totalLeads.toLocaleString(),
-      icon: Users,
-      description: "Last 30 days",
-      color: "text-primary"
-    },
-    {
-      title: "Pipeline Value",
-      value: `$${(DEMO_STATS.totalLeads * 1200).toLocaleString()}`,
-      icon: BarChart3,
-      description: "Total value",
-      color: "text-primary"
-    },
-    {
-      title: "Conversion Rate",
-      value: `${DEMO_STATS.conversionRate}%`,
-      icon: TrendingUp,
-      description: "Won / Total",
-      color: "text-primary"
-    },
-    {
-      title: "Active Leads",
-      value: (DEMO_STATS.totalLeads - DEMO_STATS.wonLeads).toLocaleString(),
-      icon: Clock,
-      description: "Excluding Won",
-      color: "text-primary"
-    }
-  ]
+  const demoLeads = useDemoLeads()
+  const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
+
+  const stats = useMemo(() => {
+    const totalLeads = leads.length
+    const wonLeads = leads.filter(l => l.status.toLowerCase() === "won").length
+    const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0.0"
+    const activeLeads = leads.filter(l => l.status.toLowerCase() !== "won").length
+
+    return [
+      {
+        title: "Total Leads",
+        value: totalLeads.toLocaleString(),
+        icon: Users,
+        description: "Last 30 days",
+        color: "text-primary"
+      },
+      {
+        title: "Pipeline Value",
+        value: `$${(totalLeads * 1200).toLocaleString()}`,
+        icon: BarChart3,
+        description: "Total value",
+        color: "text-primary"
+      },
+      {
+        title: "Conversion Rate",
+        value: `${conversionRate}%`,
+        icon: TrendingUp,
+        description: "Won / Total",
+        color: "text-primary"
+      },
+      {
+        title: "Active Leads",
+        value: activeLeads.toLocaleString(),
+        icon: Clock,
+        description: "Excluding Won",
+        color: "text-primary"
+      }
+    ]
+  }, [leads])
 
   return (
     <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">

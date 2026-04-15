@@ -45,6 +45,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { DEMO_LEADS } from "@/lib/demo-data"
 
 interface DemoLeadsTableProps {
+  leads: Lead[]
   onLeadClick: (lead: Lead) => void
   search: string
   setSearch: React.Dispatch<React.SetStateAction<string>>
@@ -83,7 +84,7 @@ const LeadRow = memo(({ lead, onLeadClick }: {
       <LeadStatusBadge status={lead.status} />
     </TableCell>
     <TableCell className="text-muted-foreground/50 text-[10px] font-bold uppercase tracking-[0.15em]">
-      {format(new Date(lead.created_at), "MMM d, yyyy")}
+      {lead.created_at ? format(new Date(lead.created_at), "MMM d, yyyy") : "-"}
     </TableCell>
     <TableCell className="pr-8" onClick={(e) => e.stopPropagation()}>
       <DropdownMenu>
@@ -113,6 +114,7 @@ const LeadRow = memo(({ lead, onLeadClick }: {
 LeadRow.displayName = "LeadRow"
 
 export function DemoLeadsTable({ 
+  leads,
   onLeadClick,
   search,
   setSearch,
@@ -130,19 +132,19 @@ export function DemoLeadsTable({
   }, [search])
 
   const filteredLeads = useMemo(() => {
-    return DEMO_LEADS.filter(lead => {
+    return leads.filter(lead => {
       const matchesSearch = 
         debouncedSearch === "" ||
         lead.first_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         lead.last_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        lead.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        lead.company.toLowerCase().includes(debouncedSearch.toLowerCase())
+        (lead.email && lead.email.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
+        (lead.company && lead.company.toLowerCase().includes(debouncedSearch.toLowerCase()))
       
       const matchesStatus = status === "all" || lead.status.toLowerCase() === status.toLowerCase()
       
       return matchesSearch && matchesStatus
     })
-  }, [debouncedSearch, status])
+  }, [leads, debouncedSearch, status])
 
   const handleClearFilters = () => {
     setSearch("")
@@ -235,7 +237,7 @@ export function DemoLeadsTable({
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
         <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-          Showing <span className="text-foreground">{filteredLeads.length}</span> of <span className="text-foreground">{DEMO_LEADS.length}</span> leads
+          Showing <span className="text-foreground">{filteredLeads.length}</span> of <span className="text-foreground">{leads.length}</span> leads
         </div>
         <div className="flex items-center gap-4">
           <Button
