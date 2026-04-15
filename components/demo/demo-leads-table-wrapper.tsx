@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react"
 import { Plus, Download, Loader2 } from "lucide-react"
 import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
+import { LeadKanban } from "@/components/leads/lead-kanban"
 import { Button } from "@/components/ui/button"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
@@ -13,12 +14,15 @@ import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 interface DemoLeadsTableWrapperProps {
   isTableOnly?: boolean
+  viewMode?: "table" | "kanban"
 }
 
-export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWrapperProps) {
+export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" }: DemoLeadsTableWrapperProps) {
   const demoLeads = useDemoLeads()
   const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
+  const updateLeadStatus = demoLeads?.updateLeadStatus
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+// ... existing state
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -75,14 +79,22 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
   if (isTableOnly) {
     return (
       <>
-        <DemoLeadsTable 
-          leads={leads}
-          onLeadClick={handleLeadClick} 
-          search={search}
-          setSearch={setSearch}
-          status={status}
-          setStatus={setStatus}
-        />
+        {viewMode === "table" ? (
+          <DemoLeadsTable 
+            leads={leads}
+            onLeadClick={handleLeadClick} 
+            search={search}
+            setSearch={setSearch}
+            status={status}
+            setStatus={setStatus}
+          />
+        ) : (
+          <LeadKanban 
+            leads={filteredLeads} 
+            onLeadClick={handleLeadClick}
+            onStatusChange={updateLeadStatus}
+          />
+        )}
         <LeadDetails 
           lead={selectedLead} 
           isOpen={isDetailsOpen} 

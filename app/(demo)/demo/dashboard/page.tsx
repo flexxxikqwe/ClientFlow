@@ -116,7 +116,7 @@ export default function DemoDashboardPage() {
           </CardHeader>
           <CardContent className="p-8">
             <div className="h-[400px] w-full relative">
-              <LeadsPerDayChartClient data={data.leadsPerDay} />
+              <LeadsPerDayChartClient data={DEMO_LEADS_PER_DAY} />
             </div>
           </CardContent>
         </Card>

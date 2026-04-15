@@ -7,6 +7,7 @@ import { DEMO_LEADS } from "@/lib/demo-data"
 interface DemoLeadsContextType {
   leads: Lead[]
   addLead: (lead: Omit<Lead, "id" | "created_at" | "updated_at" | "notes" | "ai_insights">) => void
+  updateLeadStatus: (leadId: string, newStatus: string) => void
 }
 
 const DemoLeadsContext = createContext<DemoLeadsContextType | undefined>(undefined)
@@ -15,6 +16,7 @@ export function DemoLeadsProvider({ children }: { children: React.ReactNode }) {
   const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS as Lead[])
 
   const addLead = useCallback((newLeadData: Omit<Lead, "id" | "created_at" | "updated_at" | "notes" | "ai_insights">) => {
+    // ... existing addLead logic
     const lead: Lead = {
       ...newLeadData,
       id: `demo-${Date.now()}`,
@@ -40,10 +42,17 @@ export function DemoLeadsProvider({ children }: { children: React.ReactNode }) {
     setLeads(prev => [lead, ...prev])
   }, [])
 
+  const updateLeadStatus = useCallback((leadId: string, newStatus: string) => {
+    setLeads(prev => prev.map(lead => 
+      lead.id === leadId ? { ...lead, status: newStatus, updated_at: new Date().toISOString() } : lead
+    ))
+  }, [])
+
   const value = useMemo(() => ({
     leads,
-    addLead
-  }), [leads, addLead])
+    addLead,
+    updateLeadStatus
+  }), [leads, addLead, updateLeadStatus])
 
   return (
     <DemoLeadsContext.Provider value={value}>

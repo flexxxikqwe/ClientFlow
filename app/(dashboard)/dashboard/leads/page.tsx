@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useMemo, useCallback, memo } from "react"
-import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2 } from "lucide-react"
+import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, LayoutGrid, Table as TableIcon } from "lucide-react"
 import useSWR, { mutate } from "swr"
 
 import { LeadsTable } from "@/components/leads/leads-table"
+import { LeadKanban } from "@/components/leads/lead-kanban"
 import { LeadDetails } from "@/components/leads/lead-details"
 import { CreateLeadModal } from "@/components/leads/create-lead-modal"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 export default function LeadsPage() {
   const { isDemo } = useUser()
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table")
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -33,6 +35,29 @@ export default function LeadsPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   const { data: analytics, mutate: mutateAnalytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics", fetcher)
+
+  const { data: allLeadsData, mutate: mutateAllLeads } = useSWR(
+    viewMode === "kanban" ? "/api/leads?limit=1000" : null,
+    fetcher
+  )
+
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (!response.ok) throw new Error("Failed to update status")
+
+      toast.success("Lead status updated")
+      mutateAllLeads()
+      mutateAnalytics()
+    } catch (error) {
+      toast.error("Failed to update lead status")
+    }
+  }
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)
@@ -171,20 +196,55 @@ export default function LeadsPage() {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">Active Pipeline</h2>
           </div>
           <div className="h-px flex-1 bg-border/30 mx-12 hidden md:block" />
+          <div className="flex items-center bg-secondary/20 p-1 rounded-xl border border-border/50">
+            <Button
+              variant={viewMode === "table" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className={cn(
+                "rounded-lg px-4 h-9 font-bold text-[10px] uppercase tracking-widest transition-all",
+                viewMode === "table" ? "bg-background shadow-sm text-primary" : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              <TableIcon className="h-3.5 w-3.5 mr-2" />
+              Table
+            </Button>
+            <Button
+              variant={viewMode === "kanban" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("kanban")}
+              className={cn(
+                "rounded-lg px-4 h-9 font-bold text-[10px] uppercase tracking-widest transition-all",
+                viewMode === "kanban" ? "bg-background shadow-sm text-primary" : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5 mr-2" />
+              Kanban
+            </Button>
+          </div>
         </div>
-        <LeadsTable 
-          onLeadClick={handleLeadClick}
-          page={page}
-          setPage={setPage}
-          search={search}
-          setSearch={setSearch}
-          status={status}
-          setStatus={setStatus}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
+        
+        {viewMode === "table" ? (
+          <LeadsTable 
+            onLeadClick={handleLeadClick}
+            page={page}
+            setPage={setPage}
+            search={search}
+            setSearch={setSearch}
+            status={status}
+            setStatus={setStatus}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        ) : (
+          <LeadKanban 
+            leads={allLeadsData?.leads || []}
+            onLeadClick={handleLeadClick}
+            onStatusChange={handleStatusChange}
+          />
+        )}
       </div>
 
       <LeadDetails 

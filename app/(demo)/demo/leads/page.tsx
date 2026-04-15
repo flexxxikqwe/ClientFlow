@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo } from "react"
-import { Users, Plus, BarChart3, TrendingUp, Clock } from "lucide-react"
+import { useState, useMemo } from "react"
+import { Users, Plus, BarChart3, TrendingUp, Clock, LayoutGrid, Table as TableIcon } from "lucide-react"
 
 import { DemoLeadsTableWrapper } from "@/components/demo/demo-leads-table-wrapper"
+import { LeadKanban } from "@/components/leads/lead-kanban"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -12,8 +13,10 @@ import { useDemoLeads } from "@/components/demo/demo-leads-context"
 export default function DemoLeadsPage() {
   const demoLeads = useDemoLeads()
   const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table")
 
   const stats = useMemo(() => {
+// ... existing stats logic
     const totalLeads = leads.length
     const wonLeads = leads.filter(l => l.status.toLowerCase() === "won").length
     const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0.0"
@@ -92,8 +95,34 @@ export default function DemoLeadsPage() {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">Active Pipeline</h2>
           </div>
           <div className="h-px flex-1 bg-border/30 mx-12 hidden md:block" />
+          <div className="flex items-center bg-secondary/20 p-1 rounded-xl border border-border/50">
+            <Button
+              variant={viewMode === "table" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className={cn(
+                "rounded-lg px-4 h-9 font-bold text-[10px] uppercase tracking-widest transition-all",
+                viewMode === "table" ? "bg-background shadow-sm text-primary" : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              <TableIcon className="h-3.5 w-3.5 mr-2" />
+              Table
+            </Button>
+            <Button
+              variant={viewMode === "kanban" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("kanban")}
+              className={cn(
+                "rounded-lg px-4 h-9 font-bold text-[10px] uppercase tracking-widest transition-all",
+                viewMode === "kanban" ? "bg-background shadow-sm text-primary" : "text-muted-foreground/60 hover:text-foreground"
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5 mr-2" />
+              Kanban
+            </Button>
+          </div>
         </div>
-        <DemoLeadsTableWrapper isTableOnly />
+        <DemoLeadsTableWrapper isTableOnly viewMode={viewMode} />
       </div>
     </div>
   )
