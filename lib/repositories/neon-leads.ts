@@ -57,7 +57,7 @@ export class NeonLeadsRepository implements ILeadsRepository {
     const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(leads).where(whereClause);
     const total = Number(countResult.count);
 
-    const formattedLeads = results.map(r => ({
+    const formattedLeads = results.map((r: any) => ({
       ...r.lead,
       created_at: r.lead.created_at.toISOString(),
       updated_at: r.lead.updated_at.toISOString(),
@@ -122,7 +122,7 @@ export class NeonLeadsRepository implements ILeadsRepository {
         id: r.stage.id,
         name: r.stage.name,
       } : null,
-      notes: leadNotes.map(n => ({
+      notes: leadNotes.map((n: any) => ({
         ...n.note,
         created_at: n.note.created_at.toISOString(),
         author: n.author ? {
@@ -187,7 +187,7 @@ export class NeonLeadsRepository implements ILeadsRepository {
 
   async getPipelineStages() {
     const stages = await db.select().from(pipelineStages).orderBy(asc(pipelineStages.order));
-    return stages.map(s => ({
+    return stages.map((s: any) => ({
       ...s,
       created_at: s.created_at.toISOString(),
     })) as PipelineStage[];

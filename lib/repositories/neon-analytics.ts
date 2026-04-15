@@ -41,20 +41,20 @@ export class NeonAnalyticsRepository implements IAnalyticsRepository {
     .from(leads);
 
     return {
-      leadsPerDay: leadsPerDay.map(l => ({
+      leadsPerDay: leadsPerDay.map((l: any) => ({
         date: l.date,
         leads: Number(l.count)
       })),
-      leadsBySource: leadsBySource.map(l => ({
+      leadsBySource: leadsBySource.map((l: any) => ({
         name: l.source || 'Unknown',
         value: Number(l.count)
       })),
-      leadsByStatus: leadsByStatus.map(l => ({
+      leadsByStatus: leadsByStatus.map((l: any) => ({
         name: l.status,
         value: Number(l.count)
       })),
       stats: {
-        totalLeads: leadsPerDay.reduce((acc, curr) => acc + Number(curr.leads), 0),
+        totalLeads: leadsPerDay.reduce((acc: number, curr: any) => acc + Number(curr.count), 0),
         totalValue: Number(totalValueResult.total || 0),
         conversionRate: 0.15, // Mocked for now
       }

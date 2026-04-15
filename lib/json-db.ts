@@ -30,6 +30,7 @@ export interface Lead {
   company?: string | null;
   status: string;
   source?: string | null;
+  priority: 'low' | 'medium' | 'high';
   message?: string | null;
   value?: number | null;
   owner_id?: string | null;

@@ -15,19 +15,24 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'picsum.photos',
         port: '',
-        pathname: '/**', // This allows any path under the hostname
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatar.vercel.sh',
+        port: '',
+        pathname: '/**',
       },
     ],
   },
   output: 'standalone',
   transpilePackages: ['motion'],
-  experimental: {
-    // Suppress cross-origin warnings in AI Studio environment
-    allowedDevOrigins: [
-      'ais-dev-yxzealml6nuga4dfgwmubx-588200126685.europe-west2.run.app',
-      'ais-pre-yxzealml6nuga4dfgwmubx-588200126685.europe-west2.run.app'
-    ],
-  },
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
     // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
