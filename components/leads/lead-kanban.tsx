@@ -9,9 +9,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragStart,
-  DragOver,
-  DragEnd,
+  DragStartEvent,
+  DragOverEvent,
+  DragEndEvent,
   defaultDropAnimationSideEffects,
   useDroppable,
 } from "@dnd-kit/core"
@@ -79,11 +79,11 @@ export function LeadKanban({ leads, onLeadClick, onStatusChange }: LeadKanbanPro
     return groups
   }, [leads])
 
-  const handleDragStart = (event: DragStart) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string)
   }
 
-  const handleDragEnd = (event: DragEnd) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
     setActiveId(null)
 
