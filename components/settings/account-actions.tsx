@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Download, Trash2, AlertTriangle, FileJson } from "lucide-react"
 import { toast } from "sonner"
 import { useLeads } from "@/features/leads/hooks/use-leads"
+import { Lead } from "@/types/leads"
 
 export function AccountActions() {
   const [isExporting, setIsExporting] = useState(false)
@@ -27,7 +28,7 @@ export function AccountActions() {
       const headers = ["First Name", "Last Name", "Email", "Company", "Status", "Value", "Created At"]
       const csvRows = [
         headers.join(","),
-        ...leads.map(l => [
+        ...leads.map((l: Lead) => [
           l.first_name,
           l.last_name,
           l.email || "",
