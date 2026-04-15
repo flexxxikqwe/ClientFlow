@@ -1,3 +1,5 @@
+import { format } from "date-fns"
+
 /**
  * Utility to convert an array of objects to a CSV string.
  * Handles escaping for commas, quotes, and line breaks.
@@ -23,7 +25,7 @@ export function convertToCSV(data: any[], headers: { label: string; key: string 
 function escapeCSV(val: any): string {
   if (val === null || val === undefined) return "";
   
-  let str = String(val);
+  let str = String(val).trim();
   
   // If the value contains a comma, newline, or double quote, it must be enclosed in double quotes.
   // Double quotes inside the value must be escaped by preceding them with another double quote.
@@ -57,15 +59,16 @@ export function downloadCSV(csvContent: string, filename: string): void {
  * Common Lead headers for CSV export
  */
 export const LEAD_CSV_HEADERS = [
+  { label: "Full Name", key: (l: any) => `${l.first_name} ${l.last_name}` },
   { label: "First Name", key: "first_name" },
   { label: "Last Name", key: "last_name" },
-  { label: "Full Name", key: (l: any) => `${l.first_name} ${l.last_name}` },
-  { label: "Email", key: "email" },
-  { label: "Phone", key: "phone" },
-  { label: "Company", key: "company" },
-  { label: "Status", key: "status" },
-  { label: "Value", key: "value" },
-  { label: "Source", key: "source" },
-  { label: "Created At", key: "created_at" },
-  { label: "Updated At", key: "updated_at" },
+  { label: "Email", key: (l: any) => l.email || "N/A" },
+  { label: "Phone", key: (l: any) => l.phone || "N/A" },
+  { label: "Company", key: (l: any) => l.company || "Individual" },
+  { label: "Status", key: (l: any) => l.status.toUpperCase() },
+  { label: "Priority", key: (l: any) => l.priority?.toUpperCase() || "MEDIUM" },
+  { label: "Value ($)", key: (l: any) => l.value ? l.value.toFixed(2) : "0.00" },
+  { label: "Source", key: (l: any) => l.source || "Direct" },
+  { label: "Created Date", key: (l: any) => l.created_at ? format(new Date(l.created_at), "yyyy-MM-dd HH:mm") : "N/A" },
+  { label: "Last Updated", key: (l: any) => l.updated_at ? format(new Date(l.updated_at), "yyyy-MM-dd HH:mm") : "N/A" },
 ];

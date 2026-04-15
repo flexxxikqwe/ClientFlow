@@ -28,16 +28,42 @@ import { Card, CardContent } from "@/components/ui/card"
 import { LeadStatusBadge } from "@/components/leads/lead-status-badge"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { MoreHorizontal, GripVertical } from "lucide-react"
+import { 
+  MoreHorizontal, 
+  GripVertical, 
+  Sparkles, 
+  MessageSquare, 
+  UserCheck, 
+  Trophy, 
+  XCircle,
+  Clock,
+  DollarSign
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const STAGES = [
-  { id: "new", name: "New" },
-  { id: "contacted", name: "Contacted" },
-  { id: "qualified", name: "Qualified" },
-  { id: "won", name: "Won" },
-  { id: "lost", name: "Lost" },
+  { id: "new", name: "New", color: "blue", icon: Sparkles },
+  { id: "contacted", name: "Contacted", color: "amber", icon: MessageSquare },
+  { id: "qualified", name: "Qualified", color: "purple", icon: UserCheck },
+  { id: "won", name: "Won", color: "emerald", icon: Trophy },
+  { id: "lost", name: "Lost", color: "slate", icon: XCircle },
 ]
+
+const STAGE_COLORS: Record<string, string> = {
+  blue: "border-blue-500/20 bg-blue-500/5 text-blue-500",
+  amber: "border-amber-500/20 bg-amber-500/5 text-amber-500",
+  purple: "border-purple-500/20 bg-purple-500/5 text-purple-500",
+  emerald: "border-emerald-500/20 bg-emerald-500/5 text-emerald-500",
+  slate: "border-slate-500/20 bg-slate-500/5 text-slate-500",
+}
+
+const STAGE_DOT_COLORS: Record<string, string> = {
+  blue: "bg-blue-500",
+  amber: "bg-amber-500",
+  purple: "bg-purple-500",
+  emerald: "bg-emerald-500",
+  slate: "bg-slate-500",
+}
 
 interface LeadKanbanProps {
   leads: Lead[]
@@ -121,12 +147,14 @@ export function LeadKanban({ leads, onLeadClick, onStatusChange }: LeadKanbanPro
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-6 overflow-x-auto pb-6 min-h-[600px] -mx-6 px-6 scrollbar-hide">
+      <div className="flex gap-8 overflow-x-auto pb-8 min-h-[700px] -mx-6 px-6 scrollbar-hide">
         {STAGES.map((stage) => (
           <KanbanColumn
             key={stage.id}
             id={stage.id}
             title={stage.name}
+            color={stage.color}
+            icon={stage.icon}
             leads={groupedLeads[stage.id]}
             onLeadClick={onLeadClick}
           />
@@ -137,41 +165,89 @@ export function LeadKanban({ leads, onLeadClick, onStatusChange }: LeadKanbanPro
         sideEffects: defaultDropAnimationSideEffects({
           styles: {
             active: {
-              opacity: '0.5',
+              opacity: '0.4',
             },
           },
         }),
       }}>
         {activeId && activeLead ? (
-          <LeadCard lead={activeLead} isOverlay />
+          <div className="rotate-3 scale-105 transition-transform duration-200">
+            <LeadCard lead={activeLead} isOverlay />
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>
   )
 }
 
-function KanbanColumn({ id, title, leads, onLeadClick }: { id: string, title: string, leads: Lead[], onLeadClick: (lead: Lead) => void }) {
-  const { setNodeRef } = useDroppable({ id })
+function KanbanColumn({ 
+  id, 
+  title, 
+  color, 
+  icon: Icon, 
+  leads, 
+  onLeadClick 
+}: { 
+  id: string, 
+  title: string, 
+  color: string, 
+  icon: any, 
+  leads: Lead[], 
+  onLeadClick: (lead: Lead) => void 
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id })
+
+  const totalValue = useMemo(() => {
+    return leads.reduce((sum, lead) => sum + (lead.value || 0), 0)
+  }, [leads])
 
   return (
-    <div className="flex-shrink-0 w-80 flex flex-col gap-4">
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-2">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{title}</h3>
-          <span className="px-1.5 py-0.5 rounded-md bg-secondary/50 text-[10px] font-bold text-muted-foreground/40">
-            {leads.length}
-          </span>
+    <div className="flex-shrink-0 w-[320px] flex flex-col gap-5">
+      <div className="flex items-center justify-between px-3">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm",
+            STAGE_COLORS[color]
+          )}>
+            <Icon className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/90">{title}</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                {leads.length} {leads.length === 1 ? "Lead" : "Leads"}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-muted-foreground/20" />
+              <span className="text-[10px] font-black text-primary/60 uppercase tracking-widest">
+                ${totalValue.toLocaleString()}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div 
         ref={setNodeRef}
-        className="flex-1 bg-secondary/5 rounded-2xl p-3 space-y-3 border border-border/10 min-h-[500px]"
+        className={cn(
+          "flex-1 bg-secondary/5 rounded-[2rem] p-4 space-y-4 border border-border/10 min-h-[500px] transition-all duration-300",
+          isOver && "bg-primary/5 border-primary/20 ring-4 ring-primary/5"
+        )}
       >
         <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
-          {leads.map((lead) => (
-            <SortableLeadCard key={lead.id} lead={lead} onLeadClick={onLeadClick} />
-          ))}
+          {leads.length > 0 ? (
+            leads.map((lead) => (
+              <SortableLeadCard key={lead.id} lead={lead} onLeadClick={onLeadClick} />
+            ))
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center py-12 px-6 text-center border-2 border-dashed border-border/20 rounded-[1.5rem]">
+              <div className="w-10 h-10 rounded-full bg-secondary/50 flex items-center justify-center mb-4">
+                <Icon className="h-5 w-5 text-muted-foreground/20" />
+              </div>
+              <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
+                Drop leads here
+              </p>
+            </div>
+          )}
         </SortableContext>
       </div>
     </div>
@@ -198,7 +274,7 @@ function SortableLeadCard({ lead, onLeadClick }: { lead: Lead, onLeadClick: (lea
       <div
         ref={setNodeRef}
         style={style}
-        className="opacity-30 rounded-xl border-2 border-dashed border-primary/20 h-32"
+        className="opacity-0 rounded-2xl h-32"
       />
     )
   }
@@ -210,6 +286,7 @@ function SortableLeadCard({ lead, onLeadClick }: { lead: Lead, onLeadClick: (lea
       {...attributes}
       {...listeners}
       onClick={() => onLeadClick(lead)}
+      className="outline-none"
     >
       <LeadCard lead={lead} />
     </div>
@@ -217,30 +294,66 @@ function SortableLeadCard({ lead, onLeadClick }: { lead: Lead, onLeadClick: (lea
 }
 
 function LeadCard({ lead, isOverlay = false }: { lead: Lead, isOverlay?: boolean }) {
+  const stage = STAGES.find(s => s.id === lead.status.toLowerCase()) || STAGES[0]
+
   return (
     <Card className={cn(
-      "border-border/50 bg-card/50 backdrop-blur-sm shadow-none rounded-xl overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:border-primary/30 group",
-      isOverlay && "shadow-2xl border-primary/40 scale-105 rotate-2 cursor-grabbing"
+      "border-border/50 bg-card/40 backdrop-blur-md shadow-none rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-300 hover:border-primary/40 hover:bg-card/60 group relative",
+      isOverlay && "shadow-2xl border-primary/50 bg-card/80 scale-105 cursor-grabbing"
     )}>
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+      {/* Stage accent line */}
+      <div className={cn(
+        "absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity",
+        STAGE_DOT_COLORS[stage.color]
+      )} />
+
+      <CardContent className="p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", STAGE_DOT_COLORS[stage.color])} />
+              <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] truncate">
+                {lead.company || "Individual"}
+              </p>
+            </div>
+            <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">
               {lead.first_name} {lead.last_name}
             </h4>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider truncate max-w-[180px]">
-              {lead.company || "No Company"}
-            </p>
           </div>
-          <GripVertical className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <GripVertical className="h-4 w-4 text-muted-foreground/10 group-hover:text-muted-foreground/30 transition-colors" />
+            {lead.priority && (
+              <div className={cn(
+                "px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
+                lead.priority === 'high' ? "bg-red-500/10 text-red-500" : 
+                lead.priority === 'medium' ? "bg-amber-500/10 text-amber-500" : 
+                "bg-blue-500/10 text-blue-500"
+              )}>
+                {lead.priority}
+              </div>
+            )}
+            {lead.source && (
+              <div className="px-1.5 py-0.5 rounded bg-secondary/50 text-muted-foreground/60 text-[8px] font-black uppercase tracking-widest">
+                {lead.source}
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-border/10">
-          <div className="text-[10px] font-black text-primary/80">
-            {lead.value ? `$${lead.value.toLocaleString()}` : "$0"}
+        <div className="flex items-center justify-between pt-4 border-t border-border/10">
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-3 w-3 text-primary" />
+            </div>
+            <span className="text-[11px] font-black text-foreground/90 tracking-tight">
+              {lead.value ? lead.value.toLocaleString() : "0"}
+            </span>
           </div>
-          <div className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
-            {lead.created_at ? format(new Date(lead.created_at), "MMM d") : "-"}
+          <div className="flex items-center gap-1.5 text-muted-foreground/40">
+            <Clock className="h-3 w-3" />
+            <span className="text-[9px] font-bold uppercase tracking-widest">
+              {lead.created_at ? format(new Date(lead.created_at), "MMM d") : "-"}
+            </span>
           </div>
         </div>
       </CardContent>

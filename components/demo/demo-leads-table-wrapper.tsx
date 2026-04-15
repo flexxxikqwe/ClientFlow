@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react"
 import { Plus, Download, Loader2 } from "lucide-react"
+import { format } from "date-fns"
 import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
 import { LeadKanban } from "@/components/leads/lead-kanban"
 import { Button } from "@/components/ui/button"
@@ -65,8 +66,8 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
       }
 
       const csvContent = convertToCSV(filteredLeads, LEAD_CSV_HEADERS)
-      const date = new Date().toISOString().split('T')[0]
-      downloadCSV(csvContent, `clientflow-demo-leads-${date}.csv`)
+      const date = format(new Date(), "yyyy-MM-dd-HHmm")
+      downloadCSV(csvContent, `clientflow-demo-export-${date}.csv`)
       
       toast.success(`Successfully exported ${filteredLeads.length} demo leads`)
     } catch (error) {

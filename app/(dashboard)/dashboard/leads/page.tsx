@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, memo } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, LayoutGrid, Table as TableIcon } from "lucide-react"
+import { format } from "date-fns"
 import useSWR, { mutate } from "swr"
 
 import { LeadsTable } from "@/components/leads/leads-table"
@@ -93,8 +94,8 @@ export default function LeadsPage() {
       }
 
       const csvContent = convertToCSV(leadsToExport, LEAD_CSV_HEADERS)
-      const date = new Date().toISOString().split('T')[0]
-      downloadCSV(csvContent, `clientflow-leads-${date}.csv`)
+      const date = format(new Date(), "yyyy-MM-dd-HHmm")
+      downloadCSV(csvContent, `clientflow-leads-export-${date}.csv`)
       
       toast.success(`Successfully exported ${leadsToExport.length} leads`)
     } catch (error) {
