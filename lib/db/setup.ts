@@ -1,4 +1,5 @@
-import { neon } from '@neondatabase/serverless';
+import { db } from './neon';
+import { sql } from 'drizzle-orm';
 
 const schema = `
 CREATE TABLE IF NOT EXISTS users (
@@ -66,10 +67,9 @@ SELECT '7', 'Closed Lost', 6 WHERE NOT EXISTS (SELECT 1 FROM pipeline_stages WHE
 export async function setupNeon() {
   if (!process.env.DATABASE_URL) return;
   
-  const sql = neon(process.env.DATABASE_URL);
   try {
     console.info('🛠️ ClientFlow: Setting up Neon database schema...');
-    await sql(schema);
+    await db.execute(sql.raw(schema));
     console.info('✅ ClientFlow: Neon database schema ready.');
   } catch (error) {
     console.error('❌ ClientFlow: Neon setup failed:', error);
