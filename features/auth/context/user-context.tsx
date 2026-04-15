@@ -41,11 +41,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
       const contentType = response.headers.get("content-type")
       if (!response.ok || !contentType || !contentType.includes("application/json")) {
-        // Transient error - don't wipe state
+        // Transient error or non-JSON response - don't wipe state
         return null
       }
 
-      const data = await response.json()
+      const text = await response.text()
+      if (!text) return null
+      
+      const data = JSON.parse(text)
       setUser(data.user)
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user))
@@ -72,19 +75,22 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
         const contentType = response.headers.get("content-type")
         if (response.ok && contentType && contentType.includes("application/json")) {
-          const data = await response.json()
-          if (data.user) {
-            setUser(data.user)
-            localStorage.setItem("user", JSON.stringify(data.user))
-          } else if (response.status === 200 && !isRetry && localStorage.getItem("user")) {
-            // Conservative check: if 200 null but hint exists, retry once after a beat
-            // This handles transient cookie flakiness in iframe environments
-            willRetry = true;
-            await new Promise(r => setTimeout(r, 800))
-            return initAuth(true)
-          } else {
-            setUser(null)
-            localStorage.removeItem("user")
+          const text = await response.text()
+          if (text) {
+            const data = JSON.parse(text)
+            if (data.user) {
+              setUser(data.user)
+              localStorage.setItem("user", JSON.stringify(data.user))
+            } else if (response.status === 200 && !isRetry && localStorage.getItem("user")) {
+              // Conservative check: if 200 null but hint exists, retry once after a beat
+              // This handles transient cookie flakiness in iframe environments
+              willRetry = true;
+              await new Promise(r => setTimeout(r, 800))
+              return initAuth(true)
+            } else {
+              setUser(null)
+              localStorage.removeItem("user")
+            }
           }
         } else if (response.status === 401) {
           setUser(null)

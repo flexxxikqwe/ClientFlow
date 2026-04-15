@@ -41,6 +41,12 @@ export function Sidebar() {
       href: basePath === "/demo" ? "/demo/analytics" : "/dashboard/analytics",
       color: "text-orange-700",
     },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: basePath === "/demo" ? "/demo/settings" : "/dashboard/settings",
+      color: "text-gray-500",
+    },
   ]
 
   return (
@@ -94,7 +100,7 @@ export function Sidebar() {
           {user && (
             <div className="flex items-center gap-4 px-2 group cursor-pointer">
               <Avatar className="h-10 w-10 border-2 border-border/50 transition-all group-hover:border-primary/50">
-                <AvatarImage src={`https://avatar.vercel.sh/${user.email}`} />
+                <AvatarImage src={user.avatar_url || `https://avatar.vercel.sh/${user.email}`} />
                 <AvatarFallback className="bg-secondary text-foreground text-xs font-bold">
                   {user.full_name?.[0] || user.email?.[0] || "U"}
                 </AvatarFallback>

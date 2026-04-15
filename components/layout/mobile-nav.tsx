@@ -9,7 +9,8 @@ import {
   BarChart3, 
   Sparkles,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react"
 import { motion, AnimatePresence } from "motion/react"
 import { cn } from "@/lib/utils"
@@ -58,6 +59,11 @@ export function MobileNav() {
       label: "Analytics",
       icon: BarChart3,
       href: basePath === "/demo" ? "/demo/analytics" : "/dashboard/analytics",
+    },
+    {
+      label: "Settings",
+      icon: Settings,
+      href: basePath === "/demo" ? "/demo/settings" : "/dashboard/settings",
     },
   ]
 
@@ -145,7 +151,7 @@ export function MobileNav() {
                 {user && (
                   <div className="flex items-center gap-4 px-2">
                     <Avatar className="h-10 w-10 border-2 border-border/50">
-                      <AvatarImage src={`https://avatar.vercel.sh/${user.email}`} />
+                      <AvatarImage src={user.avatar_url || `https://avatar.vercel.sh/${user.email}`} />
                       <AvatarFallback className="bg-secondary text-foreground text-xs font-bold">
                         {user.full_name?.[0] || user.email?.[0] || "U"}
                       </AvatarFallback>
