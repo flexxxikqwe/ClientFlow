@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { Plus, Download } from "lucide-react"
+import { useState, useCallback, useMemo } from "react"
+import { Plus, Download, Loader2 } from "lucide-react"
 import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
 import { Button } from "@/components/ui/button"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 import { LeadDetails } from "@/components/leads/lead-details"
+import { DEMO_LEADS } from "@/lib/demo-data"
+import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 interface DemoLeadsTableWrapperProps {
   isTableOnly?: boolean
@@ -15,16 +17,67 @@ interface DemoLeadsTableWrapperProps {
 export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWrapperProps) {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Filter state moved from DemoLeadsTable to support export
+  const [search, setSearch] = useState("")
+  const [status, setStatus] = useState("all")
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)
     setIsDetailsOpen(true)
   }, [])
 
+  const filteredLeads = useMemo(() => {
+    return DEMO_LEADS.filter(lead => {
+      const matchesSearch = 
+        search === "" ||
+        lead.first_name.toLowerCase().includes(search.toLowerCase()) ||
+        lead.last_name.toLowerCase().includes(search.toLowerCase()) ||
+        lead.email.toLowerCase().includes(search.toLowerCase()) ||
+        lead.company.toLowerCase().includes(search.toLowerCase())
+      
+      const matchesStatus = status === "all" || lead.status.toLowerCase() === status.toLowerCase()
+      
+      return matchesSearch && matchesStatus
+    })
+  }, [search, status])
+
+  const handleExport = async () => {
+    setIsExporting(true)
+    toast.info("Showcase Mode: Preparing demo leads export...")
+    
+    try {
+      // Small delay to simulate processing for better UX feel
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      if (filteredLeads.length === 0) {
+        toast.error("No matching leads found to export")
+        return
+      }
+
+      const csvContent = convertToCSV(filteredLeads, LEAD_CSV_HEADERS)
+      const date = new Date().toISOString().split('T')[0]
+      downloadCSV(csvContent, `clientflow-demo-leads-${date}.csv`)
+      
+      toast.success(`Successfully exported ${filteredLeads.length} demo leads`)
+    } catch (error) {
+      toast.error("Failed to export demo leads")
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   if (isTableOnly) {
     return (
       <>
-        <DemoLeadsTable onLeadClick={handleLeadClick} />
+        <DemoLeadsTable 
+          onLeadClick={handleLeadClick} 
+          search={search}
+          setSearch={setSearch}
+          status={status}
+          setStatus={setStatus}
+        />
         <LeadDetails 
           lead={selectedLead} 
           isOpen={isDetailsOpen} 
@@ -40,9 +93,19 @@ export function DemoLeadsTableWrapper({ isTableOnly = false }: DemoLeadsTableWra
       <Button 
         variant="outline" 
         className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" 
-        onClick={() => toast.info("Showcase Mode: Data export is simulated.")}
+        onClick={handleExport}
+        disabled={isExporting}
       >
-        <Download className="h-4 w-4 mr-2" /> Export CSV
+        {isExporting ? (
+          <>
+            <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+            Exporting...
+          </>
+        ) : (
+          <>
+            <Download className="h-4 w-4 mr-2" /> Export CSV
+          </>
+        )}
       </Button>
       <Button 
         onClick={() => toast.info("Showcase Mode: Lead creation is disabled in this preview.")}

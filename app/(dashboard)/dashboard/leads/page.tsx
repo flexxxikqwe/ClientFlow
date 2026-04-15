@@ -16,12 +16,21 @@ import { toast } from "sonner"
 import { useUser } from "@/features/auth/context/user-context"
 import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
+import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 export default function LeadsPage() {
   const { isDemo } = useUser()
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Filter state moved from LeadsTable to support export
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
+  const [status, setStatus] = useState("all")
+  const [sortBy, setSortBy] = useState("created_at")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   const { data: analytics, mutate: mutateAnalytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics", fetcher)
 
@@ -35,8 +44,40 @@ export default function LeadsPage() {
     mutateAnalytics()
   }, [mutateAnalytics])
 
-  const handleExport = () => {
-    toast.info("Export feature coming soon!")
+  const handleExport = async () => {
+    setIsExporting(true)
+    toast.info("Preparing leads export...")
+    
+    try {
+      const queryParams = new URLSearchParams({
+        limit: "1000", // Fetch a large batch for export
+        search: search,
+        status: status,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      })
+      
+      const response = await fetch(`/api/leads?${queryParams.toString()}`)
+      const data = await response.json()
+      
+      const leadsToExport = data.leads || []
+      
+      if (leadsToExport.length === 0) {
+        toast.error("No leads found to export")
+        return
+      }
+
+      const csvContent = convertToCSV(leadsToExport, LEAD_CSV_HEADERS)
+      const date = new Date().toISOString().split('T')[0]
+      downloadCSV(csvContent, `clientflow-leads-${date}.csv`)
+      
+      toast.success(`Successfully exported ${leadsToExport.length} leads`)
+    } catch (error) {
+      console.error("Export error:", error)
+      toast.error("Failed to export leads")
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const stats = useMemo(() => [
@@ -78,8 +119,20 @@ export default function LeadsPage() {
           <p className="text-sm font-medium text-muted-foreground/80">Track, manage and convert your sales opportunities with ease.</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <Button variant="outline" className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" onClick={handleExport}>
-            Export CSV
+          <Button 
+            variant="outline" 
+            className="flex-1 md:flex-none h-11 px-6 rounded-xl shadow-none border-border/50 font-bold text-[10px] uppercase tracking-[0.2em] bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20" 
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <>
+                <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              "Export CSV"
+            )}
           </Button>
           <Button 
             onClick={() => setIsCreateModalOpen(true)}
@@ -119,7 +172,19 @@ export default function LeadsPage() {
           </div>
           <div className="h-px flex-1 bg-border/30 mx-12 hidden md:block" />
         </div>
-        <LeadsTable onLeadClick={handleLeadClick} />
+        <LeadsTable 
+          onLeadClick={handleLeadClick}
+          page={page}
+          setPage={setPage}
+          search={search}
+          setSearch={setSearch}
+          status={status}
+          setStatus={setStatus}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+        />
       </div>
 
       <LeadDetails 

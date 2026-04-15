@@ -46,6 +46,10 @@ import { DEMO_LEADS } from "@/lib/demo-data"
 
 interface DemoLeadsTableProps {
   onLeadClick: (lead: Lead) => void
+  search: string
+  setSearch: (search: string) => void
+  status: string
+  setStatus: (status: string) => void
 }
 
 const LeadRow = memo(({ lead, onLeadClick }: { 
@@ -108,10 +112,14 @@ const LeadRow = memo(({ lead, onLeadClick }: {
 
 LeadRow.displayName = "LeadRow"
 
-export function DemoLeadsTable({ onLeadClick }: DemoLeadsTableProps) {
-  const [search, setSearch] = useState("")
+export function DemoLeadsTable({ 
+  onLeadClick,
+  search,
+  setSearch,
+  status,
+  setStatus
+}: DemoLeadsTableProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [status, setStatus] = useState("all")
 
   // Debounce search input to avoid filtering on every keystroke
   useEffect(() => {

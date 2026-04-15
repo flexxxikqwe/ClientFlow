@@ -6,6 +6,7 @@ import { Download, Trash2, AlertTriangle, FileJson } from "lucide-react"
 import { toast } from "sonner"
 import { useLeads } from "@/features/leads/hooks/use-leads"
 import { Lead } from "@/types/leads"
+import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 export function AccountActions() {
   const [isExporting, setIsExporting] = useState(false)
@@ -16,38 +17,17 @@ export function AccountActions() {
     toast.info("Preparing your data for export...")
     
     try {
-      // Simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Small delay to simulate processing for better UX feel
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       if (!leads || leads.length === 0) {
         toast.error("No data available to export")
         return
       }
 
-      // Simple CSV generation
-      const headers = ["First Name", "Last Name", "Email", "Company", "Status", "Value", "Created At"]
-      const csvRows = [
-        headers.join(","),
-        ...leads.map((l: Lead) => [
-          l.first_name,
-          l.last_name,
-          l.email || "",
-          l.company || "",
-          l.status,
-          l.value || 0,
-          l.created_at
-        ].map(val => `"${val}"`).join(","))
-      ]
-      
-      const csvContent = csvRows.join("\n")
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.setAttribute("href", url)
-      link.setAttribute("download", `clientflow_leads_export_${new Date().toISOString().split('T')[0]}.csv`)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const csvContent = convertToCSV(leads, LEAD_CSV_HEADERS)
+      const date = new Date().toISOString().split('T')[0]
+      downloadCSV(csvContent, `clientflow-leads-export-${date}.csv`)
       
       toast.success("Data exported successfully!")
     } catch (error) {

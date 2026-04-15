@@ -54,6 +54,16 @@ import { EmptyState } from "@/components/ui/empty-state"
 
 interface LeadsTableProps {
   onLeadClick: (lead: Lead) => void
+  page: number
+  setPage: (page: number) => void
+  search: string
+  setSearch: (search: string) => void
+  status: string
+  setStatus: (status: string) => void
+  sortBy: string
+  setSortBy: (sortBy: string) => void
+  sortOrder: "asc" | "desc"
+  setSortOrder: (sortOrder: "asc" | "desc") => void
 }
 
 const LeadRow = memo(({ lead, onLeadClick, onDelete }: { 
@@ -118,13 +128,19 @@ const LeadRow = memo(({ lead, onLeadClick, onDelete }: {
 
 LeadRow.displayName = "LeadRow"
 
-export function LeadsTable({ onLeadClick }: LeadsTableProps) {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("all")
-  const [sortBy, setSortBy] = useState("created_at")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-
+export function LeadsTable({ 
+  onLeadClick,
+  page,
+  setPage,
+  search,
+  setSearch,
+  status,
+  setStatus,
+  sortBy,
+  setSortBy,
+  sortOrder,
+  setSortOrder
+}: LeadsTableProps) {
   const debouncedSearch = useDebounce(search, 300)
 
   const { leads, pagination, isLoading, error, mutate } = useLeads({
@@ -142,7 +158,7 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
       setSortBy(column)
       setSortOrder("desc")
     }
-  }, [sortBy])
+  }, [sortBy, setSortBy, setSortOrder])
 
   const handleClearFilters = () => {
     setSearch("")
