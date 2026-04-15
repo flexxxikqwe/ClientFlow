@@ -1,94 +1,94 @@
 # ClientFlow
 
-## Overview
-ClientFlow is a streamlined CRM and lead management platform designed to help small teams track prospects, manage sales pipelines, and leverage AI for better engagement. It provides a visual, high-fidelity interface for organizing customer data and generating actionable insights from lead interactions.
+## Обзор
+ClientFlow — это современная CRM-платформа для управления лидами, разработанная для небольших команд. Она помогает отслеживать потенциальных клиентов, управлять воронкой продаж и использовать ИИ для повышения эффективности взаимодействия. Платформа предлагает визуально проработанный интерфейс для организации данных о клиентах и получения ценных инсайтов на основе анализа взаимодействий.
 
-This project is a **demo-first portfolio showcase**. It is built to demonstrate modern full-stack engineering patterns, polished UI/UX design, and practical AI integration. While it contains a functional authentication system, it is best evaluated through the dedicated showcase path which provides a stable, pre-populated environment for immediate review.
+Этот проект является **портфолио-шоукейсом (demo-first)**. Он создан для демонстрации современных паттернов фулстек-разработки, качественного UI/UX дизайна и практического применения ИИ. Несмотря на наличие функциональной системы аутентификации, проект лучше всего оценивать через специальный демонстрационный путь, который предоставляет стабильную, предварительно заполненную среду для мгновенного ознакомления.
 
-## Live Demo / Best Way to Explore
-The recommended way to experience ClientFlow is through the **Showcase Mode**. This path bypasses the standard authentication barrier and drops you directly into a pre-configured environment with realistic sample data.
+## Живое демо / Лучший способ изучения
+Рекомендуемый способ ознакомления с ClientFlow — через **Режим демонстрации (Showcase Mode)**. Этот путь позволяет обойти стандартную авторизацию и сразу попасть в настроенную среду с реалистичными данными.
 
-1. Navigate to the **Landing Page**.
-2. Click **"View Demo"** or **"Explore as Guest"**.
-3. You will be redirected to `/demo/dashboard`.
+1. Перейдите на **Главную страницу**.
+2. Нажмите **"View Demo"** или **"Explore as Guest"**.
+3. Вы будете перенаправлены на `/demo/dashboard`.
 
-This exists to ensure that reviewers can immediately see the product's full capabilities—including analytics and AI features—without needing to create an account or manually populate a database.
+Это сделано для того, чтобы проверяющие могли мгновенно увидеть все возможности продукта — включая аналитику и функции ИИ — без необходимости создавать аккаунт или вручную заполнять базу данных.
 
-## Implemented Today
-- **CRM-style Leads Management:** Full CRUD operations for leads with a dedicated "New Lead" flow and detailed profile views.
-- **Notes & Activity Tracking:** A relational activity system to record and view chronological interactions for every lead.
-- **Analytics Dashboard:** Real-time metrics and trend charts for conversion rates, pipeline value, and acquisition sources.
-- **AI-Assisted Features:** Integration with Google Gemini to generate automated lead summaries and professional follow-up drafts.
-- **Data Export:** Functional CSV export for lead data directly from the management interface.
-- **Pricing & Onboarding Flow:** A complete mock billing and plan selection experience.
-- **Dedicated Showcase Path:** A stable `/demo` route that uses a dedicated state provider for consistent evaluation.
-- **Honest Auth Reality:** A functional JWT-based authentication system (Login/Register) is implemented but remains secondary to the optimized showcase experience.
+## Реализовано на данный момент
+- **Управление лидами в стиле CRM:** Полный цикл CRUD-операций для лидов с выделенным процессом создания новых заявок и детальным просмором профилей.
+- **Заметки и отслеживание активности:** Реляционная система активности для записи и просмотра хронологии взаимодействий с каждым лидом.
+- **Панель аналитики:** Метрики в реальном времени и графики трендов конверсии, стоимости воронки и источников привлечения.
+- **Функции на базе ИИ:** Интеграция с Google Gemini для автоматической генерации резюме лидов и профессиональных черновиков ответов.
+- **Экспорт данных:** Функциональный экспорт данных о лидах в формате CSV прямо из интерфейса управления.
+- **Процесс оплаты и онбординга:** Полная имитация процесса выбора тарифного плана и биллинга.
+- **Выделенный демонстрационный путь:** Стабильный маршрут `/demo`, использующий специальный провайдер состояния для консистентной оценки.
+- **Честная аутентификация:** Реализована функциональная система аутентификации на базе JWT (Login/Register), но она остается вторичной по отношению к оптимизированному демо-режиму.
 
-## Tech Stack
-- **Framework:** Next.js 15 (App Router)
-- **Frontend:** React 19, Tailwind CSS v4, Framer Motion, Lucide React
-- **Data Fetching:** SWR (Stale-While-Revalidate)
-- **Charts:** Recharts
-- **AI:** Google Generative AI (@google/genai)
-- **Persistence:** Supabase (PostgreSQL) with a local JSON fallback
-- **Validation:** Zod (Schema-based API validation)
-- **Auth:** jose (JWT) and bcryptjs
+## Технологический стек
+- **Фреймворк:** Next.js 15 (App Router)
+- **Фронтенд:** React 19, Tailwind CSS v4, Framer Motion, Lucide React
+- **Получение данных:** SWR (Stale-While-Revalidate)
+- **Графики:** Recharts
+- **ИИ:** Google Generative AI (@google/genai)
+- **Хранение данных:** Supabase (PostgreSQL) с локальным JSON-фолбеком
+- **Валидация:** Zod (Валидация API на основе схем)
+- **Аутентификация:** jose (JWT) и bcryptjs
 
-## Architecture
-- **Next.js App Router:** Utilizes modern routing patterns, including parallel routes and layouts for the dashboard.
-- **Route Handlers:** A clean API structure using Next.js Route Handlers for all data operations.
-- **Repository Pattern:** Data access is abstracted behind interfaces, allowing the application to seamlessly switch between Supabase and local JSON storage.
-- **Hybrid Persistence:** The app defaults to local JSON persistence if Supabase credentials are not provided, ensuring it works "out of the box."
-- **Demo-First Showcase Route:** A dedicated `/demo` path that wraps the application in a `DemoProvider` to inject a stable, read-only state.
+## Архитектура
+- **Next.js App Router:** Использование современных паттернов маршрутизации, включая параллельные маршруты и макеты (layouts) для панели управления.
+- **Route Handlers:** Чистая структура API с использованием Next.js Route Handlers для всех операций с данными.
+- **Паттерн Репозиторий:** Доступ к данным абстрагирован за интерфейсами, что позволяет приложению бесшовно переключаться между Supabase и локальным JSON-хранилищем.
+- **Гибридное хранение:** Приложение по умолчанию использует локальное JSON-хранилище, если учетные данные Supabase не указаны, что обеспечивает работу "из коробки".
+- **Демо-режим (Showcase Route):** Специальный путь `/demo`, который оборачивает приложение в `DemoProvider` для внедрения стабильного состояния только для чтения.
 
-## Demo-First Showcase Mode
-The `/demo` path is the primary showcase experience. It exists to solve the "empty state" problem common in portfolio projects. Instead of asking a reviewer to sign up and type in fake leads, the showcase mode provides a high-fidelity environment that demonstrates the product's value immediately. It uses the same components and logic as the authenticated app but is backed by a stable, pre-populated data set.
+## Режим демонстрации (Demo-First)
+Путь `/demo` является основным способом ознакомления с проектом. Он решает проблему "пустого состояния", характерную для портфолио-проектов. Вместо того чтобы просить проверяющего регистрироваться и вводить фейковые данные, демо-режим предоставляет качественную среду, которая сразу демонстрирует ценность продукта. Он использует те же компоненты и логику, что и основное приложение, но опирается на стабильный, заранее подготовленный набор данных.
 
-## Current Limitations
-- **Showcase Focus:** Evaluation through the `/demo` path is the recommended and most stable experience.
-- **Mock Billing:** The pricing and billing steps are for demonstration purposes; no real payment gateway is connected.
-- **Auth Flow:** While functional, the standard auth flow is less optimized for public showcase than the dedicated demo path.
-- **No Enterprise Claims:** This is a portfolio project designed to demonstrate engineering skill, not a production-ready enterprise SaaS.
+## Текущие ограничения
+- **Фокус на демо:** Оценка через путь `/demo` является рекомендуемым и наиболее стабильным способом.
+- **Имитация биллинга:** Шаги выбора тарифа и оплаты предназначены только для демонстрации; реальный платежный шлюз не подключен.
+- **Процесс авторизации:** Хотя он функционален, стандартный поток авторизации менее оптимизирован для публичного показа, чем выделенный демо-путь.
+- **Не корпоративное решение:** Это портфолио-проект, предназначенный для демонстрации инженерных навыков, а не готовый к эксплуатации корпоративный SaaS.
 
-## Local Setup
-1. **Install dependencies:**
+## Локальная установка
+1. **Установите зависимости:**
    ```bash
    npm install
    ```
-2. **Configure Environment Variables:**
-   Create a `.env.local` file. Only the Gemini key is required for the demo/showcase features:
+2. **Настройте переменные окружения:**
+   Создайте файл `.env.local`. Для работы демо-функций и ИИ требуется только ключ Gemini:
    ```env
-   # Required for AI Features (Gemini API)
-   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+   # Требуется для функций ИИ (Gemini API)
+   NEXT_PUBLIC_GEMINI_API_KEY=ваш_ключ_gemini_api
    
-   # Optional: For standard auth flow
-   JWT_SECRET=your_32_character_secret
+   # Опционально: Для стандартной авторизации
+   JWT_SECRET=ваш_секрет_из_32_символов
    ```
-3. **Run the development server:**
+3. **Запустите сервер разработки:**
    ```bash
    npm run dev
    ```
-   *Note: The application will automatically fall back to local JSON storage if Supabase keys are missing.*
+   *Примечание: Приложение автоматически переключится на локальное JSON-хранилище, если ключи Supabase отсутствуют.*
 
-## Suggested Demo Flow
-1. **Open the Landing Page:** View the product positioning and value proposition.
-2. **Click "View Demo":** Enter the showcase environment at `/demo/dashboard`.
-3. **Explore Analytics:** View the Recharts-powered metrics.
-4. **Manage Leads:** Navigate to the Leads page, click a lead, and view the AI-generated summary.
-5. **Test Export:** Click the Export button to see the CSV generation in action.
+## Рекомендуемый сценарий осмотра
+1. **Откройте главную страницу:** Оцените позиционирование продукта и его ценностное предложение.
+2. **Нажмите "View Demo":** Войдите в демо-среду по адресу `/demo/dashboard`.
+3. **Изучите аналитику:** Посмотрите графики и метрики на базе Recharts.
+4. **Управление лидами:** Перейдите на страницу Leads, выберите лида и посмотрите сгенерированное ИИ резюме.
+5. **Проверьте экспорт:** Нажмите кнопку Export, чтобы увидеть генерацию CSV в действии.
 
-## What This Project Demonstrates
-- **Product Thinking:** Building a cohesive experience from landing page to onboarding to dashboard.
-- **Modern Full-Stack Structure:** Clean separation of concerns using the repository pattern and Next.js App Router.
-- **Demo-Ready UX:** Attention to detail in loading states, transitions, and empty states.
-- **Data Presentation:** Effective use of charts and tables to make CRM data readable.
-- **Component Architecture:** Reusable, strongly-typed React components styled with Tailwind 4.
-- **TypeScript Proficiency:** Strict typing across the entire stack, from API responses to UI props.
+## Что демонстрирует этот проект
+- **Продуктовое мышление:** Создание целостного опыта от лендинга до онбординга и панели управления.
+- **Современная фулстек-структура:** Четкое разделение ответственности с использованием паттерна Репозиторий и Next.js App Router.
+- **Готовый к показу UX:** Внимание к деталям в состояниях загрузки, переходах и пустых состояниях.
+- **Представление данных:** Эффективное использование графиков и таблиц для визуализации CRM-данных.
+- **Архитектура компонентов:** Переиспользуемые, строго типизированные React-компоненты со стилизацией на Tailwind 4.
+- **Владение TypeScript:** Строгая типизация во всем стеке, от ответов API до пропсов UI.
 
-## Planned Next Steps
-- **Full Supabase Auth:** Migrating from custom JWTs to managed Supabase Auth.
-- **Advanced Lead Scoring:** Enhancing the AI layer to provide more complex lead prioritization.
-- **Real-Time Notifications:** Implementing live updates for lead activity.
+## Планируемые следующие шаги
+- **Полная интеграция Supabase Auth:** Переход с кастомных JWT на управляемую авторизацию Supabase.
+- **Продвинутый скоринг лидов:** Улучшение слоя ИИ для более сложной приоритизации лидов.
+- **Уведомления в реальном времени:** Реализация живых обновлений активности лидов.
 
 ---
-*Built to demonstrate modern web engineering and intentional product design.*
+*Создано для демонстрации современной веб-инженерии и осознанного продуктового дизайна.*
