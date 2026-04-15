@@ -39,6 +39,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
     first_name: "",
     last_name: "",
     email: "",
+    phone: "",
     company: "",
     value: "",
     status: "new"
@@ -55,6 +56,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
         
         demoLeads.addLead({
           ...formData,
+          phone: formData.phone || null,
           value: formData.value ? parseFloat(formData.value) : 0,
           source: "Direct",
           priority: "medium",
@@ -90,6 +92,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
         first_name: "",
         last_name: "",
         email: "",
+        phone: "",
         company: "",
         value: "",
         status: "new"
@@ -146,17 +149,31 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="john@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
-              data-testid="email-input"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                data-testid="email-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                data-testid="phone-input"
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="company" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Company</Label>
