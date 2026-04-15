@@ -47,9 +47,9 @@ import { DEMO_LEADS } from "@/lib/demo-data"
 interface DemoLeadsTableProps {
   onLeadClick: (lead: Lead) => void
   search: string
-  setSearch: (search: string) => void
+  setSearch: React.Dispatch<React.SetStateAction<string>>
   status: string
-  setStatus: (status: string) => void
+  setStatus: React.Dispatch<React.SetStateAction<string>>
 }
 
 const LeadRow = memo(({ lead, onLeadClick }: { 

@@ -55,15 +55,15 @@ import { EmptyState } from "@/components/ui/empty-state"
 interface LeadsTableProps {
   onLeadClick: (lead: Lead) => void
   page: number
-  setPage: (page: number) => void
+  setPage: React.Dispatch<React.SetStateAction<number>>
   search: string
-  setSearch: (search: string) => void
+  setSearch: React.Dispatch<React.SetStateAction<string>>
   status: string
-  setStatus: (status: string) => void
+  setStatus: React.Dispatch<React.SetStateAction<string>>
   sortBy: string
-  setSortBy: (sortBy: string) => void
+  setSortBy: React.Dispatch<React.SetStateAction<string>>
   sortOrder: "asc" | "desc"
-  setSortOrder: (sortOrder: "asc" | "desc") => void
+  setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>
 }
 
 const LeadRow = memo(({ lead, onLeadClick, onDelete }: { 
