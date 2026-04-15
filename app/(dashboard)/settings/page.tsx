@@ -1,5 +1,9 @@
 import { AvatarUpload } from "@/components/settings/avatar-upload"
-import { Sparkles, Shield, Bell, CreditCard } from "lucide-react"
+import { ProfileSettings } from "@/components/settings/profile-settings"
+import { PreferenceSettings } from "@/components/settings/preference-settings"
+import { WorkspaceSettings } from "@/components/settings/workspace-settings"
+import { AccountActions } from "@/components/settings/account-actions"
+import { Sparkles } from "lucide-react"
 
 export default function SettingsPage() {
   return (
@@ -18,48 +22,11 @@ export default function SettingsPage() {
           <AvatarUpload />
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <div className="p-8 rounded-3xl bg-card/30 border border-border/50 backdrop-blur-sm space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                <Shield className="h-5 w-5 text-violet-500" />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">Security</h3>
-                <p className="text-xs text-muted-foreground">Manage your password and authentication methods.</p>
-              </div>
-            </div>
-            <div className="h-px bg-border/50" />
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
-                <Bell className="h-5 w-5 text-sky-500" />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">Notifications</h3>
-                <p className="text-xs text-muted-foreground">Configure how you receive alerts and updates.</p>
-              </div>
-            </div>
-            <div className="h-px bg-border/50" />
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <CreditCard className="h-5 w-5 text-orange-500" />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">Billing</h3>
-                <p className="text-xs text-muted-foreground">Manage your subscription and payment history.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-primary/5 border border-primary/10 flex items-center justify-between">
-            <div className="space-y-1">
-              <h4 className="font-bold text-foreground">Professional Plan</h4>
-              <p className="text-xs text-muted-foreground">Your next billing date is May 15, 2026.</p>
-            </div>
-            <button className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all">
-              Manage Plan
-            </button>
-          </div>
+        <div className="lg:col-span-2 space-y-10">
+          <ProfileSettings />
+          <PreferenceSettings />
+          <WorkspaceSettings />
+          <AccountActions />
         </div>
       </div>
     </div>
