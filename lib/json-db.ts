@@ -3,7 +3,10 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
-const DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
+const LOCAL_DATA_FILE = path.join(process.cwd(), 'lib', 'data.json');
+const TMP_DATA_FILE = path.join('/tmp', 'clientflow_data.json');
+
+let cachedDb: DbSchema | null = null;
 
 export interface User {
   id: string;
@@ -94,38 +97,55 @@ const initialData: DbSchema = {
   notes: []
 };
 
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_FILE)) {
-    const dir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2));
-  }
-}
-
 export function getDb(): DbSchema {
-  ensureDataFile();
+  if (cachedDb) return cachedDb;
+
+  // Try to load from /tmp first (it might have updates from previous requests in the same instance)
   try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading database:', error);
-    return initialData;
+    if (fs.existsSync(TMP_DATA_FILE)) {
+      const data = fs.readFileSync(TMP_DATA_FILE, 'utf-8');
+      cachedDb = JSON.parse(data);
+      return cachedDb!;
+    }
+  } catch (e) {
+    // Ignore errors reading from /tmp
   }
+
+  // Then try local bundled file
+  try {
+    if (fs.existsSync(LOCAL_DATA_FILE)) {
+      const data = fs.readFileSync(LOCAL_DATA_FILE, 'utf-8');
+      cachedDb = JSON.parse(data);
+      return cachedDb!;
+    }
+  } catch (e) {
+    // Ignore errors reading from local file
+  }
+
+  // Fallback to initialData
+  cachedDb = JSON.parse(JSON.stringify(initialData));
+  return cachedDb!;
 }
 
 export function saveDb(data: DbSchema) {
-  const tempFile = `${DATA_FILE}.tmp`;
+  cachedDb = data;
+  
+  const json = JSON.stringify(data, null, 2);
+
+  // Try to save to /tmp (usually writable in serverless/containers)
   try {
-    fs.writeFileSync(tempFile, JSON.stringify(data, null, 2));
-    fs.renameSync(tempFile, DATA_FILE);
-  } catch (error) {
-    console.error('Error saving database:', error);
-    if (fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
+    fs.writeFileSync(TMP_DATA_FILE, json);
+  } catch (e) {
+    // If /tmp fails, try local (works in dev, fails in read-only prod)
+    try {
+      const dir = path.dirname(LOCAL_DATA_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(LOCAL_DATA_FILE, json);
+    } catch (e2) {
+      console.warn('📂 ClientFlow: Persistence failed (Read-only environment). Data is now in-memory only.');
     }
-    throw new Error('Failed to save database');
   }
 }
 
