@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/features/auth/context/user-context"
+import { safeJson } from "@/lib/utils/safe-json"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -44,8 +45,8 @@ export function LoginForm() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Login failed")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Login failed")
       }
 
       await refreshUser()

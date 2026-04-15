@@ -50,6 +50,7 @@ import { LeadInfoTab } from "./lead-info-tab"
 import { LeadAiTab } from "./lead-ai-tab"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/features/auth/context/user-context"
+import { safeJson } from "@/lib/utils/safe-json"
 
 interface LeadDetailsProps {
   lead: Lead | null
@@ -106,8 +107,8 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to update lead")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to update lead")
       }
 
       toast.success("Lead updated successfully")
@@ -141,8 +142,8 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to add note")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to add note")
       }
 
       toast.success("Note added")
@@ -171,8 +172,8 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to delete lead")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to delete lead")
       }
 
       toast.success("Lead deleted successfully")

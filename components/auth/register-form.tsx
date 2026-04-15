@@ -9,6 +9,7 @@ import * as z from "zod"
 import { toast } from "sonner"
 import { Loader2, ArrowRight } from "lucide-react"
 import { useUser } from "@/features/auth/context/user-context"
+import { safeJson } from "@/lib/utils/safe-json"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,8 +47,8 @@ export function RegisterForm({ plan = "Professional" }: { plan?: string }) {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Registration failed")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Registration failed")
       }
 
       await refreshUser()

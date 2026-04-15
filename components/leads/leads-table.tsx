@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 import { useUser } from "@/features/auth/context/user-context"
+import { safeJson } from "@/lib/utils/safe-json"
 
 import {
   Table,
@@ -160,8 +161,8 @@ export function LeadsTable({ onLeadClick }: LeadsTableProps) {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to delete lead")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to delete lead")
       }
 
       toast.success("Lead deleted successfully")

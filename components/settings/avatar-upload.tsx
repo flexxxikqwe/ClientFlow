@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Upload, Loader2, User as UserIcon } from "lucide-react"
 import { toast } from "sonner"
+import { safeJson } from "@/lib/utils/safe-json"
 
 export function AvatarUpload() {
   const { user, refreshUser, isDemo } = useUser()
@@ -36,7 +37,9 @@ export function AvatarUpload() {
 
       if (!response.ok) throw new Error("Upload failed")
 
-      const blob = await response.json()
+      const blob = await safeJson(response)
+      if (!blob) throw new Error("Invalid response from server")
+      
       toast.success("Avatar updated successfully")
       await refreshUser()
     } catch (error) {

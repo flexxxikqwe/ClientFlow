@@ -9,23 +9,23 @@ export const fetcher = async (url: string) => {
   const contentType = res.headers.get("content-type");
   const isJson = contentType && contentType.includes("application/json");
 
+  const text = await res.text();
+  let data = null;
+  
+  if (isJson && text) {
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Failed to parse JSON response', e);
+    }
+  }
+
   if (!res.ok) {
     const error = new Error('An error occurred while fetching the data.') as FetchError;
-    // Attach extra info to the error object if it's JSON
-    if (isJson) {
-      try {
-        error.info = await res.json();
-      } catch (e) {
-        // Fallback if parsing fails
-      }
-    }
+    error.info = data || text;
     error.status = res.status;
     throw error;
   }
 
-  if (!isJson) {
-    throw new Error('Expected JSON response but received something else.');
-  }
-
-  return res.json();
+  return data || text;
 };

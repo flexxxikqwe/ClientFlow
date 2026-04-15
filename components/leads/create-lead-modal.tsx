@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { safeJson } from "@/lib/utils/safe-json"
 
 interface CreateLeadModalProps {
   isOpen: boolean
@@ -56,8 +57,8 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Failed to create lead")
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to create lead")
       }
 
       toast.success("Lead created successfully")
