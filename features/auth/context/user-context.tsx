@@ -65,6 +65,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true;
     async function initAuth(isRetry = false) {
+      let willRetry = false;
       try {
         const response = await fetch("/api/auth/me")
         if (!isMounted) return;
@@ -78,6 +79,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           } else if (response.status === 200 && !isRetry && localStorage.getItem("user")) {
             // Conservative check: if 200 null but hint exists, retry once after a beat
             // This handles transient cookie flakiness in iframe environments
+            willRetry = true;
             await new Promise(r => setTimeout(r, 800))
             return initAuth(true)
           } else {
@@ -91,7 +93,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error("Failed to fetch user", error)
       } finally {
-        if (isMounted && !isRetry) {
+        if (isMounted && !willRetry) {
           setIsLoading(false)
           setIsInitialLoading(false)
         }
