@@ -8,12 +8,17 @@ interface DemoLeadsContextType {
   leads: Lead[]
   addLead: (lead: Omit<Lead, "id" | "created_at" | "updated_at" | "notes" | "ai_insights">) => void
   updateLeadStatus: (leadId: string, newStatus: string) => void
+  deleteLeads: (leadIds: string[]) => void
+  selectedIds: string[]
+  setSelectedIds: (ids: string[]) => void
+  toggleSelectLead: (id: string) => void
 }
 
 const DemoLeadsContext = createContext<DemoLeadsContextType | undefined>(undefined)
 
 export function DemoLeadsProvider({ children }: { children: React.ReactNode }) {
   const [leads, setLeads] = useState<Lead[]>(DEMO_LEADS as Lead[])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const addLead = useCallback((newLeadData: Omit<Lead, "id" | "created_at" | "updated_at" | "notes" | "ai_insights">) => {
     // ... existing addLead logic
@@ -48,11 +53,26 @@ export function DemoLeadsProvider({ children }: { children: React.ReactNode }) {
     ))
   }, [])
 
+  const deleteLeads = useCallback((leadIds: string[]) => {
+    setLeads(prev => prev.filter(lead => !leadIds.includes(lead.id)))
+    setSelectedIds(prev => prev.filter(id => !leadIds.includes(id)))
+  }, [])
+
+  const toggleSelectLead = useCallback((id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }, [])
+
   const value = useMemo(() => ({
     leads,
     addLead,
-    updateLeadStatus
-  }), [leads, addLead, updateLeadStatus])
+    updateLeadStatus,
+    deleteLeads,
+    selectedIds,
+    setSelectedIds,
+    toggleSelectLead
+  }), [leads, addLead, updateLeadStatus, deleteLeads, selectedIds, toggleSelectLead])
 
   return (
     <DemoLeadsContext.Provider value={value}>

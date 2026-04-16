@@ -51,17 +51,35 @@ interface DemoLeadsTableProps {
   setSearch: React.Dispatch<React.SetStateAction<string>>
   status: string
   setStatus: React.Dispatch<React.SetStateAction<string>>
+  selectedIds: string[]
+  onToggleSelect: (id: string) => void
+  onSelectAll: (ids: string[]) => void
 }
 
-const LeadRow = memo(({ lead, onLeadClick }: { 
+const LeadRow = memo(({ lead, onLeadClick, isSelected, onToggleSelect }: { 
   lead: Lead, 
-  onLeadClick: (lead: Lead) => void
+  onLeadClick: (lead: Lead) => void,
+  isSelected: boolean,
+  onToggleSelect: (id: string) => void
 }) => (
   <TableRow 
-    className="group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20"
+    className={cn(
+      "group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20",
+      isSelected && "bg-primary/5 hover:bg-primary/10"
+    )}
     onClick={() => onLeadClick(lead)}
   >
-    <TableCell className="py-5 pl-8">
+    <TableCell className="py-5 pl-8" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center justify-center">
+        <input 
+          type="checkbox" 
+          checked={isSelected}
+          onChange={() => onToggleSelect(lead.id)}
+          className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+        />
+      </div>
+    </TableCell>
+    <TableCell className="py-5">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
           {lead.first_name[0]}{lead.last_name[0]}
@@ -119,7 +137,10 @@ export function DemoLeadsTable({
   search,
   setSearch,
   status,
-  setStatus
+  setStatus,
+  selectedIds,
+  onToggleSelect,
+  onSelectAll
 }: DemoLeadsTableProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
@@ -151,6 +172,9 @@ export function DemoLeadsTable({
     setDebouncedSearch("")
     setStatus("all")
   }
+
+  const allFilteredIds = useMemo(() => filteredLeads.map(l => l.id), [filteredLeads])
+  const isAllSelected = filteredLeads.length > 0 && filteredLeads.every(l => selectedIds.includes(l.id))
 
   return (
     <div className="space-y-6">
@@ -201,7 +225,17 @@ export function DemoLeadsTable({
           <Table>
             <TableHeader className="bg-secondary/5">
               <TableRow className="hover:bg-transparent border-b border-border/30">
-                <TableHead className="h-14 pl-8 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Name</TableHead>
+                <TableHead className="h-14 pl-8 w-[50px]">
+                  <div className="flex items-center justify-center">
+                    <input 
+                      type="checkbox" 
+                      checked={isAllSelected}
+                      onChange={() => onSelectAll(isAllSelected ? [] : allFilteredIds)}
+                      className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+                    />
+                  </div>
+                </TableHead>
+                <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Name</TableHead>
                 <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Email</TableHead>
                 <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Phone</TableHead>
                 <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Source</TableHead>
@@ -213,7 +247,7 @@ export function DemoLeadsTable({
             <TableBody>
               {filteredLeads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-[400px] text-center">
+                  <TableCell colSpan={8} className="h-[400px] text-center">
                     <EmptyState
                       title="No matching leads"
                       description="Try adjusting your search or filters."
@@ -227,6 +261,8 @@ export function DemoLeadsTable({
                     key={lead.id} 
                     lead={lead as any} 
                     onLeadClick={onLeadClick} 
+                    isSelected={selectedIds.includes(lead.id)}
+                    onToggleSelect={onToggleSelect}
                   />
                 ))
               )}

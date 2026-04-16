@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, LayoutGrid, Table as TableIcon } from "lucide-react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 import { DemoLeadsTableWrapper } from "@/components/demo/demo-leads-table-wrapper"
 import { LeadKanban } from "@/components/leads/lead-kanban"
@@ -12,8 +13,23 @@ import { useDemoLeads } from "@/components/demo/demo-leads-context"
 
 export default function DemoLeadsPage() {
   const demoLeads = useDemoLeads()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("table")
+  const [viewMode, setViewMode] = useState<"table" | "kanban">((searchParams.get("view") as "table" | "kanban") || "table")
+
+  // Sync viewMode to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (viewMode !== "table") params.set("view", viewMode)
+    else params.delete("view")
+    
+    const query = params.toString()
+    const url = `${pathname}${query ? `?${query}` : ""}`
+    router.replace(url, { scroll: false })
+  }, [viewMode, pathname, router, searchParams])
 
   const stats = useMemo(() => {
 // ... existing stats logic

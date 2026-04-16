@@ -64,19 +64,37 @@ interface LeadsTableProps {
   setSortBy: React.Dispatch<React.SetStateAction<string>>
   sortOrder: "asc" | "desc"
   setSortOrder: React.Dispatch<React.SetStateAction<"asc" | "desc">>
+  selectedIds: string[]
+  onToggleSelect: (id: string) => void
+  onSelectAll: (ids: string[]) => void
 }
 
-const LeadRow = memo(({ lead, onLeadClick, onDelete }: { 
+const LeadRow = memo(({ lead, onLeadClick, onDelete, isSelected, onToggleSelect }: { 
   lead: Lead, 
   onLeadClick: (lead: Lead) => void,
-  onDelete: (id: string, e: React.MouseEvent) => void
+  onDelete: (id: string, e: React.MouseEvent) => void,
+  isSelected: boolean,
+  onToggleSelect: (id: string) => void
 }) => (
   <TableRow 
-    className="group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20"
+    className={cn(
+      "group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20",
+      isSelected && "bg-primary/5 hover:bg-primary/10"
+    )}
     onClick={() => onLeadClick(lead)}
     data-testid={`lead-row-${lead.id}`}
   >
-    <TableCell className="py-5 pl-8">
+    <TableCell className="py-5 pl-8" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center justify-center">
+        <input 
+          type="checkbox" 
+          checked={isSelected}
+          onChange={() => onToggleSelect(lead.id)}
+          className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+        />
+      </div>
+    </TableCell>
+    <TableCell className="py-5">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
           {lead.first_name[0]}{lead.last_name[0]}
@@ -139,7 +157,10 @@ export function LeadsTable({
   sortBy,
   setSortBy,
   sortOrder,
-  setSortOrder
+  setSortOrder,
+  selectedIds,
+  onToggleSelect,
+  onSelectAll
 }: LeadsTableProps) {
   const debouncedSearch = useDebounce(search, 300)
 
@@ -150,6 +171,9 @@ export function LeadsTable({
     sortBy,
     sortOrder,
   })
+
+  const allIds = useMemo(() => leads.map(l => l.id), [leads])
+  const isAllSelected = leads.length > 0 && leads.every(l => selectedIds.includes(l.id))
 
   const handleSort = useCallback((column: string) => {
     if (sortBy === column) {
@@ -253,7 +277,17 @@ export function LeadsTable({
           <Table>
             <TableHeader className="bg-secondary/5">
               <TableRow className="hover:bg-transparent border-b border-border/30">
-                <TableHead className="h-14 pl-8 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer transition-colors hover:text-primary" onClick={() => handleSort("first_name")}>
+              <TableHead className="h-14 pl-8 w-[50px]">
+                <div className="flex items-center justify-center">
+                  <input 
+                    type="checkbox" 
+                    checked={isAllSelected}
+                    onChange={() => onSelectAll(isAllSelected ? [] : allIds)}
+                    className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+                  />
+                </div>
+              </TableHead>
+              <TableHead className="h-14 font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 cursor-pointer transition-colors hover:text-primary" onClick={() => handleSort("first_name")}>
                   <div className="flex items-center">
                     Name 
                     <ArrowUpDown className={cn("ml-2 h-3 w-3 opacity-0 transition-opacity", sortBy === "first_name" && "opacity-100 text-primary")} />
@@ -297,7 +331,7 @@ export function LeadsTable({
                 ))
               ) : leads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-[400px] text-center">
+                  <TableCell colSpan={8} className="h-[400px] text-center">
                     <EmptyState
                       title={isFiltered ? "No matching leads" : "Your lead list is empty"}
                       description={isFiltered ? "Try adjusting your search or filters." : "Start by adding your first lead to the system."}
@@ -315,6 +349,8 @@ export function LeadsTable({
                     lead={lead} 
                     onLeadClick={onLeadClick} 
                     onDelete={handleDelete} 
+                    isSelected={selectedIds.includes(lead.id)}
+                    onToggleSelect={onToggleSelect}
                   />
                 ))
               )}

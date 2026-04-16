@@ -72,3 +72,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const idsParam = searchParams.get('ids')
+    
+    if (!idsParam) {
+      return NextResponse.json({ error: 'No IDs provided' }, { status: 400 })
+    }
+
+    const ids = idsParam.split(',')
+    
+    const user = await getSessionUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // For now, we iterate over IDs. In a real production app with high volume, 
+    // we would use a bulk delete operation in the repository.
+    const results = await Promise.all(
+      ids.map(id => leadsRepository.deleteLead(id))
+    )
+
+    const successCount = results.filter(Boolean).length
+
+    logger.info('Bulk lead deletion completed', { 
+      requestedCount: ids.length, 
+      successCount 
+    })
+
+    return NextResponse.json({ 
+      success: true, 
+      deletedCount: successCount,
+      requestedCount: ids.length
+    })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal Server Error"
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}

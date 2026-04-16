@@ -2,12 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3 } from "lucide-react"
+import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3, Clock } from "lucide-react"
 import useSWR from "swr"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LeadsPerDayChart } from "@/components/analytics/leads-per-day-chart"
+import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { useUser } from "@/features/auth/context/user-context"
 import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
@@ -102,35 +103,56 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-10 grid-cols-1 lg:grid-cols-6">
-        <Card className="lg:col-span-4 border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
-          <CardHeader className="p-8 border-b border-border/30">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <CardTitle className="text-xl font-semibold flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                  </div>
-                  Lead Acquisition
-                </CardTitle>
-                <p className="text-sm font-medium text-muted-foreground/60">Daily lead volume over the last 30 days</p>
+        <div className="lg:col-span-4 space-y-10">
+          <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+            <CardHeader className="p-8 border-b border-border/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <BarChart3 className="h-4 w-4 text-primary" />
+                    </div>
+                    Lead Acquisition
+                  </CardTitle>
+                  <p className="text-sm font-medium text-muted-foreground/60">Daily lead volume over the last 30 days</p>
+                </div>
+                <Button asChild variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] h-10 px-6 border-border/50 bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20">
+                  <Link href="/dashboard/analytics">View Reports</Link>
+                </Button>
               </div>
-              <Button asChild variant="outline" size="sm" className="rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] h-10 px-6 border-border/50 bg-background/50 backdrop-blur-sm transition-all hover:bg-secondary/20">
-                <Link href="/dashboard/analytics">View Reports</Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-8">
-            {isDataLoading ? (
-              <Skeleton className="h-[400px] w-full rounded-xl bg-secondary/10" />
-            ) : (
-              <div className="h-[400px] w-full">
-                <LeadsPerDayChart data={data?.leadsPerDay || []} />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-8">
+              {isDataLoading ? (
+                <Skeleton className="h-[400px] w-full rounded-xl bg-secondary/10" />
+              ) : (
+                <div className="h-[400px] w-full">
+                  <LeadsPerDayChart data={data?.leadsPerDay || []} />
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-        <Card className="lg:col-span-2 border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+          <Card className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden">
+            <CardHeader className="p-8 border-b border-border/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Clock className="h-4 w-4 text-primary" />
+                    </div>
+                    Recent Activity
+                  </CardTitle>
+                  <p className="text-sm font-medium text-muted-foreground/60">Latest events from your sales pipeline</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8">
+              <RecentActivity activities={[]} />
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="lg:col-span-2 border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden self-start">
           <CardHeader className="p-8 border-b border-border/30">
             <CardTitle className="text-xl font-semibold">Quick Actions</CardTitle>
             <p className="text-sm font-medium text-muted-foreground/60">Common tasks to get you started</p>

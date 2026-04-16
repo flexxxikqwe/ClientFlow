@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button"
 import { LeadForm } from "@/components/marketing/lead-form"
 import { MarketingHeader } from "@/components/marketing/header"
 import { PricingSection } from "@/components/marketing/pricing-section"
+import { PortfolioNotice } from "@/components/marketing/portfolio-notice"
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20">
+      <PortfolioNotice />
       <MarketingHeader />
       
       {/* Hero Section */}

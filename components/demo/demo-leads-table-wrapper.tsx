@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { Plus, Download, Loader2 } from "lucide-react"
 import { format } from "date-fns"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { DemoLeadsTable } from "@/components/demo/demo-leads-table"
 import { LeadKanban } from "@/components/leads/lead-kanban"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ import { LeadDetails } from "@/components/leads/lead-details"
 import { CreateLeadModal } from "@/components/leads/create-lead-modal"
 import { useDemoLeads } from "@/components/demo/demo-leads-context"
 import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
+import { BulkActionToolbar } from "@/components/leads/bulk-action-toolbar"
 
 interface DemoLeadsTableWrapperProps {
   isTableOnly?: boolean
@@ -20,17 +22,60 @@ interface DemoLeadsTableWrapperProps {
 
 export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" }: DemoLeadsTableWrapperProps) {
   const demoLeads = useDemoLeads()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
   const updateLeadStatus = demoLeads?.updateLeadStatus
+  const deleteLeads = demoLeads?.deleteLeads
+  const selectedIds = useMemo(() => demoLeads?.selectedIds || [], [demoLeads?.selectedIds])
+  const setSelectedIds = demoLeads?.setSelectedIds
+  const toggleSelectLead = demoLeads?.toggleSelectLead
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 // ... existing state
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
 
-  // Filter state moved from DemoLeadsTable to support export
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("all")
+  // Filter state initialized from URL
+  const [search, setSearch] = useState(searchParams.get("search") || "")
+  const [status, setStatus] = useState(searchParams.get("status") || "all")
+
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!deleteLeads || !setSelectedIds) return
+    
+    setIsDeleting(true)
+    try {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800))
+      deleteLeads(selectedIds)
+      setSelectedIds([])
+      toast.success(`${selectedIds.length} leads deleted successfully`)
+    } catch (error) {
+      toast.error("Failed to delete leads")
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [selectedIds, deleteLeads, setSelectedIds])
+
+  // Sync state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    if (search) params.set("search", search)
+    else params.delete("search")
+    
+    if (status !== "all") params.set("status", status)
+    else params.delete("status")
+
+    const query = params.toString()
+    const url = `${pathname}${query ? `?${query}` : ""}`
+    
+    router.replace(url, { scroll: false })
+  }, [search, status, pathname, router, searchParams])
 
   const handleLeadClick = useCallback((lead: Lead) => {
     setSelectedLead(lead)
@@ -88,6 +133,9 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
             setSearch={setSearch}
             status={status}
             setStatus={setStatus}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelectLead || (() => {})}
+            onSelectAll={setSelectedIds || (() => {})}
           />
         ) : (
           <LeadKanban 
@@ -101,6 +149,12 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
           isOpen={isDetailsOpen} 
           onClose={() => setIsDetailsOpen(false)} 
           onUpdate={() => {}} 
+        />
+        <BulkActionToolbar 
+          selectedCount={selectedIds.length}
+          onClearSelection={() => setSelectedIds?.([])}
+          onDelete={handleBulkDelete}
+          isDeleting={isDeleting}
         />
       </>
     )
@@ -143,6 +197,13 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={() => {}}
+      />
+
+      <BulkActionToolbar 
+        selectedCount={selectedIds.length}
+        onClearSelection={() => setSelectedIds?.([])}
+        onDelete={handleBulkDelete}
+        isDeleting={isDeleting}
       />
     </>
   )

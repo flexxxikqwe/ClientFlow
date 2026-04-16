@@ -1,14 +1,17 @@
 "use client"
 
-import { useState, useMemo, useCallback, memo } from "react"
+import { useState, useMemo, useCallback, memo, useEffect } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, LayoutGrid, Table as TableIcon } from "lucide-react"
 import { format } from "date-fns"
 import useSWR, { mutate } from "swr"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 import { LeadsTable } from "@/components/leads/leads-table"
 import { LeadKanban } from "@/components/leads/lead-kanban"
 import { LeadDetails } from "@/components/leads/lead-details"
 import { CreateLeadModal } from "@/components/leads/create-lead-modal"
+import { BulkActionToolbar } from "@/components/leads/bulk-action-toolbar"
+import { safeJson } from "@/lib/utils/safe-json"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -22,18 +25,96 @@ import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
 export default function LeadsPage() {
   const { isDemo } = useUser()
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("table")
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const [viewMode, setViewMode] = useState<"table" | "kanban">((searchParams.get("view") as "table" | "kanban") || "table")
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
 
-  // Filter state moved from LeadsTable to support export
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState("")
-  const [status, setStatus] = useState("all")
-  const [sortBy, setSortBy] = useState("created_at")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  // Filter state initialized from URL
+  const [page, setPage] = useState(Number(searchParams.get("page")) || 1)
+  const [search, setSearch] = useState(searchParams.get("search") || "")
+  const [status, setStatus] = useState(searchParams.get("status") || "all")
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "created_at")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">((searchParams.get("sortOrder") as "asc" | "desc") || "desc")
+
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const { mutate: mutateLeads } = useLeads({
+    page,
+    search,
+    status,
+    sortBy,
+    sortOrder,
+  })
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }, [])
+
+  const handleSelectAll = useCallback((ids: string[]) => {
+    setSelectedIds(ids)
+  }, [])
+
+  const handleBulkDelete = useCallback(async () => {
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/leads?ids=${selectedIds.join(",")}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const data = await safeJson(response)
+        throw new Error(data?.error || "Failed to delete leads")
+      }
+
+      toast.success(`${selectedIds.length} leads deleted successfully`)
+      setSelectedIds([])
+      mutateLeads()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to delete leads"
+      toast.error(message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [selectedIds, mutateLeads])
+
+  // Sync state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    if (viewMode !== "table") params.set("view", viewMode)
+    else params.delete("view")
+
+    if (search) params.set("search", search)
+    else params.delete("search")
+    
+    if (status !== "all") params.set("status", status)
+    else params.delete("status")
+    
+    if (page > 1) params.set("page", page.toString())
+    else params.delete("page")
+    
+    if (sortBy !== "created_at") params.set("sortBy", sortBy)
+    else params.delete("sortBy")
+    
+    if (sortOrder !== "desc") params.set("sortOrder", sortOrder)
+    else params.delete("sortOrder")
+
+    const query = params.toString()
+    const url = `${pathname}${query ? `?${query}` : ""}`
+    
+    // Use replace to avoid history bloat
+    router.replace(url, { scroll: false })
+  }, [viewMode, search, status, page, sortBy, sortOrder, pathname, router, searchParams])
 
   const { data: analytics, mutate: mutateAnalytics, isLoading: isAnalyticsLoading } = useSWR("/api/analytics", fetcher)
 
@@ -66,9 +147,9 @@ export default function LeadsPage() {
   }, [])
 
   const handleUpdate = useCallback(() => {
-    mutate("local_leads")
+    mutateLeads()
     mutateAnalytics()
-  }, [mutateAnalytics])
+  }, [mutateLeads, mutateAnalytics])
 
   const handleExport = async () => {
     setIsExporting(true)
@@ -238,6 +319,9 @@ export default function LeadsPage() {
             setSortBy={setSortBy}
             sortOrder={sortOrder}
             setSortOrder={setSortOrder}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onSelectAll={handleSelectAll}
           />
         ) : (
           <LeadKanban 
@@ -259,6 +343,13 @@ export default function LeadsPage() {
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 
         onSuccess={handleUpdate}
+      />
+
+      <BulkActionToolbar 
+        selectedCount={selectedIds.length}
+        onClearSelection={() => setSelectedIds([])}
+        onDelete={handleBulkDelete}
+        isDeleting={isDeleting}
       />
     </div>
   )
