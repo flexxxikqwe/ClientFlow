@@ -9,7 +9,7 @@ import { Bell, Moon, Globe, ShieldCheck } from "lucide-react"
 import { useTheme } from "next-themes"
 
 export function PreferenceSettings() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [prefs, setPrefs] = useState({
     emailNotifications: true,
@@ -28,7 +28,20 @@ export function PreferenceSettings() {
     toast.success(`${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} updated`)
   }
 
-  if (!mounted) return null
+  if (!mounted) {
+    return (
+      <div className="p-8 rounded-3xl bg-card/30 border border-border/50 backdrop-blur-sm space-y-8 animate-pulse">
+        <div className="h-12 w-48 bg-secondary/20 rounded-xl" />
+        <div className="space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-20 bg-secondary/10 rounded-2xl border border-border/10" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const isDark = resolvedTheme === "dark"
 
   return (
     <div className="p-8 rounded-3xl bg-card/30 border border-border/50 backdrop-blur-sm space-y-8">
@@ -48,12 +61,13 @@ export function PreferenceSettings() {
             <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
               <Bell className="h-5 w-5 text-sky-500" />
             </div>
-            <div>
-              <Label className="font-bold text-foreground">Email Notifications</Label>
+            <div className="grid gap-1">
+              <Label htmlFor="notifications" className="font-bold text-foreground cursor-pointer">Email Notifications</Label>
               <p className="text-xs text-muted-foreground">Receive alerts about lead activity.</p>
             </div>
           </div>
           <Switch 
+            id="notifications"
             checked={prefs.emailNotifications} 
             onCheckedChange={() => handleToggle('emailNotifications')} 
           />
@@ -64,13 +78,14 @@ export function PreferenceSettings() {
             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
               <Moon className="h-5 w-5 text-indigo-500" />
             </div>
-            <div>
-              <Label className="font-bold text-foreground">Dark Mode</Label>
+            <div className="grid gap-1">
+              <Label htmlFor="dark-mode" className="font-bold text-foreground cursor-pointer">Dark Mode</Label>
               <p className="text-xs text-muted-foreground">Switch between light and dark themes.</p>
             </div>
           </div>
           <Switch 
-            checked={theme === "dark"} 
+            id="dark-mode"
+            checked={isDark} 
             onCheckedChange={(checked) => {
               setTheme(checked ? "dark" : "light")
               toast.success(`Theme updated to ${checked ? "dark" : "light"} mode`)
@@ -83,12 +98,13 @@ export function PreferenceSettings() {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
               <Globe className="h-5 w-5 text-emerald-500" />
             </div>
-            <div>
-              <Label className="font-bold text-foreground">Public Profile</Label>
+            <div className="grid gap-1">
+              <Label htmlFor="public-profile" className="font-bold text-foreground cursor-pointer">Public Profile</Label>
               <p className="text-xs text-muted-foreground">Allow others to see your business profile.</p>
             </div>
           </div>
           <Switch 
+            id="public-profile"
             checked={prefs.publicProfile} 
             onCheckedChange={() => handleToggle('publicProfile')} 
           />

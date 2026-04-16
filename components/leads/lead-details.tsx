@@ -51,6 +51,7 @@ import { LeadAiTab } from "./lead-ai-tab"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/features/auth/context/user-context"
 import { safeJson } from "@/lib/utils/safe-json"
+import { usePathname } from "next/navigation"
 
 interface LeadDetailsProps {
   lead: Lead | null
@@ -60,7 +61,9 @@ interface LeadDetailsProps {
 }
 
 export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: LeadDetailsProps) {
-  const { isDemo } = useUser()
+  const { isDemo: isUserDemo } = useUser()
+  const pathname = usePathname()
+  const isDemoMode = isUserDemo || pathname.startsWith("/demo")
   const [isEditing, setIsEditing] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
   const [noteContent, setNoteContent] = useState("")
@@ -92,7 +95,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
   const handleUpdate = useCallback(async () => {
     if (!lead) return
-    if (isDemo) {
+    if (isDemoMode) {
       toast.info("Showcase Mode: Lead updates are disabled in this preview.")
       return
     }
@@ -121,11 +124,11 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, formData, mutateLead, onUpdate, isDemo])
+  }, [lead, formData, mutateLead, onUpdate, isDemoMode])
 
   const handleAddNote = useCallback(async () => {
     if (!lead || !noteContent.trim()) return
-    if (isDemo) {
+    if (isDemoMode) {
       toast.info("Showcase Mode: Adding notes is disabled in this preview.")
       return
     }
@@ -156,11 +159,11 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, noteContent, mutateLead, onUpdate, isDemo])
+  }, [lead, noteContent, mutateLead, onUpdate, isDemoMode])
 
   const handleDelete = useCallback(async () => {
     if (!lead) return
-    if (isDemo) {
+    if (isDemoMode) {
       toast.info("Showcase Mode: Lead deletion is disabled in this preview.")
       return
     }
@@ -185,14 +188,14 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, onClose, onUpdate, isDemo])
+  }, [lead, onClose, onUpdate, isDemoMode])
 
   const handleAiAction = useCallback(async (action: "summary" | "classify" | "reply") => {
     if (!lead) return
     setIsAiLoading(true)
 
     // Handle Demo Mode Mock AI
-    if (isDemo && lead.id.startsWith("demo-")) {
+    if (isDemoMode && lead.id.startsWith("demo-")) {
       await new Promise(resolve => setTimeout(resolve, 800)) // Simulate "thinking"
       
       const insights = lead.ai_insights
@@ -239,7 +242,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsAiLoading(false)
     }
-  }, [lead, isDemo])
+  }, [lead, isDemoMode])
 
   const handleCopyReply = useCallback(() => {
     if (aiReply) {

@@ -20,6 +20,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
+import { usePathname } from "next/navigation"
 import { toast } from "sonner"
 import { safeJson } from "@/lib/utils/safe-json"
 import { useUser } from "@/features/auth/context/user-context"
@@ -32,7 +33,9 @@ interface CreateLeadModalProps {
 }
 
 export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalProps) {
-  const { isDemo } = useUser()
+  const { isDemo: isUserDemo } = useUser()
+  const pathname = usePathname()
+  const isDemoMode = isUserDemo || pathname.startsWith("/demo")
   const demoLeads = useDemoLeads()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -50,7 +53,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
     setIsLoading(true)
 
     try {
-      if (isDemo && demoLeads) {
+      if (isDemoMode && demoLeads) {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800))
         

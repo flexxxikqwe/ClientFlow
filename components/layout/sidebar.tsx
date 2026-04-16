@@ -19,33 +19,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { user, isDemo } = useUser()
+  const { user, isDemo: isUserDemo } = useUser()
 
-  const basePath = isDemo && pathname.startsWith("/demo") ? "/demo" : "/dashboard"
+  const isDemoPath = pathname.startsWith("/demo")
+  const basePath = isDemoPath ? "/demo" : "/dashboard"
 
   const routes = [
     {
       label: "Dashboard",
       icon: LayoutDashboard,
-      href: basePath === "/demo" ? "/demo/dashboard" : "/dashboard",
+      href: isDemoPath ? "/demo/dashboard" : "/dashboard",
       color: "text-sky-500",
     },
     {
       label: "Leads",
       icon: Users,
-      href: basePath === "/demo" ? "/demo/leads" : "/dashboard/leads",
+      href: isDemoPath ? "/demo/leads" : "/dashboard/leads",
       color: "text-violet-500",
     },
     {
       label: "Analytics",
       icon: BarChart3,
-      href: basePath === "/demo" ? "/demo/analytics" : "/dashboard/analytics",
+      href: isDemoPath ? "/demo/analytics" : "/dashboard/analytics",
       color: "text-orange-700",
     },
     {
       label: "Settings",
       icon: Settings,
-      href: basePath === "/demo" ? "/demo/settings" : "/dashboard/settings",
+      href: isDemoPath ? "/demo/settings" : "/dashboard/settings",
       color: "text-gray-500",
     },
   ]
@@ -101,7 +102,7 @@ export function Sidebar() {
 
       <div className="p-10 mt-auto">
         <div className="space-y-8">
-          {user && (
+          {user ? (
             <div className="flex items-center gap-4 px-2 group cursor-pointer">
               <Avatar className="h-10 w-10 border-2 border-border/50 transition-all group-hover:border-primary/50">
                 <AvatarImage src={user.avatar_url || `https://avatar.vercel.sh/${user.email}`} />
@@ -123,7 +124,26 @@ export function Sidebar() {
                 <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] truncate mt-0.5">{user.role || "Admin"}</span>
               </div>
             </div>
-          )}
+          ) : isDemoPath ? (
+            <div className="flex items-center gap-4 px-2 group">
+              <Avatar className="h-10 w-10 border-2 border-border/50">
+                <AvatarFallback className="bg-secondary text-foreground text-xs font-bold">
+                  D
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-foreground truncate leading-tight">
+                    Demo User
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest border border-primary/20">
+                    Guest
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] truncate mt-0.5">Showcase Access</span>
+              </div>
+            </div>
+          ) : null}
           <div className="pt-8 border-t border-border/30">
             <LogoutButton />
           </div>
