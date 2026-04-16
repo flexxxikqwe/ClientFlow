@@ -172,8 +172,8 @@ export function LeadsTable({
     sortOrder,
   })
 
-  const allIds = useMemo(() => leads.map(l => l.id), [leads])
-  const isAllSelected = leads.length > 0 && leads.every(l => selectedIds.includes(l.id))
+  const allIds = useMemo(() => leads.map((l: Lead) => l.id), [leads])
+  const isAllSelected = leads.length > 0 && leads.every((l: Lead) => selectedIds.includes(l.id))
 
   const handleSort = useCallback((column: string) => {
     if (sortBy === column) {

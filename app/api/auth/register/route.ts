@@ -9,7 +9,10 @@ export async function POST(request: Request) {
     
     const existingUser = await usersRepository.getUserByEmail(email)
     if (existingUser) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'User already exists', code: 'EMAIL_ALREADY_IN_USE' }, 
+        { status: 400 }
+      )
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)

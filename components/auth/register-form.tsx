@@ -48,6 +48,15 @@ export function RegisterForm({ plan = "Professional" }: { plan?: string }) {
 
       if (!response.ok) {
         const data = await safeJson(response)
+        
+        if (data?.code === 'EMAIL_ALREADY_IN_USE') {
+          form.setError("email", { 
+            type: "manual", 
+            message: "This email is already in use" 
+          })
+          return
+        }
+
         throw new Error(data?.error || "Registration failed")
       }
 
