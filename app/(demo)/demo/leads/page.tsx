@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, LayoutGrid, Table as TableIcon } from "lucide-react"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { useDemoLeads } from "@/components/demo/demo-leads-context"
 
-export default function DemoLeadsPage() {
+function DemoLeadsPageContent() {
   const demoLeads = useDemoLeads()
   const router = useRouter()
   const pathname = usePathname()
@@ -141,5 +141,23 @@ export default function DemoLeadsPage() {
         <DemoLeadsTableWrapper isTableOnly viewMode={viewMode} />
       </div>
     </div>
+  )
+}
+
+export default function DemoLeadsPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-pulse">
+        <div className="h-20 bg-secondary/20 rounded-2xl w-1/3" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-32 bg-secondary/20 rounded-2xl" />
+          ))}
+        </div>
+        <div className="h-[600px] bg-secondary/20 rounded-2xl" />
+      </div>
+    }>
+      <DemoLeadsPageContent />
+    </Suspense>
   )
 }

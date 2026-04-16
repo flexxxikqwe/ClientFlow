@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, memo, useEffect } from "react"
+import { useState, useMemo, useCallback, memo, useEffect, Suspense } from "react"
 import { Users, Plus, BarChart3, TrendingUp, Clock, Loader2, LayoutGrid, Table as TableIcon } from "lucide-react"
 import { format } from "date-fns"
 import useSWR, { mutate } from "swr"
@@ -24,7 +24,7 @@ import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
 
-export default function LeadsPage() {
+function LeadsPageContent() {
   const { isDemo } = useUser()
   const router = useRouter()
   const pathname = usePathname()
@@ -353,5 +353,26 @@ export default function LeadsPage() {
         isDeleting={isDeleting}
       />
     </div>
+  )
+}
+
+export default function LeadsPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-6 space-y-6 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="h-8 bg-secondary/20 rounded w-48" />
+          <div className="h-10 bg-secondary/20 rounded w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-32 bg-secondary/20 rounded-xl" />
+          ))}
+        </div>
+        <div className="h-[500px] bg-secondary/20 rounded-xl" />
+      </div>
+    }>
+      <LeadsPageContent />
+    </Suspense>
   )
 }

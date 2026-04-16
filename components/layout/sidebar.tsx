@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LogoutButton } from "@/components/auth/logout-button"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { useUser } from "@/features/auth/context/user-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -52,17 +53,20 @@ export function Sidebar() {
   return (
     <div className="flex flex-col h-full bg-card/20 backdrop-blur-xl text-muted-foreground border-r border-border/30">
       <div className="px-10 py-16 flex-1">
-        <Link href="/dashboard" className="flex items-center gap-4 mb-20 group transition-all duration-500">
-          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-            <Sparkles className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold text-foreground tracking-tight leading-none">
-              ClientFlow
-            </h1>
-            <span className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.3em] mt-1">CRM</span>
-          </div>
-        </Link>
+        <div className="flex items-center justify-between mb-20">
+          <Link href="/dashboard" className="flex items-center gap-4 group transition-all duration-500">
+            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+              <Sparkles className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-xl font-bold text-foreground tracking-tight leading-none">
+                ClientFlow
+              </h1>
+              <span className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.3em] mt-1">CRM</span>
+            </div>
+          </Link>
+          <ThemeToggle />
+        </div>
         
         <div className="space-y-2">
           <p className="px-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em] mb-8">Main Menu</p>

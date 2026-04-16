@@ -1,25 +1,34 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { Bell, Moon, Globe, ShieldCheck } from "lucide-react"
+import { useTheme } from "next-themes"
 
 export function PreferenceSettings() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
   const [prefs, setPrefs] = useState({
     emailNotifications: true,
     marketingEmails: false,
-    darkMode: false,
     publicProfile: false,
   })
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleToggle = (key: keyof typeof prefs) => {
     const newVal = !prefs[key]
     setPrefs({ ...prefs, [key]: newVal })
     toast.success(`${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} updated`)
   }
+
+  if (!mounted) return null
 
   return (
     <div className="p-8 rounded-3xl bg-card/30 border border-border/50 backdrop-blur-sm space-y-8">
@@ -61,8 +70,11 @@ export function PreferenceSettings() {
             </div>
           </div>
           <Switch 
-            checked={prefs.darkMode} 
-            onCheckedChange={() => handleToggle('darkMode')} 
+            checked={theme === "dark"} 
+            onCheckedChange={(checked) => {
+              setTheme(checked ? "dark" : "light")
+              toast.success(`Theme updated to ${checked ? "dark" : "light"} mode`)
+            }} 
           />
         </div>
 

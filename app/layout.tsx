@@ -25,8 +25,8 @@ export default function RootLayout({
           <UserProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark"
-              enableSystem
+              defaultTheme="light"
+              enableSystem={false}
               disableTransitionOnChange
             >
               <div className="flex flex-col min-h-screen">
