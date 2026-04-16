@@ -19,6 +19,7 @@ import { Lead } from "@/types/leads"
 import { toast } from "sonner"
 
 import { useUser } from "@/features/auth/context/user-context"
+import { useLeads } from "@/features/leads/hooks/use-leads"
 import { fetcher } from "@/lib/utils/fetcher"
 import { cn } from "@/lib/utils"
 import { convertToCSV, downloadCSV, LEAD_CSV_HEADERS } from "@/lib/utils/csv"
