@@ -255,8 +255,8 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 overflow-hidden border-border/30 bg-background/80 backdrop-blur-2xl shadow-2xl rounded-[2rem]">
-        <DialogHeader className="p-10 border-b border-border/20 bg-card/30">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 overflow-hidden border-border bg-background shadow-2xl rounded-[2rem] dark:bg-card">
+        <DialogHeader className="p-10 border-b border-border/10 bg-secondary/5">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-6">
               <div className="relative group">

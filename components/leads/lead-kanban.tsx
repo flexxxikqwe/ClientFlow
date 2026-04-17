@@ -229,7 +229,7 @@ function KanbanColumn({
       <div 
         ref={setNodeRef}
         className={cn(
-          "flex-1 bg-secondary/5 rounded-[2rem] p-4 space-y-4 border border-border/10 min-h-[500px] transition-all duration-300",
+          "flex-1 bg-secondary/5 rounded-[2rem] p-4 space-y-4 border border-border/10 min-h-[500px] transition-all duration-300 dark:bg-card/30",
           isOver && "bg-primary/5 border-primary/20 ring-4 ring-primary/5"
         )}
       >
@@ -298,8 +298,8 @@ function LeadCard({ lead, isOverlay = false }: { lead: Lead, isOverlay?: boolean
 
   return (
     <Card className={cn(
-      "border-border/50 bg-card/40 backdrop-blur-md shadow-none rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-300 hover:border-primary/40 hover:bg-card/60 group relative",
-      isOverlay && "shadow-2xl border-primary/50 bg-card/80 scale-105 cursor-grabbing"
+      "border-border/50 bg-card/40 backdrop-blur-md shadow-none rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-300 hover:border-primary/40 hover:bg-card/60 group relative dark:border-white/5",
+      isOverlay && "shadow-2xl border-primary/50 bg-card/80 scale-105 cursor-grabbing dark:bg-secondary"
     )}>
       {/* Stage accent line */}
       <div className={cn(

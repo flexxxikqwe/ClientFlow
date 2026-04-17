@@ -56,57 +56,70 @@ export function PreferenceSettings() {
       </div>
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20">
+        <div 
+          onClick={() => handleToggle('emailNotifications')}
+          className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20 cursor-pointer group"
+        >
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center transition-colors group-hover:bg-sky-500/20">
               <Bell className="h-5 w-5 text-sky-500" />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="notifications" className="font-bold text-foreground cursor-pointer">Email Notifications</Label>
+              <Label htmlFor="notifications" className="font-bold text-foreground cursor-pointer pointer-events-none">Email Notifications</Label>
               <p className="text-xs text-muted-foreground">Receive alerts about lead activity.</p>
             </div>
           </div>
           <Switch 
             id="notifications"
             checked={prefs.emailNotifications} 
-            onCheckedChange={() => handleToggle('emailNotifications')} 
+            onCheckedChange={() => {}} // Controlled via row click
+            className="pointer-events-none"
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20">
+        <div 
+          onClick={() => {
+            const nextTheme = isDark ? "light" : "dark"
+            setTheme(nextTheme)
+            toast.success(`Theme updated to ${nextTheme} mode`)
+          }}
+          className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20 cursor-pointer group"
+        >
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center transition-colors group-hover:bg-indigo-500/20">
               <Moon className="h-5 w-5 text-indigo-500" />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="dark-mode" className="font-bold text-foreground cursor-pointer">Dark Mode</Label>
+              <Label htmlFor="dark-mode" className="font-bold text-foreground cursor-pointer pointer-events-none">Dark Mode</Label>
               <p className="text-xs text-muted-foreground">Switch between light and dark themes.</p>
             </div>
           </div>
           <Switch 
             id="dark-mode"
             checked={isDark} 
-            onCheckedChange={(checked) => {
-              setTheme(checked ? "dark" : "light")
-              toast.success(`Theme updated to ${checked ? "dark" : "light"} mode`)
-            }} 
+            onCheckedChange={() => {}} // Controlled via row click
+            className="pointer-events-none"
           />
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20">
+        <div 
+          onClick={() => handleToggle('publicProfile')}
+          className="flex items-center justify-between p-4 rounded-2xl bg-secondary/10 border border-border/20 transition-all hover:bg-secondary/20 cursor-pointer group"
+        >
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center transition-colors group-hover:bg-emerald-500/20">
               <Globe className="h-5 w-5 text-emerald-500" />
             </div>
             <div className="grid gap-1">
-              <Label htmlFor="public-profile" className="font-bold text-foreground cursor-pointer">Public Profile</Label>
+              <Label htmlFor="public-profile" className="font-bold text-foreground cursor-pointer pointer-events-none">Public Profile</Label>
               <p className="text-xs text-muted-foreground">Allow others to see your business profile.</p>
             </div>
           </div>
           <Switch 
             id="public-profile"
             checked={prefs.publicProfile} 
-            onCheckedChange={() => handleToggle('publicProfile')} 
+            onCheckedChange={() => {}} // Controlled via row click
+            className="pointer-events-none"
           />
         </div>
       </div>

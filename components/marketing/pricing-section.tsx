@@ -92,7 +92,7 @@ export function PricingSection() {
                 "p-10 rounded-[2rem] border transition-all duration-500 flex flex-col group relative overflow-hidden",
                 plan.popular 
                   ? "border-primary/50 shadow-2xl shadow-primary/10 bg-card scale-105 z-10" 
-                  : "border-border/50 bg-card/80 hover:border-primary/30 shadow-xl shadow-black/5"
+                  : "border-border/50 bg-card/80 hover:border-primary/30 shadow-xl shadow-black/5 dark:shadow-white/5"
               )}
             >
               {plan.popular && (
