@@ -44,7 +44,7 @@ export function useLeads(params: {
         l.first_name.toLowerCase().includes(query) ||
         l.last_name.toLowerCase().includes(query) ||
         l.company?.toLowerCase().includes(query) ||
-        l.email.toLowerCase().includes(query)
+        l.email?.toLowerCase().includes(query)
       )
     }
 
@@ -105,7 +105,7 @@ export function useLeads(params: {
           l.first_name.toLowerCase().includes(query) ||
           l.last_name.toLowerCase().includes(query) ||
           l.company?.toLowerCase().includes(query) ||
-          l.email.toLowerCase().includes(query)
+          l.email?.toLowerCase().includes(query)
         )
       }
 
