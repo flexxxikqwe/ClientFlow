@@ -85,7 +85,9 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
     try {
       const payload = {
         ...values,
+        email: values.email || null,
         phone: values.phone || null,
+        company: values.company || null,
         value: values.value ? parseFloat(values.value) : 0,
       }
 
