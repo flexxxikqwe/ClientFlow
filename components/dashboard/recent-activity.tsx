@@ -62,7 +62,7 @@ export function RecentActivity({ activities, className }: RecentActivityProps) {
   return (
     <div className={cn("space-y-8", className)}>
       {activities.map((activity, i) => {
-        const config = ACTIVITY_ICONS[activity.type]
+        const config = ACTIVITY_ICONS[activity.type] || { icon: Clock, color: "text-slate-500", bg: "bg-slate-500/10" }
         const Icon = config.icon
 
         return (
@@ -84,9 +84,11 @@ export function RecentActivity({ activities, className }: RecentActivityProps) {
                 <p className="text-sm font-bold text-foreground tracking-tight leading-none">
                   {activity.title}
                 </p>
-                <span className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-widest">
-                  • {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
-                </span>
+                {activity.timestamp && (
+                  <span className="text-[10px] font-medium text-muted-foreground/40 uppercase tracking-widest">
+                    • {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                  </span>
+                )}
               </div>
               <p className="text-xs font-medium text-muted-foreground/80 leading-relaxed">
                 {activity.description}
