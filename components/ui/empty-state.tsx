@@ -24,7 +24,7 @@ export function EmptyState({
       )}
     >
       <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-secondary/30 border border-border/50 mb-8 transition-transform duration-500 hover:scale-110">
-        <Icon className="h-10 w-10 text-primary/60" />
+        <Icon className="h-10 w-10 text-primary/60" aria-hidden="true" />
       </div>
       <h3 className="text-xl font-semibold tracking-tight text-foreground">{title}</h3>
       {description && (

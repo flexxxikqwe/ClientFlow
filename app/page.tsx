@@ -17,7 +17,7 @@ export default function HomePage() {
         <div className="container px-8 mx-auto relative z-10 max-w-7xl">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-[0.2em] animate-in fade-in slide-in-from-top-4 duration-1000">
-              <Sparkles className="h-3 w-3" />
+              <Sparkles className="h-3 w-3" aria-hidden="true" />
               Portfolio Showcase
             </div>
             <h1 className="text-6xl lg:text-8xl font-bold tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -46,7 +46,7 @@ export default function HomePage() {
         </div>
         
         {/* Background Decoration */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden -z-10" aria-hidden="true">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px] animate-pulse delay-700" />
         </div>
@@ -95,7 +95,7 @@ export default function HomePage() {
             ].map((feature, i) => (
               <div key={i} className="group p-10 rounded-3xl border border-border/50 bg-card/30 hover:bg-card/50 hover:border-primary/30 transition-all duration-500">
                 <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <feature.icon className="w-7 h-7 text-primary" />
+                  <feature.icon className="w-7 h-7 text-primary" aria-hidden="true" />
                 </div>
                 <h3 className="text-xl font-bold mb-4 tracking-tight">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed text-sm font-medium">{feature.description}</p>
@@ -143,7 +143,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="lg:w-1/2 w-full">
-              <div className="relative p-2 rounded-[2.5rem] bg-gradient-to-b from-border/50 to-transparent border border-border/50 shadow-2xl">
+              <div className="relative p-2 rounded-[2.5rem] bg-gradient-to-b from-border/50 to-transparent border border-border/50 shadow-2xl" aria-hidden="true">
                 <div className="aspect-video bg-card rounded-[2rem] flex items-center justify-center overflow-hidden">
                   <BarChart3 className="w-24 h-24 text-primary/10 animate-pulse" />
                   {/* Decorative elements to simulate a dashboard */}
@@ -174,13 +174,13 @@ export default function HomePage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-5 group">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <CheckCircle2 className="w-6 h-6 text-primary" />
+                    <CheckCircle2 className="w-6 h-6 text-primary" aria-hidden="true" />
                   </div>
                   <span className="font-bold text-foreground">Free 14-day trial, no credit card required</span>
                 </div>
                 <div className="flex items-center gap-5 group">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <CheckCircle2 className="w-6 h-6 text-primary" />
+                    <CheckCircle2 className="w-6 h-6 text-primary" aria-hidden="true" />
                   </div>
                   <span className="font-bold text-foreground">Setup in less than 5 minutes</span>
                 </div>
@@ -197,17 +197,17 @@ export default function HomePage() {
       <footer className="py-20 bg-background border-t border-border/50">
         <div className="container px-8 mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group" aria-label="ClientFlow - Back to Home">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Sparkles className="h-5 w-5 text-primary-foreground" />
+                <Sparkles className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
               </div>
               <span className="text-xl font-bold tracking-tight text-foreground">ClientFlow</span>
             </Link>
-            <div className="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">
               <Link href="#" className="hover:text-primary transition-colors">Privacy</Link>
               <Link href="#" className="hover:text-primary transition-colors">Terms</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Twitter</Link>
-              <Link href="#" className="hover:text-primary transition-colors">LinkedIn</Link>
+              <Link href="#" className="hover:text-primary transition-colors" aria-label="Follow us on Twitter">Twitter</Link>
+              <Link href="#" className="hover:text-primary transition-colors" aria-label="Follow us on LinkedIn">LinkedIn</Link>
             </div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
               © 2026 ClientFlow Inc. All rights reserved.

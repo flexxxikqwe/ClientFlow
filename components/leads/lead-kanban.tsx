@@ -209,7 +209,7 @@ function KanbanColumn({
             "w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm",
             STAGE_COLORS[color]
           )}>
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" aria-hidden="true" />
           </div>
           <div className="flex flex-col">
             <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-foreground/90">{title}</h3>
@@ -297,21 +297,24 @@ function LeadCard({ lead, isOverlay = false }: { lead: Lead, isOverlay?: boolean
   const stage = STAGES.find(s => s.id === lead.status.toLowerCase()) || STAGES[0]
 
   return (
-    <Card className={cn(
-      "border-border/50 bg-card/40 backdrop-blur-md shadow-none rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-300 hover:border-primary/40 hover:bg-card/60 group relative dark:border-white/5",
-      isOverlay && "shadow-2xl border-primary/50 bg-card/80 scale-105 cursor-grabbing dark:bg-secondary"
-    )}>
+    <Card 
+      className={cn(
+        "border-border/50 bg-card/40 backdrop-blur-md shadow-none rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing transition-all duration-300 hover:border-primary/40 hover:bg-card/60 group relative dark:border-white/5",
+        isOverlay && "shadow-2xl border-primary/50 bg-card/80 scale-105 cursor-grabbing dark:bg-secondary"
+      )}
+      aria-label={`Lead: ${lead.first_name} ${lead.last_name}, Company: ${lead.company || "Individual"}, Status: ${stage.name}, Value: $${lead.value?.toLocaleString() || '0'}`}
+    >
       {/* Stage accent line */}
       <div className={cn(
         "absolute top-0 left-0 w-1 h-full opacity-40 group-hover:opacity-100 transition-opacity",
         STAGE_DOT_COLORS[stage.color]
-      )} />
+      )} aria-hidden="true" />
 
       <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", STAGE_DOT_COLORS[stage.color])} />
+              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", STAGE_DOT_COLORS[stage.color])} aria-hidden="true" />
               <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] truncate">
                 {lead.company || "Individual"}
               </p>
@@ -321,7 +324,7 @@ function LeadCard({ lead, isOverlay = false }: { lead: Lead, isOverlay?: boolean
             </h4>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <GripVertical className="h-4 w-4 text-muted-foreground/10 group-hover:text-muted-foreground/30 transition-colors" />
+            <GripVertical className="h-4 w-4 text-muted-foreground/10 group-hover:text-muted-foreground/30 transition-colors" aria-hidden="true" />
             {lead.priority && (
               <div className={cn(
                 "px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
@@ -343,14 +346,14 @@ function LeadCard({ lead, isOverlay = false }: { lead: Lead, isOverlay?: boolean
         <div className="flex items-center justify-between pt-4 border-t border-border/10">
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
-              <DollarSign className="h-3 w-3 text-primary" />
+              <DollarSign className="h-3 w-3 text-primary" aria-hidden="true" />
             </div>
             <span className="text-[11px] font-black text-foreground/90 tracking-tight">
               {lead.value ? lead.value.toLocaleString() : "0"}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground/40">
-            <Clock className="h-3 w-3" />
+            <Clock className="h-3 w-3" aria-hidden="true" />
             <span className="text-[9px] font-bold uppercase tracking-widest">
               {lead.created_at ? format(new Date(lead.created_at), "MMM d") : "-"}
             </span>

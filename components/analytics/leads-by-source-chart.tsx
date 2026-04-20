@@ -45,7 +45,7 @@ export function LeadsBySourceChart({ data }: LeadsBySourceChartProps) {
   }
 
   return (
-    <div className="h-[400px] w-full relative">
+    <div className="h-[400px] w-full relative" role="region" aria-label="Lead distribution by source chart">
       <ResponsiveContainer width="100%" height="100%" debounce={200}>
         <PieChart>
           <Pie

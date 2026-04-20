@@ -64,11 +64,11 @@ export const DEMO_LEADS = [
       },
       classification: {
         priority: "hot",
-        reasoning: "High seat count (50) and direct interest in Enterprise features. Referral source increases trust and closing probability."
+        reasoning: "High seat count (50) and direct interest in Enterprise features from TechCorp. The referral source and CTO involvement mentioned in the message indicate high closing probability."
       },
       reply: {
-        subject: "Enterprise Solutions for TechCorp Engineering Team",
-        body: "Hi Sarah,\n\nIt was great speaking with you about TechCorp's engineering team. Based on our conversation, I've tailored a proposal that highlights our advanced analytics engine and our Platinum support tier, which I believe perfectly aligns with your 50-person team's requirements.\n\nI've attached the detailed breakdown. Looking forward to discussing this with you and your CTO.\n\nBest regards,\nAlex"
+        subject: "Tailored Enterprise Solutions for TechCorp Engineering",
+        body: "Hi Sarah,\n\nI noticed TechCorp is looking to migrate a 50-person engineering team. We've helped similar teams streamline their workflows with our advanced analytics and priority support.\n\nI'd love to discuss how our enterprise plan can specifically address the CTO's requirements. Are you available for a brief follow-up tomorrow?\n\nBest,\nAlex"
       }
     }
   },
@@ -99,11 +99,11 @@ export const DEMO_LEADS = [
       },
       classification: {
         priority: "warm",
-        reasoning: "Clear pain point identified (bloated current system). Active engagement with a scheduled demo."
+        reasoning: "Explicit dissatisfaction with 'bloated' current system at GlobalSoft. Active engagement with a scheduled demo next week demonstrates clear intent."
       },
       reply: {
-        subject: "Streamlining GlobalSoft's Sales Workflow",
-        body: "Hi Michael,\n\nI'm glad you enjoyed the clean interface of ClientFlow. We built it specifically for teams like yours that are tired of the 'bloat' in traditional CRMs.\n\nI've prepared a focused demo for next Tuesday that highlights our core efficiency tools without the clutter. See you then!\n\nBest,\nAlex"
+        subject: "Streamlining GlobalSoft's CRM Experience",
+        body: "Hi Michael,\n\nI'm glad your team appreciated the clean interface of ClientFlow. Since GlobalSoft is looking to move away from bloated systems, I've prepared a demo that focuses strictly on the high-efficiency essentials.\n\nLooking forward to showing you how we compare next Tuesday.\n\nBest,\nAlex"
       }
     }
   },
@@ -132,11 +132,11 @@ export const DEMO_LEADS = [
       },
       classification: {
         priority: "warm",
-        reasoning: "Specific feature interest (AI) indicates a modern tech stack and willingness to adopt new tools quickly."
+        reasoning: "Specific interest in AI automation from Creative Minds Agency. LinkedIn referral indicates social proof is working; focus should be on demonstrating the 'Draft AI Reply' feature."
       },
       reply: {
-        subject: "AI-Powered Follow-ups for Creative Minds",
-        body: "Hi Emma,\n\nThanks for reaching out after seeing our LinkedIn post! I'd love to show you how our AI follow-up engine can save your agency hours of manual work.\n\nWould you be open to a quick 15-minute walkthrough of the AI Insights tab this week?\n\nBest,\nAlex"
+        subject: "AI Follow-up Demo for Creative Minds Agency",
+        body: "Hi Emma,\n\nThanks for reaching out! Since you're interested in our automated follow-up drafts, I'd love to record a quick Loom showing you exactly how they'd look for Creative Minds Agency.\n\nAre there any specific use cases your team is most excited about?\n\nBest,\nAlex"
       }
     }
   },
@@ -167,11 +167,11 @@ export const DEMO_LEADS = [
       },
       classification: {
         priority: "cold",
-        reasoning: "Lead is officially lost. High friction for digital adoption in this specific firm's culture."
+        reasoning: "Lost due to budget and cultural preference for spreadsheets at Smith Manufacturing. Keep on long-term drip for future digital transformation readiness."
       },
       reply: {
-        subject: "Resources for Smith Manufacturing's Digital Journey",
-        body: "Hi David,\n\nI completely understand the decision to stick with your current process for now. Digital transformation is a journey, not a sprint.\n\nI've attached a whitepaper on 'Gradual CRM Adoption for Manufacturing' that might be useful for your team in the future. We're here whenever you're ready to take the next step.\n\nBest regards,\nAlex"
+        subject: "Resources for Smith Manufacturing's Digital Transition",
+        body: "Hi David,\n\nI completely understand the decision to keep things in spreadsheets for now. Transitioning from legacy processes takes time.\n\nI've attached a guide on 'Hybrid CRM Workflows' that helps manufacturing teams bridge the gap. We'll be here if you decide to revisit this next quarter.\n\nBest,\nAlex"
       }
     }
   },
@@ -202,11 +202,11 @@ export const DEMO_LEADS = [
       },
       classification: {
         priority: "hot",
-        reasoning: "High contract value ($22k) and deep technical engagement (API review) suggest a serious intent to purchase."
+        reasoning: "Retail Giant represents a high-value ($22k) scale play. The active API review indicates deep technical evaluation, moving beyond surface-level curiosity."
       },
       reply: {
-        subject: "API Support and Collaboration Features for Retail Giant",
-        body: "Hi Lisa,\n\nI hope your technical team is finding the API documentation clear. I've cc'd our lead engineer to this thread in case they have any specific questions regarding our multi-user assignment logic.\n\nWe're excited about the possibility of supporting Retail Giant's scale.\n\nBest,\nAlex"
+        subject: "Collaboration Support for Retail Giant's Scale",
+        body: "Hi Lisa,\n\nI hope Retail Giant's technical team is finding the API docs useful. Our multi-user collaboration tools are designed exactly for large-scale operations like yours.\n\nWould it be helpful to have our lead engineer join a call to discuss the assignment logic further?\n\nBest,\nAlex"
       }
     }
   }

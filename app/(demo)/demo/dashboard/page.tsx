@@ -6,54 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Users, UserPlus, TrendingUp, CheckCircle2, BarChart3, Sparkles, Clock } from "lucide-react"
 import Link from "next/link"
 import { LeadsPerDayChartClient } from "@/components/analytics/leads-per-day-chart-client"
-import { RecentActivity, ActivityItem } from "@/components/dashboard/recent-activity"
+import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { QuickInsights, InsightItem } from "@/components/dashboard/quick-insights"
 import { cn } from "@/lib/utils"
-import { DEMO_LEADS_PER_DAY } from "@/lib/demo-data"
 import { useDemoLeads } from "@/components/demo/demo-leads-context"
-
-const DEMO_ACTIVITIES: ActivityItem[] = [
-  {
-    id: "1",
-    type: "lead_won",
-    title: "Deal Closed",
-    description: "Successfully converted to a paying customer.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
-    leadName: "Sarah Jenkins",
-  },
-  {
-    id: "2",
-    type: "ai_insight",
-    title: "AI Insight Generated",
-    description: "High intent detected based on recent email interaction.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    leadName: "TechFlow Solutions",
-  },
-  {
-    id: "3",
-    type: "stage_changed",
-    title: "Stage Updated",
-    description: "Moved from 'Contacted' to 'Qualified'.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    leadName: "Michael Chen",
-  },
-  {
-    id: "4",
-    type: "lead_created",
-    title: "New Lead Captured",
-    description: "Inquiry received via website contact form.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8), // 8 hours ago
-    leadName: "Global Logistics Inc",
-  },
-  {
-    id: "5",
-    type: "note_added",
-    title: "Note Added",
-    description: "Follow-up call scheduled for next Tuesday.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    leadName: "Emma Rodriguez",
-  }
-]
+import { deriveAnalytics, deriveActivity } from "@/features/leads/utils/analytics-derivation"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const DEMO_INSIGHTS: InsightItem[] = [
   {
@@ -79,43 +37,43 @@ const DEMO_INSIGHTS: InsightItem[] = [
 export default function DemoDashboardPage() {
   const demoLeads = useDemoLeads()
   const leads = useMemo(() => demoLeads?.leads || [], [demoLeads])
+  const isInitialized = demoLeads?.isInitialized ?? false
   
-  const stats = useMemo(() => {
-    const totalLeads = leads.length
-    const wonLeads = leads.filter(l => l.status.toLowerCase() === "won").length
-    const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : "0.0"
-    
+  const { stats: derivedStats, leadsPerDay } = useMemo(() => deriveAnalytics(leads), [leads])
+  const recentActivities = useMemo(() => deriveActivity(leads), [leads])
+  
+  const statsCards = useMemo(() => {
     return [
       {
         title: "Total Leads",
-        value: totalLeads.toLocaleString(),
+        value: derivedStats.totalLeads.toLocaleString(),
         icon: Users,
         description: "Total leads in session",
         color: "text-primary",
       },
       {
         title: "New Leads",
-        value: DEMO_LEADS_PER_DAY[DEMO_LEADS_PER_DAY.length - 1].count,
+        value: derivedStats.newLeadsToday.toLocaleString(),
         icon: UserPlus,
         description: "Leads added today",
         color: "text-primary",
       },
       {
         title: "Won Leads",
-        value: wonLeads.toLocaleString(),
+        value: derivedStats.wonLeads.toLocaleString(),
         icon: CheckCircle2,
         description: "Leads with 'Won' status",
         color: "text-primary",
       },
       {
         title: "Conversion Rate",
-        value: `${conversionRate}%`,
+        value: `${derivedStats.conversionRate}%`,
         icon: TrendingUp,
         description: "Won / Total ratio",
         color: "text-primary",
       }
     ]
-  }, [leads])
+  }, [derivedStats])
 
   return (
     <div className="p-6 md:p-12 space-y-10 md:space-y-16 max-w-[1600px] mx-auto animate-in fade-in duration-700">
@@ -146,20 +104,35 @@ export default function DemoDashboardPage() {
       </div>
       
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, i) => (
-          <Card key={i} className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:bg-card/50 group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">{stat.title}</CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center transition-colors group-hover:bg-primary/10">
-                <stat.icon className={cn("h-4 w-4 transition-colors", stat.color, "group-hover:text-primary")} />
+        {!isInitialized ? (
+          [1, 2, 3, 4].map((i) => (
+            <Card key={i} className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-4 w-24 bg-secondary/20" />
+                <Skeleton className="h-8 w-8 rounded-lg bg-secondary/20" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-semibold tracking-tight text-foreground">{stat.value}</div>
-              <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mt-4">{stat.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-20 bg-secondary/20" />
+                <Skeleton className="h-3 w-32 bg-secondary/20" />
+              </div>
+            </Card>
+          ))
+        ) : (
+          statsCards.map((stat, i) => (
+            <Card key={i} className="border-border/50 bg-card/30 backdrop-blur-sm shadow-none rounded-2xl overflow-hidden transition-all duration-500 hover:border-primary/40 hover:bg-card/50 group" aria-label={`${stat.title}: ${stat.value}. ${stat.description}`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+                <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">{stat.title}</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center transition-colors group-hover:bg-primary/10">
+                  <stat.icon className={cn("h-4 w-4 transition-colors", stat.color, "group-hover:text-primary")} aria-hidden="true" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-semibold tracking-tight text-foreground">{stat.value}</div>
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.2em] mt-4">{stat.description}</p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <div className="grid gap-10 grid-cols-1 lg:grid-cols-6">
@@ -170,7 +143,7 @@ export default function DemoDashboardPage() {
                 <div className="space-y-2">
                   <CardTitle className="text-xl font-semibold flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <BarChart3 className="h-4 w-4 text-primary" />
+                      <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
                     </div>
                     Lead Acquisition
                   </CardTitle>
@@ -183,7 +156,11 @@ export default function DemoDashboardPage() {
             </CardHeader>
             <CardContent className="p-8">
               <div className="h-[400px] w-full relative">
-                <LeadsPerDayChartClient data={DEMO_LEADS_PER_DAY} />
+                {!isInitialized ? (
+                  <Skeleton className="absolute inset-0 bg-secondary/10 rounded-xl" />
+                ) : (
+                  <LeadsPerDayChartClient data={leadsPerDay} />
+                )}
               </div>
             </CardContent>
           </Card>
@@ -203,7 +180,21 @@ export default function DemoDashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-8">
-              <RecentActivity activities={DEMO_ACTIVITIES} />
+              {!isInitialized ? (
+                <div className="space-y-6">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="flex items-start gap-4">
+                      <Skeleton className="h-10 w-10 rounded-xl bg-secondary/20" />
+                      <div className="flex-1 space-y-2 pt-1">
+                        <Skeleton className="h-4 w-1/3 bg-secondary/20" />
+                        <Skeleton className="h-3 w-1/2 bg-secondary/20 opacity-50" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <RecentActivity activities={recentActivities} />
+              )}
             </CardContent>
           </Card>
         </div>
@@ -215,7 +206,18 @@ export default function DemoDashboardPage() {
               <p className="text-sm font-medium text-muted-foreground/60">AI-powered pipeline observations</p>
             </CardHeader>
             <CardContent className="p-8">
-              <QuickInsights insights={DEMO_INSIGHTS} />
+              {!isInitialized ? (
+                <div className="space-y-6">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="p-4 rounded-xl border border-secondary/20 space-y-3">
+                      <Skeleton className="h-4 w-1/2 bg-secondary/20" />
+                      <Skeleton className="h-3 w-full bg-secondary/20" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <QuickInsights insights={DEMO_INSIGHTS} />
+              )}
             </CardContent>
           </Card>
 

@@ -82,6 +82,12 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
     setIsDetailsOpen(true)
   }, [])
 
+  const selectedNames = useMemo(() => {
+    return leads
+      .filter(l => selectedIds.includes(l.id))
+      .map(l => `${l.first_name} ${l.last_name}`)
+  }, [leads, selectedIds])
+
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
       const matchesSearch = 
@@ -154,6 +160,7 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
           selectedCount={selectedIds.length}
           onClearSelection={() => setSelectedIds?.([])}
           onDelete={handleBulkDelete}
+          selectedNames={selectedNames}
           isDeleting={isDeleting}
         />
       </>
@@ -203,6 +210,7 @@ export function DemoLeadsTableWrapper({ isTableOnly = false, viewMode = "table" 
         selectedCount={selectedIds.length}
         onClearSelection={() => setSelectedIds?.([])}
         onDelete={handleBulkDelete}
+        selectedNames={selectedNames}
         isDeleting={isDeleting}
       />
     </>

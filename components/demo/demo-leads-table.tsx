@@ -64,18 +64,22 @@ const LeadRow = memo(({ lead, onLeadClick, isSelected, onToggleSelect }: {
 }) => (
   <TableRow 
     className={cn(
-      "group cursor-pointer hover:bg-secondary/15 transition-all duration-200 border-b border-border/20",
+      "group cursor-pointer hover:bg-secondary/15 transition-all duration-300 border-b border-border/20 relative",
       isSelected && "bg-primary/5 hover:bg-primary/10"
     )}
     onClick={() => onLeadClick(lead)}
   >
-    <TableCell className="py-5 pl-8" onClick={(e) => e.stopPropagation()}>
+    <TableCell className="py-5 pl-8 relative" onClick={(e) => e.stopPropagation()}>
+      {isSelected && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary animate-in fade-in slide-in-from-left-1 duration-300" />
+      )}
       <div className="flex items-center justify-center">
         <input 
           type="checkbox" 
           checked={isSelected}
           onChange={() => onToggleSelect(lead.id)}
-          className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+          className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer transition-all hover:scale-110"
+          aria-label={`Select lead ${lead.first_name} ${lead.last_name}`}
         />
       </div>
     </TableCell>
@@ -107,7 +111,7 @@ const LeadRow = memo(({ lead, onLeadClick, isSelected, onToggleSelect }: {
     <TableCell className="pr-8" onClick={(e) => e.stopPropagation()}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-secondary/50 rounded-lg">
+          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-secondary/50 rounded-lg" aria-label={`Actions for ${lead.first_name} ${lead.last_name}`}>
             <MoreHorizontal className="h-4 w-4 text-muted-foreground/40" />
           </Button>
         </DropdownMenuTrigger>
@@ -181,12 +185,13 @@ export function DemoLeadsTable({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" aria-hidden="true" />
             <Input
               placeholder="Search leads..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-11 bg-secondary/10 border-border/50 focus:ring-primary/20 text-sm"
+              aria-label="Search leads by name, email, or company"
             />
           </div>
           {(search !== "" || status !== "all") && (
@@ -232,6 +237,7 @@ export function DemoLeadsTable({
                       checked={isAllSelected}
                       onChange={() => onSelectAll(isAllSelected ? [] : allFilteredIds)}
                       className="w-4 h-4 rounded border-border/50 bg-secondary/10 text-primary focus:ring-primary/20 cursor-pointer"
+                      aria-label="Select all leads on this page"
                     />
                   </div>
                 </TableHead>

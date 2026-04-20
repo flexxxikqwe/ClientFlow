@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { 
   Dialog, 
   DialogContent, 
@@ -19,12 +22,27 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { toast } from "sonner"
 import { safeJson } from "@/lib/utils/safe-json"
 import { useUser } from "@/features/auth/context/user-context"
 import { useDemoLeads } from "@/components/demo/demo-leads-context"
+import { cn } from "@/lib/utils"
+
+const leadSchema = z.object({
+  first_name: z.string().min(1, "First name is required").max(50, "Too long"),
+  last_name: z.string().min(1, "Last name is required").max(50, "Too long"),
+  email: z.string().email("Invalid email address").or(z.literal("")),
+  phone: z.string().max(20, "Phone too long").optional(),
+  company: z.string().max(100, "Company name too long").optional(),
+  value: z.string().refine((val) => !val || !isNaN(parseFloat(val)), {
+    message: "Must be a valid number"
+  }).optional(),
+  status: z.string().min(1, "Status is required")
+})
+
+type LeadFormValues = z.infer<typeof leadSchema>
 
 interface CreateLeadModalProps {
   isOpen: boolean
@@ -37,30 +55,46 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
   const pathname = usePathname()
   const isDemoMode = isUserDemo || pathname.startsWith("/demo")
   const demoLeads = useDemoLeads()
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    company: "",
-    value: "",
-    status: "new"
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm<LeadFormValues>({
+    resolver: zodResolver(leadSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      company: "",
+      value: "",
+      status: "new"
+    }
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const currentStatus = watch("status")
+
+  const onSubmit = async (values: LeadFormValues) => {
+    setIsSubmitting(true)
 
     try {
+      const payload = {
+        ...values,
+        phone: values.phone || null,
+        value: values.value ? parseFloat(values.value) : 0,
+      }
+
       if (isDemoMode && demoLeads) {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800))
         
         demoLeads.addLead({
-          ...formData,
-          phone: formData.phone || null,
-          value: formData.value ? parseFloat(formData.value) : 0,
+          ...payload,
           source: "Direct",
           priority: "medium",
           message: "Lead created during demo session.",
@@ -75,10 +109,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...formData,
-            value: formData.value ? parseFloat(formData.value) : 0,
-          }),
+          body: JSON.stringify(payload),
         })
 
         if (!response.ok) {
@@ -91,25 +122,22 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
 
       onSuccess()
       onClose()
-      setFormData({
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone: "",
-        company: "",
-        value: "",
-        status: "new"
-      })
+      reset()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Something went wrong"
       toast.error(message)
     } finally {
-      setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
+  const handleClose = () => {
+    reset()
+    onClose()
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[425px] rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight">Create New Lead</DialogTitle>
@@ -117,7 +145,7 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
             Add a new potential client to your sales pipeline.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="first_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
@@ -125,15 +153,19 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               </Label>
               <Input
                 id="first_name"
-                required
-                minLength={1}
-                maxLength={50}
                 placeholder="John"
-                value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                {...register("first_name")}
+                className={cn(
+                  "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                  errors.first_name && "border-destructive/50 focus:ring-destructive/20"
+                )}
                 data-testid="first-name-input"
               />
+              {errors.first_name && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.first_name.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="last_name" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
@@ -141,15 +173,19 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
               </Label>
               <Input
                 id="last_name"
-                required
-                minLength={1}
-                maxLength={50}
                 placeholder="Doe"
-                value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                {...register("last_name")}
+                className={cn(
+                  "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                  errors.last_name && "border-destructive/50 focus:ring-destructive/20"
+                )}
                 data-testid="last-name-input"
               />
+              {errors.last_name && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.last_name.message}
+                </p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -159,11 +195,18 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 id="email"
                 type="email"
                 placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                {...register("email")}
+                className={cn(
+                  "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                  errors.email && "border-destructive/50 focus:ring-destructive/20"
+                )}
                 data-testid="email-input"
               />
+              {errors.email && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Phone Number</Label>
@@ -171,11 +214,18 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 id="phone"
                 type="tel"
                 placeholder="+1 (555) 000-0000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                {...register("phone")}
+                className={cn(
+                  "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                  errors.phone && "border-destructive/50 focus:ring-destructive/20"
+                )}
                 data-testid="phone-input"
               />
+              {errors.phone && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.phone.message}
+                </p>
+              )}
             </div>
           </div>
           <div className="space-y-2">
@@ -183,11 +233,18 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
             <Input
               id="company"
               placeholder="Acme Inc."
-              value={formData.company}
-              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+              {...register("company")}
+              className={cn(
+                "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                errors.company && "border-destructive/50 focus:ring-destructive/20"
+              )}
               data-testid="company-input"
             />
+            {errors.company && (
+              <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.company.message}
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -198,19 +255,29 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                 min="0"
                 step="0.01"
                 placeholder="5000"
-                value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                className="h-11 bg-secondary/10 border-border/50 focus:ring-primary/20"
+                {...register("value")}
+                className={cn(
+                  "h-11 bg-secondary/10 border-border/50 focus:ring-primary/20",
+                  errors.value && "border-destructive/50 focus:ring-destructive/20"
+                )}
                 data-testid="value-input"
               />
+              {errors.value && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.value.message}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="status" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/50">Status</Label>
               <Select 
-                value={formData.status} 
-                onValueChange={(val) => setFormData({ ...formData, status: val })}
+                value={currentStatus} 
+                onValueChange={(val) => setValue("status", val, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-11 bg-secondary/10 border-border/50" data-testid="status-select">
+                <SelectTrigger className={cn(
+                  "h-11 bg-secondary/10 border-border/50",
+                  errors.status && "border-destructive/50"
+                )} data-testid="status-select">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent className="backdrop-blur-xl bg-card/95 border-border/50">
@@ -221,24 +288,29 @@ export function CreateLeadModal({ isOpen, onClose, onSuccess }: CreateLeadModalP
                   <SelectItem value="won">Won</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.status && (
+                <p className="text-[10px] font-bold text-destructive flex items-center gap-1" role="alert">
+                  <AlertCircle className="h-3 w-3" aria-hidden="true" /> {errors.status.message}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter className="pt-4">
             <Button 
               type="button" 
               variant="ghost" 
-              onClick={onClose}
+              onClick={handleClose}
               className="h-11 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="h-11 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
               data-testid="submit-lead-button"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Create Lead"

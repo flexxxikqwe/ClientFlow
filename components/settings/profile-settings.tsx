@@ -48,7 +48,7 @@ export function ProfileSettings() {
     <div className="p-8 rounded-3xl bg-card/30 border border-border/50 backdrop-blur-sm space-y-8">
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <UserIcon className="h-6 w-6 text-primary" />
+          <UserIcon className="h-6 w-6 text-primary" aria-hidden="true" />
         </div>
         <div>
           <h3 className="text-xl font-bold text-foreground">Personal Profile</h3>
@@ -78,7 +78,7 @@ export function ProfileSettings() {
                 readOnly
                 className="h-12 bg-secondary/5 border-border/30 text-muted-foreground/50 rounded-xl cursor-not-allowed pl-10"
               />
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30" aria-hidden="true" />
             </div>
             <p className="text-[10px] font-medium text-muted-foreground/40 ml-1 italic">Email cannot be changed in this version.</p>
           </div>

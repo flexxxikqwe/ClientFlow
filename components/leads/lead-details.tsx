@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { 
   X, 
   Mail, 
@@ -52,6 +55,22 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useUser } from "@/features/auth/context/user-context"
 import { safeJson } from "@/lib/utils/safe-json"
 import { usePathname } from "next/navigation"
+import { useDemoLeads } from "@/components/demo/demo-leads-context"
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog"
+
+const leadEditSchema = z.object({
+  first_name: z.string().min(1, "First name is required").max(50, "Too long"),
+  last_name: z.string().min(1, "Last name is required").max(50, "Too long"),
+  email: z.string().email("Invalid email address").or(z.literal("")),
+  phone: z.string().max(20, "Phone too long").optional().nullable(),
+  company: z.string().max(100, "Company name too long").optional().nullable(),
+  value: z.number().min(0, "Value cannot be negative").optional().nullable(),
+  status: z.string().min(1, "Status is required"),
+  owner_id: z.string().optional().nullable(),
+  message: z.string().max(1000, "Inquiry too long").optional().nullable(),
+})
+
+type LeadEditValues = z.infer<typeof leadEditSchema>
 
 interface LeadDetailsProps {
   lead: Lead | null
@@ -66,20 +85,36 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
   const isDemoMode = isUserDemo || pathname.startsWith("/demo")
   const [isEditing, setIsEditing] = useState(false)
   const [isActionLoading, setIsActionLoading] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [noteContent, setNoteContent] = useState("")
-  const [formData, setFormData] = useState<Partial<Lead>>({})
   const [aiSummary, setAiSummary] = useState<{ summary: string, keyPoints: string[] } | null>(null)
   const [aiClassification, setAiClassification] = useState<{ priority: string, reasoning: string } | null>(null)
   const [aiReply, setAiReply] = useState<{ subject: string, body: string } | null>(null)
   const [isAiLoading, setIsAiLoading] = useState(false)
 
   const { lead, isLoading, mutate: mutateLead } = useLead(initialLead?.id || null)
+  const demoLeads = useDemoLeads()
   
   const { users } = useUsers()
 
+  const form = useForm<LeadEditValues>({
+    resolver: zodResolver(leadEditSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      company: "",
+      status: "new",
+      value: 0,
+      owner_id: null,
+      message: ""
+    }
+  })
+
   useEffect(() => {
     if (lead) {
-      setFormData({
+      form.reset({
         first_name: lead.first_name,
         last_name: lead.last_name,
         email: lead.email,
@@ -91,30 +126,34 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
         message: lead.message
       })
     }
-  }, [lead])
+  }, [lead, form])
 
-  const handleUpdate = useCallback(async () => {
+  const handleUpdate = async (values: LeadEditValues) => {
     if (!lead) return
-    if (isDemoMode) {
-      toast.info("Showcase Mode: Lead updates are disabled in this preview.")
-      return
-    }
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      if (isDemoMode && demoLeads) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 600))
+        demoLeads.updateLead(lead.id, values)
+        toast.success("Lead updated (Demo Mode)")
+      } else {
+        const response = await fetch(`/api/leads/${lead.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        })
 
-      if (!response.ok) {
-        const data = await safeJson(response)
-        throw new Error(data?.error || "Failed to update lead")
+        if (!response.ok) {
+          const data = await safeJson(response)
+          throw new Error(data?.error || "Failed to update lead")
+        }
+
+        toast.success("Lead updated successfully")
       }
 
-      toast.success("Lead updated successfully")
       setIsEditing(false)
       mutateLead()
       onUpdate()
@@ -124,32 +163,36 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, formData, mutateLead, onUpdate, isDemoMode])
+  }
 
   const handleAddNote = useCallback(async () => {
     if (!lead || !noteContent.trim()) return
-    if (isDemoMode) {
-      toast.info("Showcase Mode: Adding notes is disabled in this preview.")
-      return
-    }
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}/notes`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: noteContent,
-        }),
-      })
+      if (isDemoMode && demoLeads) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 600))
+        demoLeads.addNote(lead.id, noteContent)
+        toast.success("Note added (Demo Mode)")
+      } else {
+        const response = await fetch(`/api/leads/${lead.id}/notes`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: noteContent,
+          }),
+        })
 
-      if (!response.ok) {
-        const data = await safeJson(response)
-        throw new Error(data?.error || "Failed to add note")
+        if (!response.ok) {
+          const data = await safeJson(response)
+          throw new Error(data?.error || "Failed to add note")
+        }
+
+        toast.success("Note added")
       }
 
-      toast.success("Note added")
       setNoteContent("")
       mutateLead()
       onUpdate()
@@ -159,27 +202,31 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, noteContent, mutateLead, onUpdate, isDemoMode])
+  }, [lead, noteContent, mutateLead, onUpdate, isDemoMode, demoLeads])
 
   const handleDelete = useCallback(async () => {
     if (!lead) return
-    if (isDemoMode) {
-      toast.info("Showcase Mode: Lead deletion is disabled in this preview.")
-      return
-    }
-    if (!confirm("Are you sure you want to delete this lead? This action cannot be undone.")) return
     setIsActionLoading(true)
     try {
-      const response = await fetch(`/api/leads/${lead.id}`, {
-        method: "DELETE",
-      })
+      if (isDemoMode && demoLeads) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800))
+        demoLeads.deleteLeads([lead.id])
+        toast.success(`Lead ${lead.first_name} ${lead.last_name} deleted successfully`)
+      } else {
+        const response = await fetch(`/api/leads/${lead.id}`, {
+          method: "DELETE",
+        })
 
-      if (!response.ok) {
-        const data = await safeJson(response)
-        throw new Error(data?.error || "Failed to delete lead")
+        if (!response.ok) {
+          const data = await safeJson(response)
+          throw new Error(data?.error || "Failed to delete lead")
+        }
+
+        toast.success("Lead deleted successfully")
       }
 
-      toast.success("Lead deleted successfully")
+      setShowDeleteConfirm(false)
       onClose()
       onUpdate()
     } catch (error: unknown) {
@@ -188,7 +235,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
     } finally {
       setIsActionLoading(false)
     }
-  }, [lead, onClose, onUpdate, isDemoMode])
+  }, [lead, onClose, onUpdate, isDemoMode, demoLeads])
 
   const handleAiAction = useCallback(async (action: "summary" | "classify" | "reply") => {
     if (!lead) return
@@ -274,11 +321,11 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                 </DialogTitle>
                 <DialogDescription className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em]">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-3.5 w-3.5 text-primary/60" /> {lead?.company || "Independent"}
+                    <Building2 className="h-3.5 w-3.5 text-primary/60" aria-hidden="true" /> {lead?.company || "Independent"}
                   </div>
-                  <div className="w-1 h-1 rounded-full bg-border" />
+                  <div className="w-1 h-1 rounded-full bg-border" aria-hidden="true" />
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-primary/60" /> {lead ? format(new Date(lead.created_at), "MMMM d, yyyy") : ""}
+                    <Calendar className="h-3.5 w-3.5 text-primary/60" aria-hidden="true" /> {lead ? format(new Date(lead.created_at), "MMMM d, yyyy") : ""}
                   </div>
                 </DialogDescription>
               </div>
@@ -294,9 +341,10 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
               <Button 
                 variant="destructive" 
                 className="h-12 w-12 rounded-xl shadow-xl shadow-destructive/10 transition-all hover:scale-105 active:scale-95" 
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
+                aria-label={`Delete lead ${lead?.first_name} ${lead?.last_name}`}
               >
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-5 w-5" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -306,10 +354,28 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
           {/* Left Side: Details */}
           <div className="w-3/5 border-r border-border/20 p-10 overflow-y-auto space-y-10 bg-card/10">
             {isLoading ? (
-              <div className="space-y-8">
-                <Skeleton className="h-14 w-full rounded-2xl bg-secondary/20" />
-                <Skeleton className="h-80 w-full rounded-2xl bg-secondary/20" />
-                <Skeleton className="h-80 w-full rounded-2xl bg-secondary/20" />
+              <div className="space-y-10 animate-in fade-in duration-500">
+                <Skeleton className="h-16 w-full rounded-2xl bg-secondary/30" />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Skeleton className="h-3 w-20 bg-secondary/20" />
+                      <Skeleton className="h-12 w-full rounded-xl bg-secondary/20" />
+                    </div>
+                    <div className="space-y-3">
+                      <Skeleton className="h-3 w-20 bg-secondary/20" />
+                      <Skeleton className="h-12 w-full rounded-xl bg-secondary/20" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-3 w-20 bg-secondary/20" />
+                    <Skeleton className="h-12 w-full rounded-xl bg-secondary/20" />
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-3 w-20 bg-secondary/20" />
+                    <Skeleton className="h-32 w-full rounded-xl bg-secondary/20" />
+                  </div>
+                </div>
               </div>
             ) : lead && (
               <Tabs defaultValue="info" className="w-full">
@@ -317,19 +383,18 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   <TabsTrigger value="info" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all">Information</TabsTrigger>
                   <TabsTrigger value="message" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all">Inquiry</TabsTrigger>
                   <TabsTrigger value="ai" className="flex-1 h-13 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl transition-all flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" /> AI Insights
+                    <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /> AI Insights
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="info" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <LeadInfoTab 
                     lead={lead}
-                    formData={formData}
-                    setFormData={setFormData}
+                    form={form}
                     isEditing={isEditing}
                     users={users}
                     isLoading={isActionLoading}
-                    onUpdate={handleUpdate}
+                    onUpdate={form.handleSubmit(handleUpdate)}
                   />
                 </TabsContent>
 
@@ -344,6 +409,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
 
                 <TabsContent value="ai" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <LeadAiTab 
+                    lead={lead}
                     isAiLoading={isAiLoading}
                     onAiAction={handleAiAction}
                     aiSummary={aiSummary}
@@ -361,7 +427,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
             <div className="p-8 border-b border-border/20 flex items-center justify-between bg-card/30">
               <h3 className="font-bold text-foreground flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <MessageSquare className="h-4 w-4 text-primary" />
+                  <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 Activity Timeline
               </h3>
@@ -384,7 +450,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center transition-colors group-hover:bg-primary/10">
-                            <User className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                            <User className="h-4 w-4 text-muted-foreground group-hover:text-primary" aria-hidden="true" />
                           </div>
                           <span className="text-xs font-bold text-foreground">{note.author?.full_name || "System"}</span>
                         </div>
@@ -396,7 +462,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   {(!lead?.notes || lead.notes.length === 0) && (
                     <div className="text-center py-32 opacity-20">
                       <div className="w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center mx-auto mb-6">
-                        <MessageSquare className="h-12 w-12 text-muted-foreground" />
+                        <MessageSquare className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
                       </div>
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">No activity history</p>
                     </div>
@@ -413,6 +479,7 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                   data-testid="note-input"
+                  aria-label="Add a note or activity log for this lead"
                 />
                 <Button 
                   size="icon" 
@@ -420,14 +487,24 @@ export function LeadDetails({ lead: initialLead, isOpen, onClose, onUpdate }: Le
                   onClick={handleAddNote}
                   disabled={isActionLoading || !noteContent.trim()}
                   data-testid="add-note-button"
+                  aria-label="Submit note"
                 >
-                  {isActionLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-6 w-6" />}
+                  {isActionLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-6 w-6" aria-hidden="true" />}
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </DialogContent>
+      <DeleteConfirmDialog 
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Lead"
+        description="Are you sure you want to delete this lead? This action is permanent and all associated activity data will be removed."
+        itemName={lead ? `${lead.first_name} ${lead.last_name} (${lead.company || "Independent"})` : undefined}
+        isLoading={isActionLoading}
+      />
     </Dialog>
   )
 }

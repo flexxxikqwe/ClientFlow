@@ -39,7 +39,7 @@ export function LeadsPerDayChart({ data }: LeadsPerDayChartProps) {
   }
 
   return (
-    <div className="h-[400px] w-full relative">
+    <div className="h-[400px] w-full relative" role="region" aria-label="Lead acquisition over time chart">
       <ResponsiveContainer width="100%" height="100%" debounce={200}>
         <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>

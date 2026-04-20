@@ -48,7 +48,7 @@ export function PricingSection() {
 
         {/* Billing Toggle */}
         <div className="flex justify-center mb-16">
-          <div className="relative p-1 bg-secondary/30 rounded-full flex items-center border border-border/50">
+          <div className="relative p-1 bg-secondary/30 rounded-full flex items-center border border-border/50" role="group" aria-label="Billing cycle toggle">
             <motion.div
               className="absolute h-[calc(100%-8px)] bg-background rounded-full shadow-sm border border-border/50"
               initial={false}
@@ -60,6 +60,7 @@ export function PricingSection() {
             />
             <button
               onClick={() => setBillingCycle("monthly")}
+              aria-pressed={billingCycle === "monthly"}
               className={cn(
                 "relative z-10 px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300",
                 billingCycle === "monthly" ? "text-foreground" : "text-muted-foreground"
@@ -69,12 +70,13 @@ export function PricingSection() {
             </button>
             <button
               onClick={() => setBillingCycle("yearly")}
+              aria-pressed={billingCycle === "yearly"}
               className={cn(
                 "relative z-10 px-6 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300",
                 billingCycle === "yearly" ? "text-foreground" : "text-muted-foreground"
               )}
             >
-              Yearly <span className="text-[8px] text-primary ml-1">-20%</span>
+              Yearly <span className="text-[8px] text-primary ml-1" aria-label="Save 20 percent on yearly billing">-20%</span>
             </button>
           </div>
         </div>
@@ -105,7 +107,7 @@ export function PricingSection() {
               )}
               <div className="space-y-2 mb-8">
                 <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors">{plan.name}</h3>
-                <div className="flex items-baseline gap-1 overflow-hidden h-12">
+                <div className="flex items-baseline gap-1 overflow-hidden h-12" aria-live="polite" aria-atomic="true">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={billingCycle}
@@ -127,8 +129,8 @@ export function PricingSection() {
               </div>
               <ul className="space-y-5 mb-12 flex-1">
                 {plan.features.map((feature, j) => (
-                  <li key={j} className="flex items-center gap-3 text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                    <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+                   <li key={j} className="flex items-center gap-3 text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                    <CheckCircle2 className="w-5 h-5 text-primary shrink-0" aria-hidden="true" />
                     {feature}
                   </li>
                 ))}

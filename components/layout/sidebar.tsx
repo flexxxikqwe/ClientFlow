@@ -52,17 +52,17 @@ export function Sidebar() {
   ]
 
   return (
-    <div className="flex flex-col h-full bg-card/20 backdrop-blur-xl text-muted-foreground border-r border-border/30">
+    <nav className="flex flex-col h-full bg-card/20 backdrop-blur-xl text-muted-foreground border-r border-border/30" aria-label="Main Navigation">
       <div className="px-10 py-16 flex-1">
         <div className="flex items-center justify-between mb-20">
-          <Link href="/dashboard" className="flex items-center gap-4 group transition-all duration-500">
+          <Link href="/dashboard" className="flex items-center gap-4 group transition-all duration-500" aria-label="ClientFlow CRM - Go to Dashboard">
             <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-              <Sparkles className="h-6 w-6 text-primary-foreground" />
+              <Sparkles className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-foreground tracking-tight leading-none">
+              <span className="text-xl font-bold text-foreground tracking-tight leading-none">
                 ClientFlow
-              </h1>
+              </span>
               <span className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.3em] mt-1">CRM</span>
             </div>
           </Link>
@@ -71,32 +71,36 @@ export function Sidebar() {
         
         <div className="space-y-2">
           <p className="px-4 text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em] mb-8">Main Menu</p>
-          {routes.map((route) => {
-            const isActive = pathname === route.href
-            return (
-              <Link
-                key={route.href}
-                href={route.href}
-                className={cn(
-                  "group flex items-center gap-4 px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300",
-                  isActive 
-                    ? "bg-primary/10 text-primary shadow-sm shadow-primary/5" 
-                    : "hover:bg-secondary/30 hover:text-foreground"
-                )}
-              >
-                <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300",
-                  isActive ? "bg-primary/10" : "bg-transparent group-hover:bg-secondary/50"
-                )}>
-                  <route.icon className={cn(
-                    "h-4 w-4 transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"
-                  )} />
-                </div>
-                {route.label}
-              </Link>
-            )
-          })}
+          <ul className="space-y-2">
+            {routes.map((route) => {
+              const isActive = pathname === route.href
+              return (
+                <li key={route.href}>
+                  <Link
+                    href={route.href}
+                    className={cn(
+                      "group flex items-center gap-4 px-4 py-3.5 text-sm font-semibold rounded-xl transition-all duration-300",
+                      isActive 
+                        ? "bg-primary/10 text-primary shadow-sm shadow-primary/5" 
+                        : "hover:bg-secondary/30 hover:text-foreground"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300",
+                      isActive ? "bg-primary/10" : "bg-transparent group-hover:bg-secondary/50"
+                    )}>
+                      <route.icon className={cn(
+                        "h-4 w-4 transition-colors",
+                        isActive ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"
+                      )} aria-hidden="true" />
+                    </div>
+                    {route.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </div>
 
@@ -149,6 +153,6 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-    </div>
+    </nav>
   )
 }
